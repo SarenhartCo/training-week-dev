@@ -155,6 +155,7 @@ h2{font-family:var(--display);font-weight:700;font-size:24px;margin:0;line-heigh
 .feelit b{font-weight:600}
 .setbox{border:1.5px solid var(--line);background:var(--bg);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
 .setbox.done{border:2px solid var(--done)}
+.findnote{font-size:13px;color:var(--accent);background:var(--accent-soft);border-radius:8px;padding:6px 10px;margin:8px 0 0}.newtag{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:1px 6px;vertical-align:middle}.findban b{font-weight:700}
 .setbox.cd{border:2px solid #d9611a}.setbox.cd .setmain{background:#d9611a;color:#fff}.setbox.cd .setmain small,.setbox.cd .of{color:#fff}
 .arr{height:26px;border:0;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;padding:0}
 .arr.up{border-bottom:1px solid var(--line)}
@@ -1380,17 +1381,32 @@ function prevBest(name, beforeId) {
       if (!done.length) continue;
       return { id, done: done.length, total: sets.length, reps: done[0].reps, kg: Math.max(...done.map(x => x.kg || 0)),
         allReps: done.length === sets.length && done.every(x => x.reps >= (x.target ?? x.reps)), date: l.date,
-        sets: sets.filter(x => x.done), feel: l.feel?.[eid] || null };
+        sets: sets.filter(x => x.done), feel: l.feel?.[eid] || null, finding: !!l.finding?.[eid], lastKg: done[done.length - 1].kg || 0 };
     }
   }
   return null;
 }
 function suggest(e, id) {
+  const wm = e.name.match(/^Warm-up sets: (.+)$/);            // warm-up sets follow the lift they warm up: about half its weight
+  if (wm && e.inc) { const main = suggest({ ...e, name: wm[1] }, id), st = e.inc >= 2.5 ? 2.5 : 2; return { kg: main.last ? Math.max(st === 2 ? 2 : 5, Math.floor(main.kg / 2 / st) * st) : e.kg, last: null, up: false }; }
   const last = prevBest(e.name, id);
   if (!last) return { kg: e.kg, last: null, up: false };
   if (!e.inc) return { kg: last.kg || e.kg, last, up: false };
+  if (last.finding) return { kg: last.lastKg, last, up: false, found: true };   // D2: the weight of the last set in the finding session is the new starting weight
   const up = last.feel === "light" ? true : last.feel === "heavy" ? false : last.allReps && last.reps >= e.reps;
   return { kg: up ? last.kg + e.inc : e.bw ? last.kg : Math.max(last.kg, 0), last, up };
+}
+// ---- "Finding your weight" (programme-rules D2 + M8, round 4): week 1, and the first session of any exercise not done before.
+// The feather / kettlebell then apply to the set just ticked: feather → next sets +2 steps, kettlebell → −1 step, no mark → same weight.
+function isFinding(e, w, id) { return !!e.inc && !/^Warm-up sets/.test(e.name) && (w === 1 || !prevBest(e.name, id)); }
+const findDelta = (f, e) => f === "light" ? 2 * e.inc : f === "heavy" ? -e.inc : 0;
+function setFeelApply(l, e, j, f) {                     // mark set j; move the weight of the sets not yet done
+  l.setFeel = l.setFeel || {}; const sf = l.setFeel[e.id] = l.setFeel[e.id] || {};
+  const prev = sf[j] || null, next = prev === f ? null : f, d = findDelta(next, e) - findDelta(prev, e), lo = e.bw ? -80 : 0;
+  if (next) sf[j] = next; else delete sf[j];
+  l.sets[e.id].forEach((x, i) => { if (i > j && !x.done) x.kg = Math.max(lo, Math.round(((x.kg || 0) + d) * 100) / 100); });
+  l.finding = l.finding || {}; l.finding[e.id] = true;
+  return next;
 }
 function ensureLog(w, k) {
   const id = logId(w, k), wo = workout(w, k);
@@ -1515,7 +1531,7 @@ function todayView() {
       <button class="wbtn" data-act="pickw" data-k="${key}" id="wb-${key}"><b>${wLabel(key)} · ${esc(o.name.replace(" (optional)", ""))}</b><small>${esc(sub)}</small></button><span class="go">›</span></div>`;
   });
   h += `</div>`;
-  if (w === 1 && k === "1" && !Object.keys(S.logs).length) h += `<div class="note">${esc(ph.about)} Starting weights are set from your current lifts. The app suggests more weight once you complete every rep.</div>`;
+  if (w === 1) h += `<div class="note findban"><b>Week 1: finding your weights.</b> The starting weights are a safe first guess. After each set, ask yourself: <i>how many more could I have done with good form?</i> 4 or more → tap the <b>feather</b> (next set +2 steps). None, or you didn't finish → the <b>kettlebell</b> (next set −1 step). 1–3 → no mark, same weight. Your last set becomes next week's weight.</div>`;
 
   const id = logId(w, k), l = S.logs[id];
   const st = l ? stats(l) : { done: 0, total: wo.exercises.reduce((a, e) => a + e.sets, 0), vol: 0 };
@@ -1534,10 +1550,13 @@ function todayView() {
     const cols = `grid-template-columns:repeat(${Math.max(sets.length, 1)},minmax(0,1fr))`;
     const lastRow = sg.last ? `<div class="lastlbl"><span>Last time</span>${sg.last.feel ? `<span class="fbadge ${sg.last.feel}" aria-label="Felt ${sg.last.feel}">${FEEL_ICON[sg.last.feel](12)}</span>` : ""}${sg.up && !l ? `<span class="up">↑ ${e.bw && sg.kg <= 0 ? fmt(e.inc) + " kg less help today" : "+" + fmt(e.inc) + " kg today"}</span>` : ""}</div>
         <div class="lastrow num ${sets.length > 3 ? "tight" : ""}" style="${cols}">${sg.last.sets.map(x => `<span>${x.reps}${unit ? " " + unit : ""}${x.kg && !e.bw ? " × " + fmt(x.kg) + " kg" : e.bw && x.kg ? " × " + kgLabel(x.kg) : ""}</span>`).join("")}</div>` : "";
-    const feel = l?.feel?.[e.id] || null;
-    const feelNote = feel && e.inc ? `<div class="feelnote">${feel === "light" ? `Felt light: next time ${kgWord(kgNow + e.inc)}.` : `Felt heavy: next time stay at ${kgWord(kgNow)}.`}</div>` : "";
+    const finding = isFinding(e, w, id), lastDone = sets.map(x => x.done).lastIndexOf(true);
+    const feel = finding ? (lastDone >= 0 ? l?.setFeel?.[e.id]?.[lastDone] || null : null) : l?.feel?.[e.id] || null;
+    const findNote = finding ? `<div class="findnote">${lastDone < 0 ? "Finding your weight: tick a set, then feather if 4+ more reps were possible (next set +2 steps) or kettlebell if it was too heavy (−1 step)."
+      : complete ? `Found: ${kgWord(sets[sets.length - 1].kg)} is your starting weight next time.` : `Set ${lastDone + 1}${feel === "light" ? " felt light" : feel === "heavy" ? " felt heavy" : ": no mark"} → next set ${kgWord(sets.find((x, i) => i > lastDone && !x.done)?.kg ?? kgNow)}.`}</div>` : "";
+    const feelNote = finding ? findNote : feel && e.inc ? `<div class="feelnote">${feel === "light" ? `Felt light: next time ${kgWord(kgNow + e.inc)}.` : `Felt heavy: next time stay at ${kgWord(kgNow)}.`}</div>` : "";
     h += `<section class="ex ${complete ? "complete" : ""} ${ssCls}">
-      <div class="exhead"><div class="exname">${e.ss ? `<span class="tag">${esc(e.ss)}</span>` : ""}${esc(e.name)}
+      <div class="exhead"><div class="exname">${e.ss ? `<span class="tag">${esc(e.ss)}</span>` : ""}${esc(e.name)}${finding && w !== 1 ? `<span class="newtag">New – find your weight</span>` : ""}
         ${feelIn(e.name) ? `<div class="feelit">Feel it in: <b>${feelIn(e.name)}</b></div>` : ""}
         ${e.note ? `<div class="cue">${esc(e.note)}</div>` : ""}
 </div>
@@ -2997,7 +3016,10 @@ document.addEventListener("click", ev => {
       const l = ensureLog(S.week, S.wk), set = l.sets[b.dataset.ex][+b.dataset.i];
       { const e = workout(S.week, S.wk).exercises.find(x => x.id === b.dataset.ex);   // timed set or cardio block: countdown instead of a plain tick
         if (e && !set.done && (e.unit === "sec" || e.unit === "min")) { if (S.cd && S.cd.ex === e.id && S.cd.i === +b.dataset.i) cdPause(); else { if (S.cd) cdCancel(); cdStart(e, +b.dataset.i); } break; } }
+      { const te = workout(S.week, S.wk).exercises.find(x => x.id === b.dataset.ex), j = +b.dataset.i;
+        if (set.done && te && l.setFeel?.[te.id]?.[j]) setFeelApply(l, te, j, l.setFeel[te.id][j]); }   // unticking removes that set's mark
       set.done = !set.done;
+      if (set.done) { const te = workout(S.week, S.wk).exercises.find(x => x.id === b.dataset.ex); if (te && isFinding(te, S.week, l.id)) { l.finding = l.finding || {}; l.finding[te.id] = true; } }
       if (l.finished && !set.done) l.finished = false;
       if (!l.date || !stats(l).done) l.date = today();
       saveLog(l);
@@ -3012,7 +3034,17 @@ document.addEventListener("click", ev => {
       saveLog(l); render(); break;
     }
     case "feel": {
-      const l = ensureLog(S.week, S.wk); l.feel = l.feel || {};
+      const l = ensureLog(S.week, S.wk), fe = workout(S.week, S.wk).exercises.find(x => x.id === b.dataset.ex);
+      if (fe && isFinding(fe, S.week, l.id)) {
+        const arr = l.sets[fe.id], j = arr.map(x => x.done).lastIndexOf(true);
+        if (j < 0) { toast("Tick a set first, then mark how it felt."); break; }
+        const f = setFeelApply(l, fe, j, b.dataset.f), nx = arr.find((x, i) => i > j && !x.done);
+        saveLog(l); render();
+        if (nx) toast(f === "light" ? `Felt light – next set ${fmt(nx.kg)} kg.` : f === "heavy" ? `Felt heavy – next set ${fmt(nx.kg)} kg.` : `No mark – next set stays at ${fmt(nx.kg)} kg.`);
+        else toast(f ? "Noted – this weight is your starting point next time." : "Mark removed.");
+        break;
+      }
+      l.feel = l.feel || {};
       l.feel[b.dataset.ex] = l.feel[b.dataset.ex] === b.dataset.f ? null : b.dataset.f;
       saveLog(l); render(); break;
     }
