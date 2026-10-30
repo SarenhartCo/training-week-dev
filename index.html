@@ -2892,15 +2892,16 @@ function cardioSegments(note, total, name) {
   const sec = (n, u) => Math.round(+n * (/^s/.test(u) ? 1 : 60)), K = w => /hard/i.test(w) ? "hard" : /steady|jog/i.test(w) ? "steady" : "easy";
   const out = [], push = (k, s, l) => { if (s > 0) out.push({ k, s, ...(l ? { l } : {}) }); };
   let m;
-  const lead = note.match(/^(\d+) min Easy/); if (lead) push("easy", +lead[1] * 60);
-  if ((m = note.match(/(\d+) × (\d+) (s|min) (Hard|Steady) \/ (\d+) (s|min) Easy/))) { for (let i = 0; i < +m[1]; i++) { push(K(m[4]), sec(m[2], m[3])); push("easy", sec(m[5], m[6])); } }
+  const lead = note.match(/^(\d+) min Easy/i); if (lead) push("easy", +lead[1] * 60);
+  if ((m = note.match(/last (\d+) min a bit harder/i))) { push("easy", total - +m[1] * 60); push("steady", +m[1] * 60); return out; }
+  if ((m = note.match(/(\d+) × (\d+) (s|min) (Hard|Steady) \/ (\d+) (s|min) Easy/i))) { for (let i = 0; i < +m[1]; i++) { push(K(m[4]), sec(m[2], m[3])); push("easy", sec(m[5], m[6])); } }
   else if ((m = note.match(/(\d+) × \((\d+) min jog \/ (\d+) min walk\)/))) { for (let i = 0; i < +m[1]; i++) { push("steady", +m[2] * 60, "Jog"); push("easy", +m[3] * 60, "Walk"); } }
   else if ((m = note.match(/(\d+) × (\d+) min Steady(?:, (\d+) min Easy between)?(?: \+ (\d+) min Hard finish)?/))) {
     for (let i = 0; i < +m[1]; i++) { push("steady", +m[2] * 60); if (m[3] && i < +m[1] - 1) push("easy", +m[3] * 60); }
     if (m[4]) push("hard", +m[4] * 60);
   }
   const used = out.reduce((t, x) => t + x.s, 0);
-  if (!out.length) push(/^Finisher/.test(name) ? "hard" : K(note.split(/[.–]/)[0]), total);
+  if (!out.length) push(/^Finisher/.test(name) ? "hard" : K(note.split(/[.,–]/)[0]), total);
   else if (total - used > 0) push("easy", total - used);
   else if (used > total && out.length) out[out.length - 1].s = Math.max(30, out[out.length - 1].s - (used - total));
   return out;
