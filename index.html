@@ -1399,12 +1399,28 @@ function suggest(e, id) {
 // ---- "Finding your weight" (programme-rules D2 + M8, round 4): week 1, and the first session of any exercise not done before.
 // The feather / kettlebell then apply to the set just ticked: feather → next sets +2 steps, kettlebell → −1 step, no mark → same weight.
 function isFinding(e, w, id) { return !!e.inc && !/^Warm-up sets/.test(e.name) && (w === 1 || !prevBest(e.name, id)); }
-const findDelta = (f, e) => f === "light" ? 2 * e.inc : f === "heavy" ? -e.inc : 0;
-function setFeelApply(l, e, j, f) {                     // mark set j; move the weight of the sets not yet done
+// The session remembers what it learned (Christian 2026-10-30): never back up to a weight marked too heavy, never down to one marked too easy.
+// Feather: +2 steps, but stay below the lightest "too heavy" weight. Kettlebell: −1 step, but not below the heaviest "too easy" weight.
+// When "too easy" and "too heavy" are one step apart, the lighter one is the found weight.
+function findState(l, e) {
+  const arr = l.sets[e.id], sf = l.setFeel?.[e.id] || {}, lo = e.bw ? -80 : 0, r = v => Math.round(v * 100) / 100;
+  let L = null, H = null, next = null;
+  arr.forEach((x, j) => { if (!x.done) return; const w = x.kg || 0, m = sf[j];
+    if (m === "light") L = L == null ? w : Math.max(L, w);
+    if (m === "heavy") H = H == null ? w : Math.min(H, w);
+    let t = w;
+    if (m === "light") { t = w + 2 * e.inc; if (H != null) t = Math.max(w, Math.min(t, H - e.inc)); }
+    if (m === "heavy") { t = w - e.inc; if (L != null) t = Math.max(t, L); }
+    next = Math.max(lo, r(t)); });
+  const found = L != null && H != null && H - L <= e.inc + 1e-9 ? L : null;
+  return { L, H, next: found != null ? found : next, found };
+}
+function setFeelApply(l, e, j, f) {                     // mark set j, then set the weight of the sets not yet done
   l.setFeel = l.setFeel || {}; const sf = l.setFeel[e.id] = l.setFeel[e.id] || {};
-  const prev = sf[j] || null, next = prev === f ? null : f, d = findDelta(next, e) - findDelta(prev, e), lo = e.bw ? -80 : 0;
+  const next = (sf[j] || null) === f ? null : f;
   if (next) sf[j] = next; else delete sf[j];
-  l.sets[e.id].forEach((x, i) => { if (i > j && !x.done) x.kg = Math.max(lo, Math.round(((x.kg || 0) + d) * 100) / 100); });
+  const st = findState(l, e);
+  if (st.next != null) l.sets[e.id].forEach((x, i) => { if (i > j && !x.done) x.kg = st.next; });
   l.finding = l.finding || {}; l.finding[e.id] = true;
   return next;
 }
@@ -1553,7 +1569,7 @@ function todayView() {
     const finding = isFinding(e, w, id), lastDone = sets.map(x => x.done).lastIndexOf(true);
     const feel = finding ? (lastDone >= 0 ? l?.setFeel?.[e.id]?.[lastDone] || null : null) : l?.feel?.[e.id] || null;
     const findNote = finding ? `<div class="findnote">${lastDone < 0 ? "Finding your weight: tick a set, then feather if 4+ more reps were possible (next set +2 steps) or kettlebell if it was too heavy (−1 step)."
-      : complete ? `Found: ${kgWord(sets[sets.length - 1].kg)} is your starting weight next time.` : `Set ${lastDone + 1}${feel === "light" ? " felt light" : feel === "heavy" ? " felt heavy" : ": no mark"} → next set ${kgWord(sets.find((x, i) => i > lastDone && !x.done)?.kg ?? kgNow)}.`}</div>` : "";
+      : complete ? `Found: ${kgWord(sets[sets.length - 1].kg)} is your starting weight next time.` : l && findState(l, e).found != null ? `Found: ${kgWord(findState(l, e).found)} – between too easy and too heavy. The rest of the sets stay here.` : `Set ${lastDone + 1}${feel === "light" ? " felt light" : feel === "heavy" ? " felt heavy" : ": no mark"} → next set ${kgWord(sets.find((x, i) => i > lastDone && !x.done)?.kg ?? kgNow)}.`}</div>` : "";
     const feelNote = finding ? findNote : feel && e.inc ? `<div class="feelnote">${feel === "light" ? `Felt light: next time ${kgWord(kgNow + e.inc)}.` : `Felt heavy: next time stay at ${kgWord(kgNow)}.`}</div>` : "";
     h += `<section class="ex ${complete ? "complete" : ""} ${ssCls}">
       <div class="exhead"><div class="exname">${e.ss ? `<span class="tag">${esc(e.ss)}</span>` : ""}${esc(e.name)}${finding && w !== 1 ? `<span class="newtag">New – find your weight</span>` : ""}
@@ -3017,7 +3033,8 @@ document.addEventListener("click", ev => {
       { const e = workout(S.week, S.wk).exercises.find(x => x.id === b.dataset.ex);   // timed set or cardio block: countdown instead of a plain tick
         if (e && !set.done && (e.unit === "sec" || e.unit === "min")) { if (S.cd && S.cd.ex === e.id && S.cd.i === +b.dataset.i) cdPause(); else { if (S.cd) cdCancel(); cdStart(e, +b.dataset.i); } break; } }
       { const te = workout(S.week, S.wk).exercises.find(x => x.id === b.dataset.ex), j = +b.dataset.i;
-        if (set.done && te && l.setFeel?.[te.id]?.[j]) setFeelApply(l, te, j, l.setFeel[te.id][j]); }   // unticking removes that set's mark
+        if (set.done && te && l.setFeel?.[te.id]?.[j]) { delete l.setFeel[te.id][j]; set.done = false; const st = findState(l, te); set.done = true;
+          if (st.next != null) l.sets[te.id].forEach((x, i) => { if (i > j && !x.done) x.kg = st.next; }); } }   // unticking removes that set's mark
       set.done = !set.done;
       if (set.done) { const te = workout(S.week, S.wk).exercises.find(x => x.id === b.dataset.ex); if (te && isFinding(te, S.week, l.id)) { l.finding = l.finding || {}; l.finding[te.id] = true; } }
       if (l.finished && !set.done) l.finished = false;
@@ -3040,7 +3057,9 @@ document.addEventListener("click", ev => {
         if (j < 0) { toast("Tick a set first, then mark how it felt."); break; }
         const f = setFeelApply(l, fe, j, b.dataset.f), nx = arr.find((x, i) => i > j && !x.done);
         saveLog(l); render();
-        if (nx) toast(f === "light" ? `Felt light – next set ${fmt(nx.kg)} kg.` : f === "heavy" ? `Felt heavy – next set ${fmt(nx.kg)} kg.` : `No mark – next set stays at ${fmt(nx.kg)} kg.`);
+        const fs = findState(l, fe);
+        if (nx && fs.found != null) toast(`Found: ${fmt(fs.found)} kg – between too easy and too heavy.`);
+        else if (nx) toast(f === "light" ? `Felt light – next set ${fmt(nx.kg)} kg.` : f === "heavy" ? `Felt heavy – next set ${fmt(nx.kg)} kg.` : `No mark – next set stays at ${fmt(nx.kg)} kg.`);
         else toast(f ? "Noted – this weight is your starting point next time." : "Mark removed.");
         break;
       }
