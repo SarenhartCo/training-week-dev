@@ -3025,7 +3025,7 @@ const TIPS = [
   { id: "T7", title: "Balance first", tab: "today", sel: ".ex.bal", onScreen: true, when: () => goal() === "Balance",
     text: "Balance is done first, while you're fresh. Always stand <b>next to a support</b> – a rack, a wall or a sturdy chair. Hold as steady as you can; touching down is fine." },
   { id: "T2", title: "Ticking sets", tab: "today", sel: ".ex:not(.wu) .setmain", when: () => true, next: "T3",
-    text: "Tap a set when it's done. Use the arrows to change the reps if you did something else. Timed sets count down for you. Tap <b>How to do it</b> for the guide and animation." },
+    text: "Tap a set when it's done. Use the arrows to change the reps if you did more or less than specified. Timed sets count down for you. Tap <b>How to do it</b> for the guide and animation." },
   { id: "T3", title: "Week 1: finding your weights", tab: "today", sel: ".ex:not(.wu) .feel", when: () => S.week === 1 && !!document.querySelector(".findban"), chained: true,
     text: "The starting weights are a safe first guess. After each set, ask yourself: <b>“How many more could I have done with good form?”</b>" + "@@ICONS@@" + "Your last set becomes next week's weight." },
   { id: "T4", title: "From now on: one mark per exercise", tab: "today", sel: ".ex:not(.wu):not(.finding) .feel", when: () => S.week >= 2, onScreen: true,
