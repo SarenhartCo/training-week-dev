@@ -288,6 +288,13 @@ tr:last-child td{border-bottom:0}
 .timer .bar span{display:block;height:100%;background:var(--accent)}
 .timer.cdbar{flex-wrap:wrap}.timer.cdbar .clock{font-size:40px;min-width:96px}.timer.cdbar .lbl{flex:1 1 150px;font-size:14px}.timer.cdbar .lbl b{font-size:18px;letter-spacing:.04em}.timer.cdbar small{display:block;margin-top:4px}
 .cdbtns{display:flex;gap:8px;width:100%}.cdbtns .btn{flex:1}
+#tipov{position:fixed;inset:0;z-index:50}
+.tipring{position:fixed;border:3px solid var(--accent);border-radius:14px;box-shadow:0 0 0 9999px rgba(10,14,20,.55);pointer-events:none;transition:all .2s}
+.tipsheet{position:fixed;left:12px;right:12px;max-width:536px;margin:0 auto;background:var(--surface);color:var(--ink);border-radius:16px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.tipsheet h2{font-family:var(--display);font-size:24px;margin:2px 0 6px}.tipbody{font-size:15px;line-height:1.45}.tipbtns{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.tipicons{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}.tipicons li{display:flex;gap:8px;align-items:center;font-size:14px}
+.ti{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none;border:1.5px solid var(--line)}.ti.light{background:var(--accent);color:#fff;border-color:var(--accent)}.ti.heavy{background:var(--warn);color:#fff;border-color:var(--warn)}
+.howto{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.howto b{display:block;margin-bottom:2px}
 @keyframes cdflash{0%,50%{background:var(--fc)}25%,75%,100%{background:var(--surface)}}
 .timer.flash{animation:cdflash .8s ease-in-out 2}.timer.flash .clock,.timer.flash .lbl b{animation:cdflashtx .8s ease-in-out 2}
 @keyframes cdflashtx{0%,50%{color:#fff}25%,75%,100%{color:var(--fc)}}
@@ -323,6 +330,7 @@ document.getElementById("devreset").addEventListener("click", e => {
 <div class="wrap" id="app"></div>
 <div class="bottom">
   <div class="timer" id="timer" hidden></div>
+  <div id="tipov" hidden></div>
   <nav class="tabs" aria-label="Sections">
     <button class="tab" data-tab="today" id="tab-today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h2M19 12h2M6 8v8M18 8v8M9 6v12M15 6v12M9 12h6"/></svg>Workout</button>
     <button class="tab" data-tab="plan" id="tab-plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Programme</button>
@@ -1462,6 +1470,7 @@ function stats(l) {
 // ---- render
 const app = document.getElementById("app");
 function render() {
+  queueMicrotask(checkTips);                       // first-timer tips look at the finished screen
   const f = document.activeElement, fid = f && f.id, sel = f && "selectionStart" in f ? (() => { try { return [f.selectionStart, f.selectionEnd]; } catch { return null; } })() : null;
   ["today","plan","body","history","lib"].forEach(t => document.getElementById("tab-" + t).setAttribute("aria-current", S.tab === t ? "page" : "false"));
   document.body.classList.toggle("obmode", !!S.ob);
@@ -1574,7 +1583,8 @@ function todayView() {
     const findNote = finding ? `<div class="findnote">${lastDone < 0 ? "Finding your weight: tick a set, then feather if 4+ more reps were possible (next set about +20 %) or kettlebell if it was too heavy (about −10 %)."
       : complete ? `Found: ${kgWord(sets[sets.length - 1].kg)} is your starting weight next time.` : l && findState(l, e).found != null ? `Found: ${kgWord(findState(l, e).found)} – between too easy and too heavy. The rest of the sets stay here.` : `Set ${lastDone + 1}${feel === "light" ? " felt light" : feel === "heavy" ? " felt heavy" : ": no mark"} → next set ${kgWord(sets.find((x, i) => i > lastDone && !x.done)?.kg ?? kgNow)}.`}</div>` : "";
     const feelNote = finding ? findNote : feel && e.inc ? `<div class="feelnote">${feel === "light" ? `Felt light: next time ${kgWord(kgNow + e.inc)}.` : `Felt heavy: next time stay at ${kgWord(kgNow)}.`}</div>` : "";
-    h += `<section class="ex ${complete ? "complete" : ""} ${ssCls}">
+    const exCls = [/^Warm-up/.test(e.name) ? "wu" : "", isFinding(e, w, id) ? "finding" : "", e.unit === "min" && !/^Warm-up$|^Cool-down$/.test(e.name) ? "cardio" : "", /stand|Tandem|Heel-to-toe|step and hold|star reach|Step switch|March|hop and stick|Skater|knee drive|Skipping|Toe stand|Calf-raise hold|Split-stance|RDL reach|Single-leg Pallof|Pistol/.test(e.name) && !e.inc ? "bal" : "", /ladder/i.test(e.name) ? "ladder" : "", /Barbell back squat/.test(e.name) ? "bbsquat" : ""].filter(Boolean).join(" ");
+    h += `<section class="ex ${complete ? "complete" : ""} ${ssCls} ${exCls}">
       <div class="exhead"><div class="exname">${e.ss ? `<span class="tag">${esc(e.ss)}</span>` : ""}${esc(e.name)}${finding && w !== 1 ? `<span class="newtag">New – find your weight</span>` : ""}
         ${feelIn(e.name) ? `<div class="feelit">Feel it in: <b>${feelIn(e.name)}</b></div>` : ""}
         ${e.note ? `<div class="cue">${esc(e.note)}</div>` : ""}
@@ -2750,6 +2760,7 @@ function planView() {
   let h = head(P.title || "Programme", "Programme");
   const prof = loadProfile();
   h += `<div class="card obsum"><div><b>Your answers</b><small>${prof && prof.answers ? esc([prof.answers.goal, prof.answers.shape, prof.answers.days + " days", prof.answers.time, prof.answers.where].join(" · ")) + (prof.direction ? " · " + esc(prof.direction) : "") : "Setup skipped"}</small></div><button type="button" class="btn ghost small" data-act="obedit">Change my answers</button></div>`;
+  h += tipsCard();
   h += `<p class="muted" style="margin:0 0 14px">Four phases of three weeks. Each phase repeats the same workouts so you can add weight week to week. Edits save as you type.</p>`;
   P.phases.forEach((ph, pi) => {
     const pk = "p" + pi, open = S.open === pk;
@@ -2999,6 +3010,76 @@ function cdFinish(complete) {
   render();
 }
 function cdCancel() { clearInterval(cdTimer); S.cd = null; timerEl.hidden = true; timerEl.classList.remove("flash"); render(); }
+// ---- first-timer tips (first-timer-popups.md P1–P6, T1–T11, approved 2026-10-17; texts updated for what DEV does today)
+// Each tip shows the first time its feature is on screen; one at a time; never while a countdown runs. T2 → Got it → T3 straight away.
+const TIP_KEY = "twdev.tips";
+const tipSeen = () => { try { return JSON.parse(localStorage.getItem(TIP_KEY)) || {}; } catch { return {}; } };
+const tipSave = v => { try { localStorage.setItem(TIP_KEY, JSON.stringify(v)); } catch {} };
+const ICON_ROW = () => `<ul class="tipicons"><li><span class="ti light">${FEEL_ICON.light(16)}</span><span><b>Feather</b> – 4 or more reps left → next set about 20 % heavier</span></li>
+  <li><span class="ti none"></span><span><b>No mark</b> – 1–3 left → same weight</span></li>
+  <li><span class="ti heavy">${FEEL_ICON.heavy(16)}</span><span><b>Kettlebell</b> – none left, or didn't finish → about 10 % lighter</span></li></ul>`;
+const goal = () => loadProfile()?.answers?.goal || null, atHome = () => loadProfile()?.answers?.where === "Home";
+const TIPS = [
+  { id: "T1", title: "Your 12 weeks", tab: "today", sel: ".weekcard", when: () => true,
+    text: "4 phases of 3 weeks. The workouts stay the same within a phase so the weights can climb, then change. <b>The week is what counts</b> – move workouts around as your days allow." },
+  { id: "T7", title: "Balance first", tab: "today", sel: ".ex.bal", onScreen: true, when: () => goal() === "Balance",
+    text: "Balance is done first, while you're fresh. Always stand <b>next to a support</b> – a rack, a wall or a sturdy chair. Hold as steady as you can; touching down is fine." },
+  { id: "T2", title: "Ticking sets", tab: "today", sel: ".ex:not(.wu) .setmain", when: () => true, next: "T3",
+    text: "Tap a set when it's done. Use the arrows to change the reps if you did something else. Timed sets count down for you. Tap <b>How to do it</b> for the guide and animation." },
+  { id: "T3", title: "Week 1: finding your weights", tab: "today", sel: ".ex:not(.wu) .feel", when: () => S.week === 1 && !!document.querySelector(".findban"), chained: true,
+    text: "The starting weights are a safe first guess. After each set, ask yourself: <b>“How many more could I have done with good form?”</b>" + "@@ICONS@@" + "If a weight was too heavy once, the app won't go back up to it. Your last set becomes next week's weight." },
+  { id: "T4", title: "From now on: one mark per exercise", tab: "today", sel: ".ex:not(.wu):not(.finding) .feel", when: () => S.week >= 2, onScreen: true,
+    text: "The feather and kettlebell now count for the whole exercise and set next session's weight. <b>Feather</b> → up a step · <b>No mark, all reps done</b> → up a step · <b>Kettlebell</b> → same weight. New exercises still start with “find your weight”." },
+  { id: "T5", title: "Supersets", tab: "today", sel: ".ex:not(.bal) .exname .tag", onScreen: true, when: () => true,
+    text: "Do one set of <b>A1</b>, then one set of <b>A2</b> (and A3), then rest. They're done in the same spot, so you keep your place." },
+  { id: "T8", title: "How hard? The talk test", tab: "today", sel: ".ex.cardio .setmain", onScreen: true, when: () => goal() === "Cardio",
+    text: "<b>Easy</b> – full sentences · <b>Steady</b> – short sentences · <b>Hard</b> – only a few words. Tap the block to start: the app guides you through each part, with a sound and a buzz when the intensity changes." },
+  { id: "T10", title: "Ladders", tab: "today", sel: ".ex.ladder", onScreen: true, when: () => atHome(),
+    text: "Some home exercises get harder by changing the exercise instead of adding weight. When the top of the rep range is easy, move up one step. Two kettlebells in a row → one step back." },
+  { id: "T11", title: "Safety bars first", tab: "today", sel: ".ex.bbsquat", onScreen: true, when: () => true,
+    text: "Set the rack's safety bars just below your lowest squat position before you start. If a rep fails, sit down onto the bars." }
+];
+const tipText = t => t.text.replace("@@ICONS@@", ICON_ROW());
+function checkTips() {
+  if (S.tip || S.ob || S.cd || !S.loaded) return;
+  const seen = tipSeen(); if (seen.skipAll) return;
+  for (const t of TIPS) {
+    if (seen[t.id] || t.chained || t.tab !== S.tab || !t.when()) continue;
+    const el = document.querySelector(t.sel); if (!el) continue;
+    if (t.onScreen) { const r = el.getBoundingClientRect(); if (r.top < 60 || r.bottom > innerHeight - 160) continue; }   // "the first time it appears" = on screen
+    return showTip(t, el);
+  }
+}
+function showTip(t, el) {
+  S.tip = t.id; S.tipSel = t.sel; if (!t.onScreen) el.scrollIntoView({ block: "center" });
+  const ov = document.getElementById("tipov");
+  ov.innerHTML = `<div class="tipring"></div><div class="tipsheet" role="dialog" aria-labelledby="tip-title"><div class="eyebrow">Tip</div><h2 id="tip-title">${esc(t.title)}</h2><div class="tipbody">${tipText(t)}</div>
+    <div class="tipbtns"><button type="button" class="linkbtn" data-act="tipskip">Skip all tips</button><button type="button" class="btn" data-act="tipok">Got it</button></div></div>`;
+  ov.hidden = false; S.tipEl = el; placeRing(); setTimeout(placeRing, 350);
+}
+function placeRing() {
+  const ov = document.getElementById("tipov"), r = ov.querySelector(".tipring");
+  if (S.tipEl && !S.tipEl.isConnected) S.tipEl = document.querySelector(S.tipSel);
+  const el = S.tipEl; if (!r || !el) return;
+  const b = el.getBoundingClientRect(), pad = 6;
+  Object.assign(r.style, { left: b.left - pad + "px", top: b.top - pad + "px", width: b.width + 2 * pad + "px", height: b.height + 2 * pad + "px" });
+  const tabs = document.querySelector("nav.tabs"); ov.querySelector(".tipsheet").style.bottom = (tabs ? tabs.getBoundingClientRect().height : 64) + 8 + "px";
+}
+let tipScrollT = null;
+window.addEventListener("scroll", () => { if (S.tip) return placeRing(); clearTimeout(tipScrollT); tipScrollT = setTimeout(checkTips, 500); }, { passive: true });
+window.addEventListener("resize", () => S.tip && placeRing());
+function closeTip(skipAll) {
+  const seen = tipSeen(), t = TIPS.find(x => x.id === S.tip); if (t) seen[t.id] = true; if (skipAll) seen.skipAll = true; tipSave(seen);
+  const ov = document.getElementById("tipov"); ov.hidden = true; ov.innerHTML = ""; S.tip = null; S.tipEl = null;
+  if (!skipAll && t?.next) { const n = TIPS.find(x => x.id === t.next), el = n && !seen[n.id] && n.when() && document.querySelector(n.sel); if (el) return showTip(n, el); }
+  setTimeout(checkTips, 300);
+}
+function tipsCard() {      // Settings on the Programme tab: How the app works + Show tips again (P5)
+  const open = S.open === "howto";
+  return `<div class="day ${open ? "open" : ""}"><button class="dayhead" data-act="toggle" data-key="howto" aria-expanded="${open}"><span class="dt">How the app works<small>All the tips in one place</small></span><span class="chev">›</span></button>
+    ${open ? `<div class="daybody">${TIPS.map(t => `<div class="howto"><b>${esc(t.title)}</b><div>${tipText(t)}</div></div>`).join("")}
+      <button type="button" class="btn ghost" data-act="tipreset">Show tips again</button></div>` : ""}</div>`;
+}
 let wake = null;
 async function keepAwake() { try { if (!wake && navigator.wakeLock) { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => wake = null); } } catch {} }
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.timer) keepAwake(); });
@@ -3027,6 +3108,9 @@ document.addEventListener("click", ev => {
       if (l.finished && !advanceIfWeekDone(S.week)) toast(`${wLabel(k)} marked done.`);
       render(); break;
     }
+    case "tipok": closeTip(false); break;
+    case "tipskip": closeTip(true); break;
+    case "tipreset": { const v = {}; tipSave(v); toast("Tips will show again as you go."); render(); break; }
     case "cdpause": cdPause(); break;
     case "cddone": cdFinish(false); break;
     case "cdcancel": cdCancel(); break;
