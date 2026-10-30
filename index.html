@@ -287,6 +287,9 @@ tr:last-child td{border-bottom:0}
 .timer .bar span{display:block;height:100%;background:var(--accent)}
 .timer.cdbar{flex-wrap:wrap}.timer.cdbar .clock{font-size:40px;min-width:96px}.timer.cdbar .lbl{flex:1 1 150px;font-size:14px}.timer.cdbar .lbl b{font-size:18px;letter-spacing:.04em}.timer.cdbar small{display:block;margin-top:4px}
 .cdbtns{display:flex;gap:8px;width:100%}.cdbtns .btn{flex:1}
+@keyframes cdflash{0%,50%{background:var(--fc)}25%,75%,100%{background:var(--surface)}}
+.timer.flash{animation:cdflash .8s ease-in-out 2}.timer.flash .clock,.timer.flash .lbl b{animation:cdflashtx .8s ease-in-out 2}
+@keyframes cdflashtx{0%,50%{color:#fff}25%,75%,100%{color:var(--fc)}}
 .tabs{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
 .tab{background:none;border:0;padding:11px 0 9px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em}
 .tab svg{width:22px;height:22px}
@@ -2851,7 +2854,7 @@ function startTimer(sec, label) {
 }
 function renderTimer() {
   if (S.cd) { cdPaint(); return; }                     // a countdown owns the bar while it runs
-  timerEl.classList.remove("cdbar");
+  timerEl.classList.remove("cdbar", "flash");
   const t = S.timer;
   if (!t) { timerEl.hidden = true; return; }
   const left = Math.round((t.end - Date.now()) / 1000);
@@ -2917,8 +2920,8 @@ function cdTick() {
     const prev = c.segs[c.idx]; c.done += prev.s; c.idx++;
     if (c.idx >= c.segs.length) return cdFinish(true);
     const seg = c.segs[c.idx]; c.end = Date.now() + seg.s * 1000;
-    if (c.unit === "sec") { if (seg.k === "work") { try { navigator.vibrate?.(150); } catch {} } }
-    else if (seg.k !== prev.k) { beep(); try { navigator.vibrate?.([300, 100, 300]); } catch {} }   // only when the intensity changes
+    if (c.unit === "sec") { if (seg.k === "work") { try { navigator.vibrate?.(150); } catch {} c.flash = Date.now() + 1600; } }
+    else if (seg.k !== prev.k) { beep(); try { navigator.vibrate?.([300, 100, 300]); } catch {} c.flash = Date.now() + 1600; }   // only when the intensity changes – sound, buzz and the bar flashes
   }
   cdPaint();
 }
@@ -2932,6 +2935,8 @@ function cdPaint() {
   const totalLeft = left + c.segs.slice(c.idx + 1).reduce((t, x) => t + x.s, 0), next = c.segs[c.idx + 1];
   const pct = Math.max(0, Math.min(100, (1 - left / seg.s) * 100));
   timerEl.hidden = false; timerEl.classList.add("cdbar");
+  const fl = c.flash && Date.now() < c.flash; timerEl.style.setProperty("--fc", col);
+  if (fl && !timerEl.classList.contains("flash")) { timerEl.classList.remove("flash"); void timerEl.offsetWidth; timerEl.classList.add("flash"); } else if (!fl) timerEl.classList.remove("flash");
   timerEl.innerHTML = `<div class="clock num" style="color:${col}">${cdFmt(left)}</div>
     <div class="lbl"><b style="color:${col}">${esc(label.toUpperCase())}</b>${CD_HINT[seg.k] ? " · " + CD_HINT[seg.k] : ""}${c.paused ? " · paused" : ""}<div class="bar"><span style="width:${pct}%;background:${col}"></span></div>
       <small>${esc(c.name)}${next ? ` · next: ${esc(next.l || CD_KIND[next.k][0])} ${cdFmt(next.s)}` : ""}${c.unit === "min" ? ` · ${cdFmt(totalLeft)} left` : ""}</small></div>
@@ -2950,11 +2955,11 @@ function cdFinish(complete) {
     set.done = true; if (!l.date || !stats(l).done) l.date = today(); saveLog(l);
   }
   beep(); try { navigator.vibrate?.([400, 120, 400, 120, 400]); } catch {}
-  S.cd = null; timerEl.hidden = true;
+  S.cd = null; timerEl.hidden = true; timerEl.classList.remove("flash");
   if (c.unit === "sec" && c.rest) startTimer(c.rest, c.name);
   render();
 }
-function cdCancel() { clearInterval(cdTimer); S.cd = null; timerEl.hidden = true; render(); }
+function cdCancel() { clearInterval(cdTimer); S.cd = null; timerEl.hidden = true; timerEl.classList.remove("flash"); render(); }
 let wake = null;
 async function keepAwake() { try { if (!wake && navigator.wakeLock) { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => wake = null); } } catch {} }
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.timer) keepAwake(); });
