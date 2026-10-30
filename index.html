@@ -1583,7 +1583,7 @@ function todayView() {
     const findNote = finding ? `<div class="findnote">${lastDone < 0 ? "Finding your weight: tick a set, then feather if 4+ more reps were possible (next set about +20 %) or kettlebell if it was too heavy (about −10 %)."
       : complete ? `Found: ${kgWord(sets[sets.length - 1].kg)} is your starting weight next time.` : l && findState(l, e).found != null ? `Found: ${kgWord(findState(l, e).found)} – between too easy and too heavy. The rest of the sets stay here.` : `Set ${lastDone + 1}${feel === "light" ? " felt light" : feel === "heavy" ? " felt heavy" : ": no mark"} → next set ${kgWord(sets.find((x, i) => i > lastDone && !x.done)?.kg ?? kgNow)}.`}</div>` : "";
     const feelNote = finding ? findNote : feel && e.inc ? `<div class="feelnote">${feel === "light" ? `Felt light: next time ${kgWord(kgNow + e.inc)}.` : `Felt heavy: next time stay at ${kgWord(kgNow)}.`}</div>` : "";
-    const exCls = [/^Warm-up/.test(e.name) ? "wu" : "", isFinding(e, w, id) ? "finding" : "", e.unit === "min" && !/^Warm-up$|^Cool-down$/.test(e.name) ? "cardio" : "", /stand|Tandem|Heel-to-toe|step and hold|star reach|Step switch|March|hop and stick|Skater|knee drive|Skipping|Toe stand|Calf-raise hold|Split-stance|RDL reach|Single-leg Pallof|Pistol/.test(e.name) && !e.inc ? "bal" : "", /ladder/i.test(e.name) ? "ladder" : "", /Barbell back squat/.test(e.name) ? "bbsquat" : ""].filter(Boolean).join(" ");
+    const exCls = [/^Warm-up/.test(e.name) ? "wu" : "", isFinding(e, w, id) ? "finding" : "", e.unit === "min" && !/^Warm-up$|^Cool-down$/.test(e.name) ? "cardio" : "", /stand|Tandem|Heel-to-toe|step and hold|star reach|Step switch|March|hop and stick|Skater|knee drive|Skipping|Toe stand|Calf-raise hold|Split-stance|RDL reach|Single-leg Pallof|Pistol/.test(e.name) && !e.inc ? "bal" : "", /ladder/i.test(e.name) ? "ladder" : "", /Barbell back squat/.test(e.name) ? "bbsquat" : "", e.unit === "sec" ? "timed" : ""].filter(Boolean).join(" ");
     h += `<section class="ex ${complete ? "complete" : ""} ${ssCls} ${exCls}">
       <div class="exhead"><div class="exname">${e.ss ? `<span class="tag">${esc(e.ss)}</span>` : ""}${esc(e.name)}${finding && w !== 1 ? `<span class="newtag">New – find your weight</span>` : ""}
         ${feelIn(e.name) ? `<div class="feelit">Feel it in: <b>${feelIn(e.name)}</b></div>` : ""}
@@ -2766,7 +2766,7 @@ function planView() {
     const pk = "p" + pi, open = S.open === pk;
     const doneWeeks = ph.weeks.filter(w => REQ.every(k => isDone(w, k))).length;
     const now = ph.weeks.includes(cur);
-    h += `<div class="day ${open ? "open" : ""}"><button class="dayhead" data-act="toggle" data-key="${pk}" id="dh-${pk}" aria-expanded="${open}">
+    h += `<div class="day phase ${open ? "open" : ""}"><button class="dayhead" data-act="toggle" data-key="${pk}" id="dh-${pk}" aria-expanded="${open}">
       <span class="dn">Phase ${pi + 1}</span><span class="dt">${esc(ph.name)}<small>Weeks ${ph.weeks[0]}–${ph.weeks[ph.weeks.length - 1]} · ${doneWeeks}/3 weeks done${now ? " · you are here" : ""}</small></span><span class="chev">›</span></button>`;
     if (open) {
       h += `<div class="daybody"><div class="muted" style="font-size:14px">${esc(ph.about)}</div>`;
@@ -3020,20 +3020,28 @@ const ICON_ROW = () => `<ul class="tipicons"><li><span class="ti light">${FEEL_I
   <li><span class="ti heavy">${FEEL_ICON.heavy(16)}</span><span><b>Kettlebell</b> – none left, or didn't finish → about 10 % lighter</span></li></ul>`;
 const goal = () => loadProfile()?.answers?.goal || null, atHome = () => loadProfile()?.answers?.where === "Home";
 const TIPS = [
-  { id: "T1", title: "Your 12 weeks", tab: "today", sel: ".weekcard", when: () => true,
-    text: "4 phases of 3 weeks. The workouts stay the same within a phase so the weights can climb, then change. <b>The week is what counts</b> – move workouts around as your days allow." },
+  { id: "T1", title: "Your 12 weeks", tab: "plan", sel: ".day.phase", when: () => true, guide: true, back: "today",
+    text: "Here on <b>Programme</b>: 4 phases of 3 weeks. The workouts stay the same within a phase so the weights can climb, then change. Tap a phase to see its workouts. <b>The week is what counts</b> – move workouts around as your days allow." },
   { id: "T7", title: "Balance first", tab: "today", sel: ".ex.bal", onScreen: true, when: () => goal() === "Balance",
     text: "Balance is done first, while you're fresh. Always stand <b>next to a support</b> – a rack, a wall or a sturdy chair. Hold as steady as you can; touching down is fine." },
   { id: "T2", title: "Ticking sets", tab: "today", sel: ".ex:not(.wu) .setmain", when: () => true, next: "T3",
     text: "Tap a set when it's done. Use the arrows to change the reps if you did something else. Timed sets count down for you. Tap <b>How to do it</b> for the guide and animation." },
   { id: "T3", title: "Week 1: finding your weights", tab: "today", sel: ".ex:not(.wu) .feel", when: () => S.week === 1 && !!document.querySelector(".findban"), chained: true,
-    text: "The starting weights are a safe first guess. After each set, ask yourself: <b>“How many more could I have done with good form?”</b>" + "@@ICONS@@" + "If a weight was too heavy once, the app won't go back up to it. Your last set becomes next week's weight." },
+    text: "The starting weights are a safe first guess. After each set, ask yourself: <b>“How many more could I have done with good form?”</b>" + "@@ICONS@@" + "Your last set becomes next week's weight." },
   { id: "T4", title: "From now on: one mark per exercise", tab: "today", sel: ".ex:not(.wu):not(.finding) .feel", when: () => S.week >= 2, onScreen: true,
     text: "The feather and kettlebell now count for the whole exercise and set next session's weight. <b>Feather</b> → up a step · <b>No mark, all reps done</b> → up a step · <b>Kettlebell</b> → same weight. New exercises still start with “find your weight”." },
-  { id: "T5", title: "Supersets", tab: "today", sel: ".ex:not(.bal) .exname .tag", onScreen: true, when: () => true,
+  { id: "T5", title: "Supersets", tab: "today", sel: ".ex.ss1:not(.bal)", onScreen: true, when: () => true,
     text: "Do one set of <b>A1</b>, then one set of <b>A2</b> (and A3), then rest. They're done in the same spot, so you keep your place." },
   { id: "T8", title: "How hard? The talk test", tab: "today", sel: ".ex.cardio .setmain", onScreen: true, when: () => goal() === "Cardio",
     text: "<b>Easy</b> – full sentences · <b>Steady</b> – short sentences · <b>Hard</b> – only a few words. Tap the block to start: the app guides you through each part, with a sound and a buzz when the intensity changes." },
+  { id: "T12", title: "Timed sets count down", tab: "today", sel: ".ex.timed .setmain", onScreen: true, when: () => true,
+    text: "Tap the set to start: 5 seconds to get ready, then it counts down – left side, then right side when it's per side. At 0 it beeps, buzzes and turns green by itself. <b>Pause</b>, <b>Done</b> or <b>Cancel</b> in the bar at the top." },
+  { id: "TB", title: "Your body", tab: "body", sel: "#bodyform", when: () => true,
+    text: "Log your weight – and waist if you like – every week or two, at the same time of day. The trend shows above it. Your weight also counts in <b>kg lifted</b> for pull-ups and push-ups." },
+  { id: "TH", title: "Your progress", tab: "history", sel: ".grid12", when: () => true,
+    text: "Every workout is a square – it turns green when it's done. Further down: your heaviest sets and every session. <b>Save a backup</b> now and then – everything is stored on this phone." },
+  { id: "TL", title: "All exercises", tab: "lib", sel: "#libq", when: () => true,
+    text: "Search by name, muscle or equipment. Tap an exercise for the animation, the technique and what to avoid." },
   { id: "T10", title: "Ladders", tab: "today", sel: ".ex.ladder", onScreen: true, when: () => atHome(),
     text: "Some home exercises get harder by changing the exercise instead of adding weight. When the top of the rep range is easy, move up one step. Two kettlebells in a row → one step back." },
   { id: "T11", title: "Safety bars first", tab: "today", sel: ".ex.bbsquat", onScreen: true, when: () => true,
@@ -3043,15 +3051,18 @@ const tipText = t => t.text.replace("@@ICONS@@", ICON_ROW());
 function checkTips() {
   if (S.tip || S.ob || S.cd || !S.loaded) return;
   const seen = tipSeen(); if (seen.skipAll) return;
+  const g = TIPS.find(t => t.guide && !seen[t.id]);
+  if (g && S.tab !== g.tab && S.tab === "today" && S.program) { S.tab = g.tab; window.scrollTo(0, 0); render(); return; }   // first start: take the user to the Programme tab
   for (const t of TIPS) {
     if (seen[t.id] || t.chained || t.tab !== S.tab || !t.when()) continue;
     const el = document.querySelector(t.sel); if (!el) continue;
-    if (t.onScreen) { const r = el.getBoundingClientRect(); if (r.top < 60 || r.bottom > innerHeight - 160) continue; }   // "the first time it appears" = on screen
+    if (t.onScreen) { const r = el.getBoundingClientRect(); if (r.bottom < 60 || r.top > innerHeight - 120) continue; }   // "the first time it appears" = on screen
     return showTip(t, el);
   }
 }
 function showTip(t, el) {
-  S.tip = t.id; S.tipSel = t.sel; if (!t.onScreen) el.scrollIntoView({ block: "center" });
+  S.tip = t.id; S.tipSel = t.sel;
+  const top = el.getBoundingClientRect().top; window.scrollBy({ top: top - 110, behavior: "instant" });   // the feature sits near the top, above the tip sheet
   const ov = document.getElementById("tipov");
   ov.innerHTML = `<div class="tipring"></div><div class="tipsheet" role="dialog" aria-labelledby="tip-title"><div class="eyebrow">Tip</div><h2 id="tip-title">${esc(t.title)}</h2><div class="tipbody">${tipText(t)}</div>
     <div class="tipbtns"><button type="button" class="linkbtn" data-act="tipskip">Skip all tips</button><button type="button" class="btn" data-act="tipok">Got it</button></div></div>`;
@@ -3071,6 +3082,7 @@ window.addEventListener("resize", () => S.tip && placeRing());
 function closeTip(skipAll) {
   const seen = tipSeen(), t = TIPS.find(x => x.id === S.tip); if (t) seen[t.id] = true; if (skipAll) seen.skipAll = true; tipSave(seen);
   const ov = document.getElementById("tipov"); ov.hidden = true; ov.innerHTML = ""; S.tip = null; S.tipEl = null;
+  if (t?.back && S.tab !== t.back) { S.tab = t.back; window.scrollTo(0, 0); render(); return; }
   if (!skipAll && t?.next) { const n = TIPS.find(x => x.id === t.next), el = n && !seen[n.id] && n.when() && document.querySelector(n.sel); if (el) return showTip(n, el); }
   setTimeout(checkTips, 300);
 }
