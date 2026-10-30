@@ -1400,7 +1400,7 @@ function suggest(e, id) {
 // The feather / kettlebell then apply to the set just ticked: feather → next sets +2 steps, kettlebell → −1 step, no mark → same weight.
 function isFinding(e, w, id) { return !!e.inc && !/^Warm-up sets/.test(e.name) && (w === 1 || !prevBest(e.name, id)); }
 // The session remembers what it learned (Christian 2026-10-30): never back up to a weight marked too heavy, never down to one marked too easy.
-// Feather: +2 steps, but stay below the lightest "too heavy" weight. Kettlebell: −1 step, but not below the heaviest "too easy" weight.
+// Feather: ≈ +20 %, but stay below the lightest "too heavy" weight. Kettlebell: ≈ −10 %, but not below the heaviest "too easy" weight.
 // When "too easy" and "too heavy" are one step apart, the lighter one is the found weight.
 function findState(l, e) {
   const arr = l.sets[e.id], sf = l.setFeel?.[e.id] || {}, lo = e.bw ? -80 : 0, r = v => Math.round(v * 100) / 100;
@@ -1409,8 +1409,11 @@ function findState(l, e) {
     if (m === "light") L = L == null ? w : Math.max(L, w);
     if (m === "heavy") H = H == null ? w : Math.min(H, w);
     let t = w;
-    if (m === "light") { t = w + 2 * e.inc; if (H != null) t = Math.max(w, Math.min(t, H - e.inc)); }
-    if (m === "heavy") { t = w - e.inc; if (L != null) t = Math.max(t, L); }
+    // by percentage (Christian 2026-10-30): feather ≈ +20 %, kettlebell ≈ −10 %, rounded to the exercise's step, at least 1 step
+    // – big muscles with big weights move more kg than small ones. Assisted (body-weight) exercises keep +2 / −1 steps.
+    const pct = (f, n) => e.bw ? n * e.inc : Math.max(e.inc, Math.round(Math.abs(w) * f / e.inc) * e.inc);
+    if (m === "light") { t = w + pct(0.2, 2); if (H != null) t = Math.max(w, Math.min(t, H - e.inc)); }
+    if (m === "heavy") { t = w - pct(0.1, 1); if (L != null) t = Math.max(t, L); }
     next = Math.max(lo, r(t)); });
   const found = L != null && H != null && H - L <= e.inc + 1e-9 ? L : null;
   return { L, H, next: found != null ? found : next, found };
@@ -1547,7 +1550,7 @@ function todayView() {
       <button class="wbtn" data-act="pickw" data-k="${key}" id="wb-${key}"><b>${wLabel(key)} · ${esc(o.name.replace(" (optional)", ""))}</b><small>${esc(sub)}</small></button><span class="go">›</span></div>`;
   });
   h += `</div>`;
-  if (w === 1) h += `<div class="note findban"><b>Week 1: finding your weights.</b> The starting weights are a safe first guess. After each set, ask yourself: <i>how many more could I have done with good form?</i> 4 or more → tap the <b>feather</b> (next set +2 steps). None, or you didn't finish → the <b>kettlebell</b> (next set −1 step). 1–3 → no mark, same weight. Your last set becomes next week's weight.</div>`;
+  if (w === 1) h += `<div class="note findban"><b>Week 1: finding your weights.</b> The starting weights are a safe first guess. After each set, ask yourself: <i>how many more could I have done with good form?</i> 4 or more → tap the <b>feather</b> (next set about 20 % heavier). None, or you didn't finish → the <b>kettlebell</b> (about 10 % lighter). 1–3 → no mark, same weight. Your last set becomes next week's weight.</div>`;
 
   const id = logId(w, k), l = S.logs[id];
   const st = l ? stats(l) : { done: 0, total: wo.exercises.reduce((a, e) => a + e.sets, 0), vol: 0 };
@@ -1568,7 +1571,7 @@ function todayView() {
         <div class="lastrow num ${sets.length > 3 ? "tight" : ""}" style="${cols}">${sg.last.sets.map(x => `<span>${x.reps}${unit ? " " + unit : ""}${x.kg && !e.bw ? " × " + fmt(x.kg) + " kg" : e.bw && x.kg ? " × " + kgLabel(x.kg) : ""}</span>`).join("")}</div>` : "";
     const finding = isFinding(e, w, id), lastDone = sets.map(x => x.done).lastIndexOf(true);
     const feel = finding ? (lastDone >= 0 ? l?.setFeel?.[e.id]?.[lastDone] || null : null) : l?.feel?.[e.id] || null;
-    const findNote = finding ? `<div class="findnote">${lastDone < 0 ? "Finding your weight: tick a set, then feather if 4+ more reps were possible (next set +2 steps) or kettlebell if it was too heavy (−1 step)."
+    const findNote = finding ? `<div class="findnote">${lastDone < 0 ? "Finding your weight: tick a set, then feather if 4+ more reps were possible (next set about +20 %) or kettlebell if it was too heavy (about −10 %)."
       : complete ? `Found: ${kgWord(sets[sets.length - 1].kg)} is your starting weight next time.` : l && findState(l, e).found != null ? `Found: ${kgWord(findState(l, e).found)} – between too easy and too heavy. The rest of the sets stay here.` : `Set ${lastDone + 1}${feel === "light" ? " felt light" : feel === "heavy" ? " felt heavy" : ": no mark"} → next set ${kgWord(sets.find((x, i) => i > lastDone && !x.done)?.kg ?? kgNow)}.`}</div>` : "";
     const feelNote = finding ? findNote : feel && e.inc ? `<div class="feelnote">${feel === "light" ? `Felt light: next time ${kgWord(kgNow + e.inc)}.` : `Felt heavy: next time stay at ${kgWord(kgNow)}.`}</div>` : "";
     h += `<section class="ex ${complete ? "complete" : ""} ${ssCls}">
