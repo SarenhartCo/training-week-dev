@@ -316,7 +316,7 @@ tr:last-child td{border-bottom:0}
 .badges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:18px}
 .badge{border:1.5px dashed var(--line);border-radius:14px;padding:10px 6px;text-align:center;display:grid;gap:4px;justify-items:center;opacity:.6}.badge b{font-size:13px;line-height:1.2}.badge small{font-size:11px;color:var(--muted);line-height:1.25}
 .badge .bico{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--sunk);color:var(--muted)}
-.badge.got{opacity:1;border:1.5px solid var(--line);background:var(--surface)}.badge.got.streak .bico{background:#fde7d9;color:#d9611a}.badge.got.phase .bico{background:var(--accent-soft);color:var(--accent)}.badge.got.pb .bico{background:#fbf0c9;color:#a87900}.badge.got.mile .bico{background:var(--done-bg);color:var(--done)}
+.badge .bdate{color:var(--done);font-weight:700}.badge.got{opacity:1;border:1.5px solid var(--line);background:var(--surface)}.badge.got.streak .bico{background:#fde7d9;color:#d9611a}.badge.got.phase .bico{background:var(--accent-soft);color:var(--accent)}.badge.got.pb .bico{background:#fbf0c9;color:#a87900}.badge.got.mile .bico{background:var(--done-bg);color:var(--done)}
 .howto{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.howto b{display:block;margin-bottom:2px}
 @keyframes cdflash{0%,50%{background:var(--fc)}25%,75%,100%{background:var(--surface)}}
 .timer.flash{animation:cdflash .8s ease-in-out 2}.timer.flash .clock,.timer.flash .lbl b{animation:cdflashtx .8s ease-in-out 2}
@@ -3363,7 +3363,7 @@ function sessionsByExercise() {                  // name → [{id, kg}] oldest f
   const out = {};
   for (const id of Object.keys(S.logs).sort()) { const l = S.logs[id];
     for (const [eid, sets] of Object.entries(l.sets || {})) { const n = l.names?.[eid]; if (!n || /^Warm-up/.test(n)) continue; const d = sets.filter(x => x.done && x.kg != null); if (!d.length) continue;
-      (out[n] = out[n] || []).push({ id, kg: Math.max(...d.map(x => x.kg || 0)), bw: d.some(x => x.kg < 0) }); } }
+      (out[n] = out[n] || []).push({ id, kg: Math.max(...d.map(x => x.kg || 0)), bw: d.some(x => x.kg < 0), finding: !!l.finding?.[eid] }); } }
   return out;
 }
 function badgeList() {
@@ -3373,27 +3373,28 @@ function badgeList() {
   const workouts = Object.values(S.logs).filter(l => l.finished).length;
   const kg = Object.values(S.logs).reduce((t, l) => t + stats(l).vol, 0);
   const sx = sessionsByExercise(); let pbs = 0, pbList = [];
-  for (const [n, a] of Object.entries(sx)) { let top = a[0].kg; for (let i = 1; i < a.length; i++) if (a[i].kg > top) { top = a[i].kg; pbs++; pbList.push(n); } }
+  // a personal best only counts outside "find your weight" sessions – those just set the starting point (Christian 2026-10-31)
+  for (const [n, a] of Object.entries(sx)) { let top = a[0].kg; for (let i = 1; i < a.length; i++) { if (a[i].finding) { top = Math.max(top, a[i].kg); continue; } if (a[i].kg > top) { top = a[i].kg; pbs++; pbList.push(n); } } }
   const pullFree = Object.entries(sx).some(([n, a]) => /pull-up/i.test(n) && a.some((x, i) => i > 0 && x.kg >= 0 && a.slice(0, i).some(y => y.kg < 0)));
   const cardio = typeof isCardioPlan === "function" && isCardioPlan(), week150 = cardio && Array.from({ length: tw }, (_, i) => i + 1).some(w => weekMinutes(w) >= cardioTarget(w));
+  const PH = ["Groundwork", "Level Up", "Heavy Hitter", "Programme Finisher"];   // snappier names (Christian 2026-10-31); phase 4 = the whole programme
   const B = [
-    ["first", "mile", "First workout", "Finish your first workout.", workouts >= 1],
-    ["week1", "mile", "First full week", "Do all the planned workouts of a week.", best >= 1],
-    ["s2", "streak", "2 weeks in a row", "Two full weeks in a row.", best >= 2],
-    ["s4", "streak", "4 weeks in a row", "Four full weeks in a row.", best >= 4],
-    ["s8", "streak", "8 weeks in a row", "Eight full weeks in a row.", best >= 8],
-    ["s12", "streak", "Every week, all 12", "All 12 weeks full, in a row.", best >= 12],
-    ...S.program.phases.map((ph, i) => ["p" + (i + 1), "phase", `Phase ${i + 1} done`, `Finish all of phase ${i + 1}: ${ph.name}.`, phasesDone[i]]),
-    ["p12", "phase", "12 weeks done", "Finish the whole programme.", phasesDone.every(Boolean)],
-    ["pb1", "pb", "First personal best", "Lift more than ever before on an exercise.", pbs >= 1],
-    ["pb10", "pb", "10 personal bests", "Ten new bests across your exercises.", pbs >= 10],
-    ["pb25", "pb", "25 personal bests", "Twenty-five new bests.", pbs >= 25],
-    ["w10", "mile", "10 workouts", "Finish 10 workouts.", workouts >= 10],
-    ["w25", "mile", "25 workouts", "Finish 25 workouts.", workouts >= 25],
-    ["kg10k", "mile", "10 000 kg lifted", "Lift 10 tonnes in total.", kg >= 10000],
-    ["kg100k", "mile", "100 000 kg lifted", "Lift 100 tonnes in total.", kg >= 100000],
-    ...(Object.keys(sx).some(n => /pull-up/i.test(n)) || pullFree ? [["pullfree", "mile", "Pull-up without help", "Your first pull-up with no machine help.", pullFree]] : []),
-    ...(cardio ? [["c150", "mile", "First 150-minute week", "Reach your weekly cardio minutes.", week150]] : [])
+    ["first", "mile", "Day One", "Finish your first workout.", workouts >= 1],
+    ["week1", "mile", "Full House", "Do every planned workout of a week.", best >= 1],
+    ["s2", "streak", "Back-to-Back", "Two full weeks in a row.", best >= 2],
+    ["s4", "streak", "On a Roll", "Four full weeks in a row.", best >= 4],
+    ["s8", "streak", "Unstoppable", "Eight full weeks in a row.", best >= 8],
+    ["s12", "streak", "Iron Streak", "All 12 weeks full, in a row.", best >= 12],
+    ...S.program.phases.map((ph, i) => ["p" + (i + 1), "phase", PH[i] || `Phase ${i + 1}`, i === S.program.phases.length - 1 ? "Finish the whole programme – all four phases." : `Finish phase ${i + 1}: ${ph.name}.`, phasesDone[i]]),
+    ["pb1", "pb", "New Record", "Lift more than ever before on an exercise.", pbs >= 1],
+    ["pb10", "pb", "Record Breaker", "Ten personal bests.", pbs >= 10],
+    ["pb25", "pb", "Hall of Fame", "Twenty-five personal bests.", pbs >= 25],
+    ["w10", "mile", "Double Digits", "Finish 10 workouts.", workouts >= 10],
+    ["w25", "mile", "Quarter Century", "Finish 25 workouts.", workouts >= 25],
+    ["kg10k", "mile", "Ten Tonner", "Lift 10 000 kg in total.", kg >= 10000],
+    ["kg100k", "mile", "Mountain Mover", "Lift 100 000 kg in total.", kg >= 100000],
+    ...(Object.keys(sx).some(n => /pull-up/i.test(n)) || pullFree ? [["pullfree", "mile", "Lift-Off", "Your first pull-up with no machine help.", pullFree]] : []),
+    ...(cardio ? [["c150", "mile", "150 Club", "Reach your weekly cardio minutes.", week150]] : [])
   ];
   return { list: B.map(([id, icon, title, how, got]) => ({ id, icon, title, how, got })), pbs, best, workouts };
 }
@@ -3409,7 +3410,7 @@ function badgesHtml() {
   const { list } = badgeList(), saved = jget(BADGE_KEY), got = list.filter(b => b.got).length;
   const ico = b => `<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">${BADGE_ICON[b.icon]}</svg>`;
   return `<h2 class="sec">Badges <span class="muted">· ${got} of ${list.length}</span></h2><div class="badges">${list.map(b => `<div class="badge ${b.got ? "got " + b.icon : ""}" title="${esc(b.how)}">
-    <span class="bico">${ico(b)}</span><b>${esc(b.title)}</b><small>${b.got ? (saved[b.id] ? "Earned " + shortDate(saved[b.id]) : "Earned") : esc(b.how)}</small></div>`).join("")}</div>`;
+    <span class="bico">${ico(b)}</span><b>${esc(b.title)}</b><small>${esc(b.how)}</small>${b.got ? `<small class="bdate">Earned ${saved[b.id] ? shortDate(saved[b.id]) : ""}</small>` : ""}</div>`).join("")}</div>`;
 }
 let wake = null;
 async function keepAwake() { try { if (!wake && navigator.wakeLock) { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => wake = null); } } catch {} }
