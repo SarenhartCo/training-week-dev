@@ -313,6 +313,10 @@ tr:last-child td{border-bottom:0}
 #wdov{position:fixed;inset:0;z-index:55;background:rgba(10,14,20,.55);display:flex;align-items:center;justify-content:center;padding:16px}#wdov[hidden]{display:none}
 .wdsheet{background:var(--surface);color:var(--ink);border-radius:18px;padding:20px;max-width:420px;width:100%;text-align:center}.wdsheet h2{font-family:var(--display);font-size:32px;margin:4px 0 8px}.wdsheet p{margin:6px 0}
 .wdbtns{display:grid;gap:8px;margin:14px 0 6px}.wdline{margin:2px 0 !important}.wdline+p:not(.wdline){margin-top:12px !important}
+.badges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:18px}
+.badge{border:1.5px dashed var(--line);border-radius:14px;padding:10px 6px;text-align:center;display:grid;gap:4px;justify-items:center;opacity:.6}.badge b{font-size:13px;line-height:1.2}.badge small{font-size:11px;color:var(--muted);line-height:1.25}
+.badge .bico{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--sunk);color:var(--muted)}
+.badge.got{opacity:1;border:1.5px solid var(--line);background:var(--surface)}.badge.got.streak .bico{background:#fde7d9;color:#d9611a}.badge.got.phase .bico{background:var(--accent-soft);color:var(--accent)}.badge.got.pb .bico{background:#fbf0c9;color:#a87900}.badge.got.mile .bico{background:var(--done-bg);color:var(--done)}
 .howto{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.howto b{display:block;margin-bottom:2px}
 @keyframes cdflash{0%,50%{background:var(--fc)}25%,75%,100%{background:var(--surface)}}
 .timer.flash{animation:cdflash .8s ease-in-out 2}.timer.flash .clock,.timer.flash .lbl b{animation:cdflashtx .8s ease-in-out 2}
@@ -2903,7 +2907,7 @@ function wireChart() {
 }
 function niceStep(raw) { const p = Math.pow(10, Math.floor(Math.log10(raw))); const n = raw / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p; }
 
-function historyView() { return historyInner() + backupCard(); }
+function historyView() { badgesCheck(); return historyInner() + badgesHtml() + backupCard(); }
 function historyInner() {
   let h = head("12-week overview", "Progress");
   const P = S.program;
@@ -3105,7 +3109,7 @@ const TIPS = [
   { id: "TB", title: "Your body", tab: "body", sel: "#bodyform", when: () => true,
     text: "Log your weight – and waist if you like – every week or two, at the same time of day. The trend shows above it. Your weight also counts in <b>kg lifted</b> for pull-ups and push-ups." },
   { id: "TH", title: "Your progress", tab: "history", sel: ".grid12", when: () => true,
-    text: "Every workout is a square – it turns green when it's done. Further down: your heaviest sets and every session. <b>Save a backup</b> now and then – everything is stored on this phone." },
+    text: "Every workout is a square – it turns green when it's done. Further down: your badges, your heaviest sets and every session. <b>Save a backup</b> now and then – everything is stored on this phone." },
   { id: "TL", title: "All exercises", tab: "lib", sel: "#libq", when: () => true,
     text: "Search by name, muscle or equipment. Tap an exercise for the animation, the technique and what to avoid." },
   { id: "T10", title: "Ladders", tab: "today", sel: ".ex.ladder", onScreen: true, when: () => atHome(),
@@ -3346,6 +3350,67 @@ function weekDoneClose(next) {
   else if (WK.includes("c")) S.wk = "c";
   S.timer = null; clearInterval(tick); window.scrollTo(0, 0); render();
 }
+// ---- Badges (Christian 2026-10-27: all four kinds in the first version – full weeks in a row, phases / 12 weeks, personal bests, milestones)
+// Worked out from the logs every time; the date each badge was first earned is kept on the phone (twdev.badges) so new ones can be announced.
+const BADGE_KEY = "twdev.badges";
+const BADGE_ICON = {
+  streak: `<path d="M12 3c1 3 4 4.5 4 8.5A4 4 0 0 1 8 11c0-1.4.6-2.4 1.4-3.2C9.6 9.4 10.6 10 11 10c0-2.6.2-4.6 1-7z" fill="currentColor"/><path d="M8 16h8v2H8z" fill="currentColor"/>`,
+  phase: `<path d="M6 21V4h10l-1.6 3L16 10H8v11z" fill="currentColor"/>`,
+  pb: `<path d="M7 4h10v3a5 5 0 0 1-10 0zM5 5h2v2a2 2 0 0 1-2-2zm12 0h2a2 2 0 0 1-2 2zM11 12h2v4h3v3H8v-3h3z" fill="currentColor"/>`,
+  mile: `<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6-4.5-4.1 6-.7z" fill="currentColor"/>`
+};
+function sessionsByExercise() {                  // name → [{id, kg}] oldest first (loaded exercises, done sets only)
+  const out = {};
+  for (const id of Object.keys(S.logs).sort()) { const l = S.logs[id];
+    for (const [eid, sets] of Object.entries(l.sets || {})) { const n = l.names?.[eid]; if (!n || /^Warm-up/.test(n)) continue; const d = sets.filter(x => x.done && x.kg != null); if (!d.length) continue;
+      (out[n] = out[n] || []).push({ id, kg: Math.max(...d.map(x => x.kg || 0)), bw: d.some(x => x.kg < 0) }); } }
+  return out;
+}
+function badgeList() {
+  const tw = totalWeeks(), full = w => REQ.every(k => isDone(w, k));
+  let streak = 0, best = 0; for (let w = 1; w <= tw; w++) { if (full(w)) { streak++; best = Math.max(best, streak); } else streak = 0; }
+  const phasesDone = S.program.phases.map(ph => ph.weeks.every(full));
+  const workouts = Object.values(S.logs).filter(l => l.finished).length;
+  const kg = Object.values(S.logs).reduce((t, l) => t + stats(l).vol, 0);
+  const sx = sessionsByExercise(); let pbs = 0, pbList = [];
+  for (const [n, a] of Object.entries(sx)) { let top = a[0].kg; for (let i = 1; i < a.length; i++) if (a[i].kg > top) { top = a[i].kg; pbs++; pbList.push(n); } }
+  const pullFree = Object.entries(sx).some(([n, a]) => /pull-up/i.test(n) && a.some((x, i) => i > 0 && x.kg >= 0 && a.slice(0, i).some(y => y.kg < 0)));
+  const cardio = typeof isCardioPlan === "function" && isCardioPlan(), week150 = cardio && Array.from({ length: tw }, (_, i) => i + 1).some(w => weekMinutes(w) >= cardioTarget(w));
+  const B = [
+    ["first", "mile", "First workout", "Finish your first workout.", workouts >= 1],
+    ["week1", "mile", "First full week", "Do all the planned workouts of a week.", best >= 1],
+    ["s2", "streak", "2 weeks in a row", "Two full weeks in a row.", best >= 2],
+    ["s4", "streak", "4 weeks in a row", "Four full weeks in a row.", best >= 4],
+    ["s8", "streak", "8 weeks in a row", "Eight full weeks in a row.", best >= 8],
+    ["s12", "streak", "Every week, all 12", "All 12 weeks full, in a row.", best >= 12],
+    ...S.program.phases.map((ph, i) => ["p" + (i + 1), "phase", `Phase ${i + 1} done`, `Finish all of phase ${i + 1}: ${ph.name}.`, phasesDone[i]]),
+    ["p12", "phase", "12 weeks done", "Finish the whole programme.", phasesDone.every(Boolean)],
+    ["pb1", "pb", "First personal best", "Lift more than ever before on an exercise.", pbs >= 1],
+    ["pb10", "pb", "10 personal bests", "Ten new bests across your exercises.", pbs >= 10],
+    ["pb25", "pb", "25 personal bests", "Twenty-five new bests.", pbs >= 25],
+    ["w10", "mile", "10 workouts", "Finish 10 workouts.", workouts >= 10],
+    ["w25", "mile", "25 workouts", "Finish 25 workouts.", workouts >= 25],
+    ["kg10k", "mile", "10 000 kg lifted", "Lift 10 tonnes in total.", kg >= 10000],
+    ["kg100k", "mile", "100 000 kg lifted", "Lift 100 tonnes in total.", kg >= 100000],
+    ...(Object.keys(sx).some(n => /pull-up/i.test(n)) || pullFree ? [["pullfree", "mile", "Pull-up without help", "Your first pull-up with no machine help.", pullFree]] : []),
+    ...(cardio ? [["c150", "mile", "First 150-minute week", "Reach your weekly cardio minutes.", week150]] : [])
+  ];
+  return { list: B.map(([id, icon, title, how, got]) => ({ id, icon, title, how, got })), pbs, best, workouts };
+}
+function badgesCheck() {                         // remember first-earned dates; return the new ones
+  if (!S.program) return [];
+  const saved = jget(BADGE_KEY), fresh = [];
+  for (const b of badgeList().list) if (b.got && !saved[b.id]) { saved[b.id] = today(); fresh.push(b); }
+  if (fresh.length) jset(BADGE_KEY, saved);
+  return fresh;
+}
+function badgeAnnounce() { const f = badgesCheck(); if (f.length) setTimeout(() => toast(f.length === 1 ? `Badge earned: ${f[0].title}` : `${f.length} badges earned: ${f.map(x => x.title).join(", ")}`), 600); }
+function badgesHtml() {
+  const { list } = badgeList(), saved = jget(BADGE_KEY), got = list.filter(b => b.got).length;
+  const ico = b => `<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">${BADGE_ICON[b.icon]}</svg>`;
+  return `<h2 class="sec">Badges <span class="muted">· ${got} of ${list.length}</span></h2><div class="badges">${list.map(b => `<div class="badge ${b.got ? "got " + b.icon : ""}" title="${esc(b.how)}">
+    <span class="bico">${ico(b)}</span><b>${esc(b.title)}</b><small>${b.got ? (saved[b.id] ? "Earned " + shortDate(saved[b.id]) : "Earned") : esc(b.how)}</small></div>`).join("")}</div>`;
+}
 let wake = null;
 async function keepAwake() { try { if (!wake && navigator.wakeLock) { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => wake = null); } } catch {} }
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.timer) keepAwake(); });
@@ -3372,6 +3437,7 @@ document.addEventListener("click", ev => {
       l.finished = !l.finished; l.finishedAt = l.finished ? new Date().toISOString() : null;
       saveLog(l);
       if (l.finished && !advanceIfWeekDone(S.week)) toast(`${wLabel(k)} marked done.`);
+      if (l.finished) badgeAnnounce();
       render(); break;
     }
     case "pcclose": { const v = pcClosed(); v[b.dataset.p] = true; try { localStorage.setItem(PC_KEY, JSON.stringify(v)); } catch {} render(); break; }
@@ -3443,7 +3509,7 @@ document.addEventListener("click", ev => {
       const left = arr.filter(x => !x.done); const lo = +(b.dataset.min || 0); (left.length ? left : arr).forEach(x => x.kg = Math.max(lo, Math.round(((x.kg || 0) + d) * 100) / 100));
       saveLog(l); render(); break;
     }
-    case "finish": { const l = S.logs[logId(S.week, S.wk)]; if (l) { l.finished = true; l.finishedAt = new Date().toISOString(); saveLog(l); S.timer = null; clearInterval(tick);
+    case "finish": { const l = S.logs[logId(S.week, S.wk)]; if (l) { l.finished = true; l.finishedAt = new Date().toISOString(); saveLog(l); S.timer = null; clearInterval(tick); badgeAnnounce();
       if (!advanceIfWeekDone(S.week)) { const nk = REQ.find(k => !isDone(S.week, k)); toast(nk ? "Workout saved. Next up: " + wLabel(nk) + "." : "Workout saved."); }
       render(); } break; }
     case "libopen": { const id = b.dataset.c; S.libOpen = S.libOpen === id ? null : id; render(); if (S.libOpen) document.querySelector(".libitem.open")?.scrollIntoView({ block: "nearest" }); break; }
