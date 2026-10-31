@@ -3412,7 +3412,7 @@ function badgeList() {
   // lifetime totals: this programme's logs + the summaries of finished programmes (kept on the phone by the 12-week wrap-up, when that's built)
   const past = jget("twdev.history"), progs = (past.programmes || []).length + 1;
   let cmin = 0; for (const [id, l] of Object.entries(S.logs)) { const w = +id.slice(1, 3), k = id.split("-")[1], wo = workout(w, k); if (!wo) continue;
-    for (const e of wo.exercises) if (e.unit === "min" && !/^(Warm-up|Cool-down)$/.test(e.name)) for (const x of l.sets?.[e.id] || []) if (x.done) cmin += x.reps || 0; }
+    for (const e of wo.exercises) if (e.unit === "min") for (const x of l.sets?.[e.id] || []) if (x.done) cmin += x.reps || 0; }
   for (const [k, b] of Object.entries(jget(BONUS_KEY))) if (k !== "off" && b?.done && !b.skipped) cmin += b.min || 0;   // bonus easy sessions count too
   cmin += past.cardioMin || 0;
   const kgAll = kg + (past.kg || 0), workoutsAll = workouts + (past.workouts || 0);
