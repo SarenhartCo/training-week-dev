@@ -3380,9 +3380,10 @@ function badgeList() {
   const past = jget("twdev.history"), progs = (past.programmes || []).length + 1;
   let cmin = 0; for (const [id, l] of Object.entries(S.logs)) { const w = +id.slice(1, 3), k = id.split("-")[1], wo = workout(w, k); if (!wo) continue;
     for (const e of wo.exercises) if (e.unit === "min" && !/^(Warm-up|Cool-down)$/.test(e.name)) for (const x of l.sets?.[e.id] || []) if (x.done) cmin += x.reps || 0; }
+  for (const [k, b] of Object.entries(jget(BONUS_KEY))) if (k !== "off" && b?.done && !b.skipped) cmin += b.min || 0;   // bonus easy sessions count too
   cmin += past.cardioMin || 0;
   const kgAll = kg + (past.kg || 0), workoutsAll = workouts + (past.workouts || 0);
-  const cardio = typeof isCardioPlan === "function" && isCardioPlan(), week150 = cardio && Array.from({ length: tw }, (_, i) => i + 1).some(w => weekMinutes(w) >= cardioTarget(w));
+  const cardio = typeof isCardioPlan === "function" && isCardioPlan(), week150 = Array.from({ length: tw }, (_, i) => i + 1).some(w => weekMinutes(w) >= (cardio ? cardioTarget(w) : 150));   // every badge is open to every plan (Christian 2026-10-31)
   const PH = ["Groundwork", "Level Up", "Heavy Hitter", "Programme Finisher"];   // snappier names (Christian 2026-10-31); phase 4 = the whole programme
   const B = [
     ["first", "mile", "Day One", "Finish your first workout.", workouts >= 1],
@@ -3404,17 +3405,22 @@ function badgeList() {
     ["kg250k", "mile", "Heavy Lifter", "Lift 250 000 kg in total.", kgAll >= 250000],
     ["kg500k", "mile", "Half a Million", "Lift 500 000 kg in total.", kgAll >= 500000],
     ["kg1m", "mile", "Million Club", "Lift 1 000 000 kg in total.", kgAll >= 1000000],
-    ["j-vasa", "mile", "Mora to Sälen", "9 hours of cardio – time enough to cover the classic ski-race track, 90 km, at 10 km/h.", cmin >= 540],
-    ["j-camino", "mile", "Camino", "80 hours of cardio – time enough to run the Camino de Santiago, 800 km, at 10 km/h.", cmin >= 4800],
-    ["j-sweden", "mile", "Length of Sweden", "157 hours of cardio – time enough to run Smygehuk to Treriksröset, 1 570 km, at 10 km/h.", cmin >= 9420],
-    ["coast", "mile", "Coast to Coast", "480 hours of cardio – time enough to run across America, 4 800 km, at 10 km/h.", cmin >= 28800],
-    ["j-wall", "mile", "Great Wall", "885 hours of cardio – time enough to run the Great Wall of China, 8 850 km, at 10 km/h.", cmin >= 53100],
-    ["j-transsib", "mile", "Trans-Siberian", "929 hours of cardio – time enough to run Moscow to Vladivostok, 9 290 km, at 10 km/h.", cmin >= 55740],
-    ["j-australia", "mile", "Around Australia", "1 450 hours of cardio – time enough to run around Australia, 14 500 km, at 10 km/h.", cmin >= 87000],
+    ["j-vasa", "mile", "Mora to Sälen", "9 hours of cardio – time enough to cover the classic ski-race track, about 90 km, at 10 km/h.", cmin >= 540],
+    ["j-sparta", "mile", "Athens to Sparta", "25 hours of cardio – time enough to run from Athens to Sparta, about 250 km, at 10 km/h.", cmin >= 1500],
+    ["j-gbg", "mile", "Stockholm to Gothenburg", "47 hours of cardio – time enough to run from Stockholm to Gothenburg, about 470 km, at 10 km/h.", cmin >= 2820],
+    ["j-camino", "mile", "Camino", "80 hours of cardio – time enough to run the Camino de Santiago, about 800 km, at 10 km/h.", cmin >= 4800],
+    ["j-berlin", "mile", "Paris to Berlin", "105 hours of cardio – time enough to run from Paris to Berlin, about 1 050 km, at 10 km/h.", cmin >= 6300],
+    ["j-sweden", "mile", "Length of Sweden", "157 hours of cardio – time enough to run Smygehuk to Treriksröset, about 1 570 km, at 10 km/h.", cmin >= 9420],
+    ["j-norway", "mile", "Length of Norway", "250 hours of cardio – time enough to run Lindesnes to the North Cape, about 2 500 km, at 10 km/h.", cmin >= 15000],
+    ["coast", "mile", "Coast to Coast", "480 hours of cardio – time enough to run across America, about 4 800 km, at 10 km/h.", cmin >= 28800],
+    ["j-nile", "mile", "Length of the Nile", "665 hours of cardio – time enough to run the length of the Nile, about 6 650 km, at 10 km/h.", cmin >= 39900],
+    ["j-wall", "mile", "Great Wall", "885 hours of cardio – time enough to run the Great Wall of China, about 8 850 km, at 10 km/h.", cmin >= 53100],
+    ["j-transsib", "mile", "Trans-Siberian", "929 hours of cardio – time enough to run Moscow to Vladivostok, about 9 290 km, at 10 km/h.", cmin >= 55740],
+    ["j-australia", "mile", "Around Australia", "1 450 hours of cardio – time enough to run around Australia, about 14 500 km, at 10 km/h.", cmin >= 87000],
     ["prog2", "phase", "Not Done Yet", "Start your second programme after the first 12 weeks.", progs >= 2],
     ["prog5", "phase", "Lifer", "Start your fifth programme.", progs >= 5],
-    ...(Object.keys(sx).some(n => /pull-up/i.test(n)) || pullFree ? [["pullfree", "mile", "Lift-Off", "Your first pull-up with no machine help.", pullFree]] : []),
-    ...(cardio ? [["c150", "mile", "150 Club", "Reach your weekly cardio minutes.", week150]] : [])
+    ["pullfree", "mile", "Lift-Off", "Your first pull-up with no machine help.", pullFree],
+    ["c150", "mile", "150 Club", "Reach 150 cardio minutes in a week (or your build-up target on a Cardio plan).", week150]
   ];
   return { list: B.map(([id, icon, title, how, got]) => ({ id, icon, title, how, got })), pbs, best, workouts };
 }
