@@ -3367,6 +3367,38 @@ function sessionsByExercise() {                  // name → [{id, kg}] oldest f
       (out[n] = out[n] || []).push({ id, kg: Math.max(...d.map(x => x.kg || 0)), bw: d.some(x => x.kg < 0), finding: !!l.finding?.[eid] }); } }
   return out;
 }
+// Cardio journey badges (Christian 2026-10-31): earned by cardio TIME; the distance is only the story = hours × 10 km/h.
+// Three "home" stops follow where the phone is (time zone, else language region); the rest are the same for everyone.
+const JOURNEY_HOME = {
+  nordic: [["Stockholm to Gothenburg", "run from Stockholm to Gothenburg", 470], ["Length of Sweden", "run Smygehuk to Treriksröset", 1570], ["Length of Norway", "run Lindesnes to the North Cape", 2500]],
+  uk: [["London to Paris", "run from London to Paris", 460], ["End to End", "run Land's End to John o' Groats", 1410], ["The Danube", "run the length of the Danube", 2850]],
+  us: [["LA to Vegas", "run from Los Angeles to Las Vegas", 430], ["New York to Chicago", "run from New York to Chicago", 1270], ["Route 66", "run Route 66, Chicago to Santa Monica", 3940]],
+  dach: [["Berlin to Munich", "run from Berlin to Munich", 585], ["The Rhine", "run the length of the Rhine", 1230], ["The Danube", "run the length of the Danube", 2850]],
+  world: [["London to Paris", "run from London to Paris", 460], ["End to End", "run the length of Britain, Land's End to John o' Groats", 1410], ["The Danube", "run the length of the Danube", 2850]]
+};
+function homeRegion() {
+  let tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch {}
+  if (/^(Europe\/(Stockholm|Oslo|Copenhagen|Helsinki|Mariehamn)|Atlantic\/Reykjavik|Arctic\/Longyearbyen)$/.test(tz)) return "nordic";
+  if (/^Europe\/(London|Dublin|Belfast|Isle_of_Man|Jersey|Guernsey)$/.test(tz)) return "uk";
+  if (/^Europe\/(Berlin|Vienna|Zurich|Busingen|Vaduz)$/.test(tz)) return "dach";
+  if (/^(America\/(New_York|Chicago|Denver|Phoenix|Los_Angeles|Anchorage|Detroit|Boise|Indiana|Kentucky|North_Dakota|Juneau|Sitka|Nome|Adak|Menominee)|Pacific\/Honolulu)/.test(tz)) return "us";
+  const reg = ((navigator.language || "").split("-")[1] || "").toUpperCase();
+  return ["SE", "NO", "DK", "FI", "IS"].includes(reg) ? "nordic" : ["GB", "IE"].includes(reg) ? "uk" : reg === "US" ? "us" : ["DE", "AT", "CH"].includes(reg) ? "dach" : "world";
+}
+function journeyBadges(cmin) {
+  const imp = loadProfile()?.answers?.units === "imperial", n = x => x.toLocaleString("en").replace(/,/g, imp ? "," : " ");
+  const dist = km => imp ? `about ${n(Math.round(km * 0.621371 / 10) * 10)} miles, at 6 mph` : `about ${n(km)} km, at 10 km/h`;
+  const H = JOURNEY_HOME[homeRegion()];
+  const J = [["j-vasa", "mile", "Mora to Sälen", "cover the classic ski-race track", 90],
+    ["j-sparta", "gift", "Delivering a Gift", "run as far as Athens to Sparta", 250],
+    ["j-home1", "mile", ...H[0]], ["j-camino", "mile", "Camino", "run the Camino de Santiago", 800],
+    ["j-berlin", "mile", "Paris to Berlin", "run from Paris to Berlin", 1050], ["j-home2", "mile", ...H[1]],
+    ["j-home3", "mile", ...H[2]], ["coast", "mile", "Coast to Coast", "run across America", 4800],
+    ["j-nile", "mile", "Length of the Nile", "run the length of the Nile", 6650], ["j-wall", "mile", "Great Wall", "run the Great Wall of China", 8850],
+    ["j-transsib", "mile", "Trans-Siberian", "run Moscow to Vladivostok", 9290], ["j-australia", "mile", "Around Australia", "run around Australia", 14500]];
+  return J.map(([id, icon, title, what, km]) => { const h = Math.round(km / 10); return [id, icon, title, `${n(h)} hours of cardio – time enough to ${what}, ${dist(km)}.`, cmin >= h * 60]; })
+    .sort((a, b) => parseFloat(a[3].replace(/[ ,]/g, "")) - parseFloat(b[3].replace(/[ ,]/g, "")));
+}
 function badgeList() {
   const tw = totalWeeks(), full = w => REQ.every(k => isDone(w, k));
   let streak = 0, best = 0; for (let w = 1; w <= tw; w++) { if (full(w)) { streak++; best = Math.max(best, streak); } else streak = 0; }
@@ -3406,18 +3438,7 @@ function badgeList() {
     ["kg250k", "mile", "Heavy Lifter", "Lift 250 000 kg in total.", kgAll >= 250000],
     ["kg500k", "mile", "Half a Million", "Lift 500 000 kg in total.", kgAll >= 500000],
     ["kg1m", "mile", "Million Club", "Lift 1 000 000 kg in total.", kgAll >= 1000000],
-    ["j-vasa", "mile", "Mora to Sälen", "9 hours of cardio – time enough to cover the classic ski-race track, about 90 km, at 10 km/h.", cmin >= 540],
-    ["j-sparta", "gift", "Delivering a Gift", "25 hours of cardio – time enough to run about 250 km, as far as Athens to Sparta, at 10 km/h. From Greece with love.", cmin >= 1500],
-    ["j-gbg", "mile", "Stockholm to Gothenburg", "47 hours of cardio – time enough to run from Stockholm to Gothenburg, about 470 km, at 10 km/h.", cmin >= 2820],
-    ["j-camino", "mile", "Camino", "80 hours of cardio – time enough to run the Camino de Santiago, about 800 km, at 10 km/h.", cmin >= 4800],
-    ["j-berlin", "mile", "Paris to Berlin", "105 hours of cardio – time enough to run from Paris to Berlin, about 1 050 km, at 10 km/h.", cmin >= 6300],
-    ["j-sweden", "mile", "Length of Sweden", "157 hours of cardio – time enough to run Smygehuk to Treriksröset, about 1 570 km, at 10 km/h.", cmin >= 9420],
-    ["j-norway", "mile", "Length of Norway", "250 hours of cardio – time enough to run Lindesnes to the North Cape, about 2 500 km, at 10 km/h.", cmin >= 15000],
-    ["coast", "mile", "Coast to Coast", "480 hours of cardio – time enough to run across America, about 4 800 km, at 10 km/h.", cmin >= 28800],
-    ["j-nile", "mile", "Length of the Nile", "665 hours of cardio – time enough to run the length of the Nile, about 6 650 km, at 10 km/h.", cmin >= 39900],
-    ["j-wall", "mile", "Great Wall", "885 hours of cardio – time enough to run the Great Wall of China, about 8 850 km, at 10 km/h.", cmin >= 53100],
-    ["j-transsib", "mile", "Trans-Siberian", "929 hours of cardio – time enough to run Moscow to Vladivostok, about 9 290 km, at 10 km/h.", cmin >= 55740],
-    ["j-australia", "mile", "Around Australia", "1 450 hours of cardio – time enough to run around Australia, about 14 500 km, at 10 km/h.", cmin >= 87000],
+    ...journeyBadges(cmin),
     ["prog2", "phase", "Not Done Yet", "Start your second programme after the first 12 weeks.", progs >= 2],
     ["prog5", "phase", "Lifer", "Start your fifth programme.", progs >= 5],
     ["pullfree", "mile", "Lift-Off", "Your first pull-up with no machine help.", pullFree],
