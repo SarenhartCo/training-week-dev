@@ -308,6 +308,11 @@ tr:last-child td{border-bottom:0}
 .pcaim{margin:0 0 6px;font-size:14px}.pclist{margin:4px 0;padding-left:18px;font-size:14px}.pcnew{font-size:14px;margin-top:6px}.pcchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .sshead{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:16px 4px 6px}
 .bbq{border:1.5px solid var(--accent);margin:14px 0 8px}.bbq p{margin:4px 0 10px;font-size:15px}.bbbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.mincard{margin-bottom:14px}.mchead{display:flex;justify-content:space-between;align-items:baseline}.mchead b{font-family:var(--display);font-size:22px}.mincard .meter{margin:8px 0 6px}
+.bonusrow{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:14px}.bonusrow span{flex:1}.easych{margin:0 0 8px}
+#wdov{position:fixed;inset:0;z-index:55;background:rgba(10,14,20,.55);display:flex;align-items:center;justify-content:center;padding:16px}#wdov[hidden]{display:none}
+.wdsheet{background:var(--surface);color:var(--ink);border-radius:18px;padding:20px;max-width:420px;width:100%;text-align:center}.wdsheet h2{font-family:var(--display);font-size:32px;margin:4px 0 8px}.wdsheet p{margin:6px 0}
+.wdbtns{display:grid;gap:8px;margin:14px 0 6px}
 .howto{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.howto b{display:block;margin-bottom:2px}
 @keyframes cdflash{0%,50%{background:var(--fc)}25%,75%,100%{background:var(--surface)}}
 .timer.flash{animation:cdflash .8s ease-in-out 2}.timer.flash .clock,.timer.flash .lbl b{animation:cdflashtx .8s ease-in-out 2}
@@ -346,6 +351,7 @@ document.getElementById("devreset").addEventListener("click", e => {
   <div class="timer" id="timer" hidden></div>
   <div id="tipov" hidden></div>
   <div id="swapov" hidden></div>
+  <div id="wdov" hidden></div>
   <nav class="tabs" aria-label="Sections">
     <button class="tab" data-tab="today" id="tab-today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h2M19 12h2M6 8v8M18 8v8M9 6v12M15 6v12M9 12h6"/></svg>Workout</button>
     <button class="tab" data-tab="plan" id="tab-plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Programme</button>
@@ -1579,6 +1585,7 @@ function todayView() {
   });
   h += `</div>`;
   if (S.program?.phases?.[pi] && !pcClosed()[pi]) h += phaseCardHtml(phaseNews(pi), true);   // shown during the phase until closed
+  if (isCardioPlan()) h += minutesCard(w);
   if (w === 1) h += `<div class="note findban"><b>Week 1: finding your weights.</b> The starting weights are a safe first guess. After each set, ask yourself: <i>how many more could I have done with good form?</i> 4 or more → tap the <b>feather</b> (next set about 20 % heavier). None, or you didn't finish → the <b>kettlebell</b> (about 10 % lighter). 1–3 → no mark, same weight. Your last set becomes next week's weight.</div>`;
 
   const id = logId(w, k), l = S.logs[id];
@@ -1616,6 +1623,7 @@ function todayView() {
         ${e.note ? `<div class="cue">${esc(e.note)}</div>` : ""}
 </div>
         <div class="target num">${e.sets} × ${e.reps}${unit ? " " + unit : ""}</div></div>
+      ${easyChoice(e, sets)}
       <div class="exbody"><div class="setcol">${lastRow}
         <div class="sets" style="${cols}">${sets.map((x, j) => `<div class="setbox ${x.done ? "done" : ""}${S.cd && S.cd.ex === e.id && S.cd.i === j ? " cd" : ""}">
           <button class="arr up" data-act="reps" data-ex="${e.id}" data-i="${j}" data-d="1" aria-label="Set ${j + 1}: more">${ARROW_UP}</button>
@@ -2773,6 +2781,8 @@ function libResults(cards) {
 }
 function advanceIfWeekDone(prevWeek) {
   if (!REQ.every(k => isDone(prevWeek, k))) return false;
+  const seen = jget(WD_KEY);
+  if (!seen[prevWeek]) { seen[prevWeek] = true; jset(WD_KEY, seen); S.weekDone = prevWeek; S.timer = null; clearInterval(tick); setTimeout(weekDoneRender, 0); return true; }   // "Nice week!" pop-up
   const cw = currentWeek();
   if (cw === prevWeek) return false;
   S.week = cw; S.wk = nextWorkout(cw); S.timer = null; clearInterval(tick);
@@ -3088,6 +3098,8 @@ const TIPS = [
     text: "<b>Easy</b> – full sentences · <b>Steady</b> – short sentences · <b>Hard</b> – only a few words. Tap the block to start: the app guides you through each part, with a sound and a buzz when the intensity changes." },
   { id: "T6", title: "Swap", tab: "today", sel: ".ex:not(.wu) .swapbtn", onScreen: true, when: () => Object.values(S.logs[logId(S.week, S.wk)]?.sets || {}).some(a => a.some(x => x.done)),
     text: "Busy machine, too hard, or doesn't feel right? Tap <b>Swap</b> for 2–3 alternatives that train the same muscle – ▶ shows how. Pick <b>Just today</b> or <b>Rest of this phase</b>." },
+  { id: "T9", title: "Weekly minutes", tab: "today", sel: ".mincard", when: () => isCardioPlan(),
+    text: "The goal is about 150 minutes a week. Hard minutes count double and warm-ups count. If a week ends short, you'll get the offer of a bonus session." },
   { id: "T12", title: "Timed sets count down", tab: "today", sel: ".ex.timed .setmain", onScreen: true, when: () => true,
     text: "Tap the set to start: 5 seconds to get ready, then it counts down – left side, then right side when it's per side. At 0 it beeps, buzzes and turns green by itself. <b>Pause</b>, <b>Done</b> or <b>Cancel</b> in the bar at the top." },
   { id: "TB", title: "Your body", tab: "body", sel: "#bodyform", when: () => true,
@@ -3281,6 +3293,58 @@ function bbTry(id) {
   saveLog(l); const v = bbState(); v[o.from] = { tried: true }; bbSave(v);
   render(); toast(`Barbell it is – first session finds your weight from ${fmt(o.kg)} kg.`);
 }
+// ---- Weekly cardio minutes + "Nice week!" (cardio-workouts J5/J10, backlog 2026-10-10; Christian 2026-10-27: one pop-up for both)
+// WHO counting: Hard minutes count double, warm-ups and cool-downs count. New users build up 120 → 130 → 140 → 150 by phase 4.
+const WD_KEY = "twdev.weekdone", BONUS_KEY = "twdev.bonus";
+const jget = k => { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; } }, jset = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const isCardioPlan = () => loadProfile()?.answers?.goal === "Cardio";
+function cardioTarget(w) { return loadProfile()?.answers?.level === "New" ? [120, 130, 140, 150][phaseIndex(w)] ?? 150 : 150; }
+function weekMinutes(w) {
+  let min = 0;
+  for (const k of WK) { const l = S.logs[logId(w, k)], wo = workout(w, k); if (!l || !wo) continue;
+    for (const e of wo.exercises) { if (e.unit !== "min") continue; const sets = l.sets?.[e.id] || [];
+      for (const x of sets) if (x.done) { const full = e.reps || x.reps || 1; min += x.reps + hardMinutes(e.note) * Math.min(1, x.reps / full); } } }
+  const b = jget(BONUS_KEY)[w]; if (b?.done) min += b.min;
+  return Math.round(min);
+}
+function minutesCard(w) {
+  const t = cardioTarget(w), m = weekMinutes(w), pct = Math.min(100, Math.round(m / t * 100)), b = jget(BONUS_KEY)[w];
+  return `<div class="card mincard"><div class="mchead"><span class="eyebrow">Weekly minutes</span><b class="num">${m} / ${t} min</b></div>
+    <div class="meter"><span style="width:${pct}%;${m >= t ? "background:var(--done)" : ""}"></span></div>
+    <small class="muted">${m >= t ? `✓ ${t} minutes reached this week.` : "Hard minutes count double · warm-ups count"}${t < 150 ? " · building up to 150 by phase 4" : ""}</small>
+    ${b && !b.done ? `<div class="bonusrow"><span>Bonus easy session · ${b.min} min</span><button type="button" class="btn small" data-act="bonusdone" data-w="${w}">Done</button><button type="button" class="linkbtn" data-act="bonusdrop" data-w="${w}">Skip</button></div>` : ""}</div>`;
+}
+// planned easy session: pick 20 / 30 / 45 min until it's ticked
+function easyChoice(e, sets) {
+  if (!isCardioPlan() || !/^Easy cardio/.test(e.name) || sets.some(x => x.done)) return "";
+  const plan = e.reps, opts = [...new Set([20, 30, 45, plan])].sort((a, b) => a - b);
+  return `<div class="obchips easych" role="group" aria-label="Length">${opts.map(v => `<button type="button" class="obchip" data-act="easymin" data-ex="${e.id}" data-v="${v}" aria-pressed="${sets[0]?.reps === v}">${v} min</button>`).join("")}</div>`;
+}
+function weekDoneView() {
+  const w = S.weekDone; if (!w) return "";
+  const done = REQ.filter(k => isDone(w, k)).length, extraDone = WK.includes("c") && isDone(w, "c");
+  const vol = WK.reduce((t, k) => t + (S.logs[logId(w, k)] ? stats(S.logs[logId(w, k)]).vol : 0), 0);
+  let body = `<p>${done} of ${REQ.length} workouts done${vol ? ` · ${fmt(Math.round(vol))} kg lifted` : ""}${isCardioPlan() ? ` · ${weekMinutes(w)} / ${cardioTarget(w)} min` : ""}.</p>`, btns;
+  if (isCardioPlan()) {
+    const short = cardioTarget(w) - weekMinutes(w), offered = jget(BONUS_KEY)[w], off = jget(BONUS_KEY).off;
+    if (short > 0 && !extraDone && WK.includes("c")) {
+      const ce = workout(w, "c")?.exercises?.[0], cs = S.logs[logId(w, "c")]?.sets?.[ce?.id], em = (cs || []).reduce((t, x) => t + x.reps, 0) || ce?.reps || 0, reach = weekMinutes(w) + em;
+      body += `<p>The planned easy session (${em} min) ${reach >= cardioTarget(w) ? `gets you to ${cardioTarget(w)} minutes` : `brings you to ${reach} of ${cardioTarget(w)} minutes`}. Do it this week?</p>`; btns = [["wdstay", "Yes, this week"], ["wdnext", "Next week"]]; }
+    else if (short > 0 && !offered && !off) { const m = Math.max(15, Math.ceil(short / 5) * 5); body += `<p>You're ${short} minutes short of ${cardioTarget(w)}. Add a bonus easy session of ${m} minutes – a walk or an easy ride?</p>`; btns = [["wdbonus:" + m, "Add bonus"], ["wdnext", "Next week"]]; }
+    else btns = [["wdnext", "Next week"]];
+  } else if (WK.includes("c") && !extraDone) { body += `<p>Do you plan to do the extra session this week?</p>`; btns = [["wdstay", "Yes, this week"], ["wdnext", "No – next week"]]; }
+  else btns = [["wdnext", "Next week"]];
+  return `<div class="wdsheet" role="dialog" aria-labelledby="wd-title"><div class="eyebrow">Week ${w}</div><h2 id="wd-title">Nice week!</h2>${body}
+    <div class="wdbtns">${btns.map(([a, l], i) => `<button type="button" class="btn ${i ? "ghost" : ""}" data-act="${a.split(":")[0]}" data-v="${a.split(":")[1] || ""}">${l}</button>`).join("")}</div>
+    ${isCardioPlan() && !jget(BONUS_KEY).off ? `<button type="button" class="linkbtn" data-act="bonusoff">Don't offer bonus sessions</button>` : ""}</div>`;
+}
+function weekDoneRender() { const ov = document.getElementById("wdov"); if (!S.weekDone) { ov.hidden = true; ov.innerHTML = ""; return; } ov.hidden = false; ov.innerHTML = weekDoneView(); }
+function weekDoneClose(next) {
+  const w = S.weekDone; S.weekDone = null; weekDoneRender();
+  if (next) { const cw = currentWeek(); S.week = cw > w ? cw : Math.min(w + 1, totalWeeks()); S.wk = nextWorkout(S.week); toast(`Week ${S.week} is ready.`); }
+  else if (WK.includes("c")) S.wk = "c";
+  S.timer = null; clearInterval(tick); window.scrollTo(0, 0); render();
+}
 let wake = null;
 async function keepAwake() { try { if (!wake && navigator.wakeLock) { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => wake = null); } } catch {} }
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.timer) keepAwake(); });
@@ -3313,6 +3377,13 @@ document.addEventListener("click", ev => {
     case "bbtry": bbTry(b.dataset.ex); break;
     case "bbnot": { const e = workout(S.week, S.wk).exercises.find(x => x.id === b.dataset.ex), v = bbState(); v[e.name] = { notYet: bbHistory(e.name).length }; bbSave(v); render(); toast("OK – we'll ask again in a couple of sessions."); break; }
     case "bbstay": { const e = workout(S.week, S.wk).exercises.find(x => x.id === b.dataset.ex), v = bbState(); v[e.name] = { stay: true }; bbSave(v); render(); toast("Staying with dumbbells for this programme."); break; }
+    case "wdstay": weekDoneClose(false); break;
+    case "wdnext": weekDoneClose(true); break;
+    case "wdbonus": { const v = jget(BONUS_KEY); v[S.weekDone] = { min: +b.dataset.v, done: false }; jset(BONUS_KEY, v); weekDoneClose(false); toast("Bonus session added – tick it on the minutes card when it's done."); break; }
+    case "bonusoff": { const v = jget(BONUS_KEY); v.off = true; jset(BONUS_KEY, v); weekDoneRender(); break; }
+    case "bonusdone": { const v = jget(BONUS_KEY); if (v[b.dataset.w]) v[b.dataset.w].done = true; jset(BONUS_KEY, v); render(); break; }
+    case "bonusdrop": { const v = jget(BONUS_KEY); if (v[b.dataset.w]) v[b.dataset.w] = { min: 0, done: true, skipped: true }; jset(BONUS_KEY, v); render(); break; }
+    case "easymin": { const l = ensureLog(S.week, S.wk); l.sets[b.dataset.ex].forEach(x => { x.reps = +b.dataset.v; x.target = +b.dataset.v; }); saveLog(l); render(); break; }
     case "swopen": S.swap = { ex: b.dataset.ex, reason: null, pick: null, prev: null }; swapRender(); break;
     case "swreason": S.swap.reason = S.swap.reason === b.dataset.v ? null : b.dataset.v; S.swap.pick = null; swapRender(); break;
     case "swpick": S.swap.pick = b.dataset.v; swapRender(); break;
