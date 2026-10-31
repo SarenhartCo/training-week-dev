@@ -294,6 +294,18 @@ tr:last-child td{border-bottom:0}
 .tipsheet h2{font-family:var(--display);font-size:24px;margin:2px 0 6px}.tipbody{font-size:15px;line-height:1.45}.tipbtns{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
 .tipicons{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}.tipicons li{display:flex;gap:8px;align-items:center;font-size:14px}
 .ti{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none;border:1.5px solid var(--line)}.ti.light{background:var(--accent);color:#fff;border-color:var(--accent)}.ti.heavy{background:var(--warn);color:#fff;border-color:var(--warn)}
+.swapbtn{margin-left:8px;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-soft);border:0;border-radius:8px;padding:3px 9px;vertical-align:middle}
+.swapped{font-size:12px;color:var(--muted);font-weight:400}.linkbtn.inl{padding:0;font-size:12px}
+#swapov{position:fixed;inset:0;z-index:60;background:rgba(10,14,20,.55);display:flex;align-items:flex-end;justify-content:center}#swapov[hidden]{display:none}
+.swapsheet{background:var(--surface);color:var(--ink);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px 20px}
+.swapsheet h2{font-family:var(--display);font-size:24px;margin:2px 0 10px}.swlist{display:grid;gap:8px;margin:12px 0 6px}
+.swopt{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;border:1.5px solid var(--line);border-radius:12px;padding:6px}.swopt.on{border:2px solid var(--accent);background:var(--accent-soft)}
+.swpick{background:none;border:0;text-align:left;display:grid;gap:2px;padding:6px;color:inherit}.swpick small{color:var(--muted);font-size:12px}
+.swplay{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--bg);font-size:16px}.swprev{grid-column:1/-1}.swprev svg{max-width:220px}.swprev ol{margin:6px 0 4px;padding-left:20px;font-size:14px}
+.swbtns{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;margin-top:10px}
+.phasecard{margin-bottom:14px;border:1.5px solid var(--accent)}.pchead{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.phasecard h2{font-family:var(--display);font-size:22px;margin:2px 0 6px}
+.pcaim{margin:0 0 6px;font-size:14px}.pclist{margin:4px 0;padding-left:18px;font-size:14px}.pcnew{font-size:14px;margin-top:6px}.pcchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.sshead{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:16px 4px 6px}
 .howto{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.howto b{display:block;margin-bottom:2px}
 @keyframes cdflash{0%,50%{background:var(--fc)}25%,75%,100%{background:var(--surface)}}
 .timer.flash{animation:cdflash .8s ease-in-out 2}.timer.flash .clock,.timer.flash .lbl b{animation:cdflashtx .8s ease-in-out 2}
@@ -331,6 +343,7 @@ document.getElementById("devreset").addEventListener("click", e => {
 <div class="bottom">
   <div class="timer" id="timer" hidden></div>
   <div id="tipov" hidden></div>
+  <div id="swapov" hidden></div>
   <nav class="tabs" aria-label="Sections">
     <button class="tab" data-tab="today" id="tab-today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h2M19 12h2M6 8v8M18 8v8M9 6v12M15 6v12M9 12h6"/></svg>Workout</button>
     <button class="tab" data-tab="plan" id="tab-plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Programme</button>
@@ -1369,7 +1382,11 @@ const SEED = {"program": {"title": "12-week upper-body focus", "start": "2026-09
 const totalWeeks = () => S.program ? S.program.phases.reduce((a, p) => a + p.weeks.length, 0) : 12;
 function phaseOf(week) { const ps = S.program.phases; return ps.find(p => p.weeks.includes(week)) || ps[ps.length - 1]; }
 function phaseIndex(week) { return S.program.phases.indexOf(phaseOf(week)); }
-function workout(week, k) { return phaseOf(week).workouts[k]; }
+function workout(week, k) {                           // "Just today" swaps live in the day's log and override the programme for that workout only
+  const wo = phaseOf(week).workouts[k], sw = S.logs[logId(week, k)]?.swaps;
+  if (!wo || !sw || !Object.keys(sw).length) return wo;
+  return { ...wo, exercises: wo.exercises.map(e => sw[e.id] ? { ...e, ...sw[e.id] } : e) };
+}
 const isDone = (w, k) => !!S.logs[logId(w, k)]?.finished;
 function currentWeek() {
   for (let w = 1; w <= totalWeeks(); w++) if (!REQ.every(k => isDone(w, k))) return w;
@@ -1559,6 +1576,7 @@ function todayView() {
       <button class="wbtn" data-act="pickw" data-k="${key}" id="wb-${key}"><b>${wLabel(key)} · ${esc(o.name.replace(" (optional)", ""))}</b><small>${esc(sub)}</small></button><span class="go">›</span></div>`;
   });
   h += `</div>`;
+  if (S.program?.phases?.[pi] && !pcClosed()[pi]) h += phaseCardHtml(phaseNews(pi), true);   // shown during the phase until closed
   if (w === 1) h += `<div class="note findban"><b>Week 1: finding your weights.</b> The starting weights are a safe first guess. After each set, ask yourself: <i>how many more could I have done with good form?</i> 4 or more → tap the <b>feather</b> (next set about 20 % heavier). None, or you didn't finish → the <b>kettlebell</b> (about 10 % lighter). 1–3 → no mark, same weight. Your last set becomes next week's weight.</div>`;
 
   const id = logId(w, k), l = S.logs[id];
@@ -1584,8 +1602,13 @@ function todayView() {
       : complete ? `Found: ${kgWord(sets[sets.length - 1].kg)} is your starting weight next time.` : l && findState(l, e).found != null ? `Found: ${kgWord(findState(l, e).found)} – between too easy and too heavy. The rest of the sets stay here.` : `Set ${lastDone + 1}${feel === "light" ? " felt light" : feel === "heavy" ? " felt heavy" : ": no mark"} → next set ${kgWord(sets.find((x, i) => i > lastDone && !x.done)?.kg ?? kgNow)}.`}</div>` : "";
     const feelNote = finding ? findNote : feel && e.inc ? `<div class="feelnote">${feel === "light" ? `Felt light: next time ${kgWord(kgNow + e.inc)}.` : `Felt heavy: next time stay at ${kgWord(kgNow)}.`}</div>` : "";
     const exCls = [/^Warm-up/.test(e.name) ? "wu" : "", isFinding(e, w, id) ? "finding" : "", e.unit === "min" && !/^Warm-up$|^Cool-down$/.test(e.name) ? "cardio" : "", /stand|Tandem|Heel-to-toe|step and hold|star reach|Step switch|March|hop and stick|Skater|knee drive|Skipping|Toe stand|Calf-raise hold|Split-stance|RDL reach|Single-leg Pallof|Pistol/.test(e.name) && !e.inc ? "bal" : "", /ladder/i.test(e.name) ? "ladder" : "", /Barbell back squat/.test(e.name) ? "bbsquat" : "", e.unit === "sec" ? "timed" : ""].filter(Boolean).join(" ");
+    if (e.ss && e.ss.endsWith("1") && nextSs && nextSs[0] === e.ss[0]) {          // superset header: "Superset A · incline bench" (approved)
+      const spot = (e.note || "").match(/Superset at the ([^.]+)\./)?.[1], bal = /\bbal\b/.test(exCls);
+      const n = wo.exercises.filter(x => x.ss && x.ss[0] === e.ss[0]).length;
+      h += `<div class="sshead">${bal ? `Balance block · ${n} exercises, ${e.sets} rounds` : `Superset ${e.ss[0]}${spot ? " · " + esc(spot) : ""} · ${n} exercises`}</div>`;
+    }
     h += `<section class="ex ${complete ? "complete" : ""} ${ssCls} ${exCls}">
-      <div class="exhead"><div class="exname">${e.ss ? `<span class="tag">${esc(e.ss)}</span>` : ""}${esc(e.name)}${finding && w !== 1 ? `<span class="newtag">New – find your weight</span>` : ""}
+      <div class="exhead"><div class="exname">${e.ss ? `<span class="tag">${esc(e.ss)}</span>` : ""}${esc(e.name)}${finding && w !== 1 ? `<span class="newtag">New – find your weight</span>` : ""}${typeof EX !== "undefined" && (EX[e.name] || EX[e.swappedFrom?.name]) && EX[e.name]?.m !== "cardio" && !/^Warm-up/.test(e.name) && !complete ? `<button type="button" class="swapbtn" data-act="swopen" data-ex="${e.id}">Swap</button>` : ""}${e.swappedFrom ? `<div class="swapped">Swapped from ${esc(e.swappedFrom.name)}${e.swapScope === "today" ? " (today)" : " (this phase)"} · <button type="button" class="linkbtn inl" data-act="swundo" data-ex="${e.id}">Undo</button></div>` : ""}
         ${feelIn(e.name) ? `<div class="feelit">Feel it in: <b>${feelIn(e.name)}</b></div>` : ""}
         ${e.note ? `<div class="cue">${esc(e.note)}</div>` : ""}
 </div>
@@ -2769,7 +2792,7 @@ function planView() {
     h += `<div class="day phase ${open ? "open" : ""}"><button class="dayhead" data-act="toggle" data-key="${pk}" id="dh-${pk}" aria-expanded="${open}">
       <span class="dn">Phase ${pi + 1}</span><span class="dt">${esc(ph.name)}<small>Weeks ${ph.weeks[0]}–${ph.weeks[ph.weeks.length - 1]} · ${doneWeeks}/3 weeks done${now ? " · you are here" : ""}</small></span><span class="chev">›</span></button>`;
     if (open) {
-      h += `<div class="daybody"><div class="muted" style="font-size:14px">${esc(ph.about)}</div>`;
+      h += `<div class="daybody">${phaseCardHtml(phaseNews(pi), false)}`;
       WK.forEach(k => {
         const wo = ph.workouts[k], wkKey = pk + "-" + k, wopen = S.openW === wkKey;
         h += `<div class="sub ${wopen ? "open" : ""}"><button class="dayhead" data-act="togglew" data-key="${wkKey}" id="dh-${wkKey}" aria-expanded="${wopen}"><span class="dt">${wLabel(k)} · ${esc(wo.name)}<small>${wo.exercises.map(e => esc(e.name)).join(" · ")}</small></span><span class="chev">›</span></button>`;
@@ -2923,6 +2946,32 @@ function beep() {
     g.gain.setValueAtTime(.0001, ctx.currentTime + o); g.gain.exponentialRampToValueAtTime(.3, ctx.currentTime + o + .02); g.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + o + .18);
     osc.connect(g).connect(ctx.destination); osc.start(ctx.currentTime + o); osc.stop(ctx.currentTime + o + .2); }); } catch {}
 }
+// ---- "New this phase" card (programme-rules, approved; Christian 2026-10-31: card at the top of Workout, with what the phase is aiming for)
+const PC_KEY = "twdev.phasecard";
+const pcClosed = () => { try { return JSON.parse(localStorage.getItem(PC_KEY)) || {}; } catch { return {}; } };
+function phaseMain(ph) {          // first loaded lift of each workout, per workout key
+  const out = {}; for (const [k, w] of Object.entries(ph.workouts)) { if (k === "c") continue; const x = w.exercises.find(e => e.inc && !/^Warm-up/.test(e.name) && e.unit === "reps"); if (x) out[k] = x; } return out;
+}
+function phaseNews(pi) {
+  const P = S.program, ph = P.phases[pi], prev = P.phases[pi - 1];
+  const names = p => new Set(Object.entries(p.workouts).flatMap(([k, w]) => w.exercises.filter(e => !/^Warm-up|^Cool-down|^Finisher/.test(e.name) && e.unit !== "min").map(e => e.name)));
+  const now = names(ph), before = prev ? names(prev) : new Set();
+  const newEx = prev ? [...now].filter(n => !before.has(n)) : [];
+  const m = Object.values(phaseMain(ph)), pm = prev ? phaseMain(prev) : {};
+  const reps = [...new Set(m.map(x => x.reps))].sort((a, b) => b - a), prevReps = [...new Set(Object.values(pm).map(x => x.reps))].sort((a, b) => b - a);
+  const sets = Math.max(0, ...m.map(x => x.sets)), prevSets = Math.max(0, ...Object.values(pm).map(x => x.sets));
+  const rest = Math.max(0, ...m.map(x => x.rest || 0));
+  const lines = [];
+  if (m.length) lines.push(prev && reps.join("/") !== prevReps.join("/") ? `Main lifts: ${prevReps.join("–")} → <b>${reps.join("–")} reps</b>${sets !== prevSets ? `, ${sets} sets` : ""}` : `Main lifts: <b>${sets} × ${reps.join("–")} reps</b>${rest ? `, ${Math.round(rest / 15) * 15} s rest` : ""}`);
+  return { ph, pi, aim: ph.about, lines, newEx };
+}
+function phaseCardHtml(n, closable) {
+  return `<div class="card phasecard"><div class="pchead"><div><div class="eyebrow">New this phase · weeks ${n.ph.weeks[0]}–${n.ph.weeks[n.ph.weeks.length - 1]}</div><h2>Phase ${n.pi + 1}: ${esc(n.ph.name)}</h2></div>
+    ${closable ? `<button type="button" class="iconbtn" data-act="pcclose" data-p="${n.pi}" aria-label="Close">✕</button>` : ""}</div>
+    <p class="pcaim"><b>Aiming for:</b> ${esc(n.aim)}</p>
+    ${n.lines.length ? `<ul class="pclist">${n.lines.map(l => `<li>${l}</li>`).join("")}</ul>` : ""}
+    ${n.newEx.length ? `<div class="pcnew"><b>New exercises</b> – each starts with “find your weight”:<div class="pcchips">${n.newEx.slice(0, 12).map(x => `<span class="pill">${esc(x)}</span>`).join("")}${n.newEx.length > 12 ? `<span class="pill">+${n.newEx.length - 12} more</span>` : ""}</div></div>` : ""}</div>`;
+}
 // ---- in-app countdown (round 4, approved by Christian 2026-10-27)
 // Timed sets (seconds): tap → 5 s "get ready" → countdown (left / 5 s switch / right for "per side") → buzz + sound → set turns green, rest timer starts.
 // Cardio blocks (minutes): tap → guided session through the parts of the block, colour + name per intensity, sound + buzz only when the intensity changes.
@@ -3034,6 +3083,8 @@ const TIPS = [
     text: "Do one set of <b>A1</b>, then one set of <b>A2</b> (and A3), then rest. They're done in the same spot, so you keep your place." },
   { id: "T8", title: "How hard? The talk test", tab: "today", sel: ".ex.cardio .setmain", onScreen: true, when: () => goal() === "Cardio",
     text: "<b>Easy</b> – full sentences · <b>Steady</b> – short sentences · <b>Hard</b> – only a few words. Tap the block to start: the app guides you through each part, with a sound and a buzz when the intensity changes." },
+  { id: "T6", title: "Swap", tab: "today", sel: ".ex:not(.wu) .swapbtn", onScreen: true, when: () => Object.values(S.logs[logId(S.week, S.wk)]?.sets || {}).some(a => a.some(x => x.done)),
+    text: "Busy machine, too hard, or doesn't feel right? Tap <b>Swap</b> for 2–3 alternatives that train the same muscle – ▶ shows how. Pick <b>Just today</b> or <b>Rest of this phase</b>." },
   { id: "T12", title: "Timed sets count down", tab: "today", sel: ".ex.timed .setmain", onScreen: true, when: () => true,
     text: "Tap the set to start: 5 seconds to get ready, then it counts down – left side, then right side when it's per side. At 0 it beeps, buzzes and turns green by itself. <b>Pause</b>, <b>Done</b> or <b>Cancel</b> in the bar at the top." },
   { id: "TB", title: "Your body", tab: "body", sel: "#bodyform", when: () => true,
@@ -3092,6 +3143,77 @@ function tipsCard() {      // Settings on the Programme tab: How the app works +
     ${open ? `<div class="daybody">${TIPS.map(t => `<div class="howto"><b>${esc(t.title)}</b><div>${tipText(t)}</div></div>`).join("")}
       <button type="button" class="btn ghost" data-act="tipreset">Show tips again</button></div>` : ""}</div>`;
 }
+// ---- Swap (programme-rules D4, approved; Christian 2026-10-31: small "Swap" next to the name, new alternative starts in finding mode)
+// 2–3 alternatives for the same muscle that respect "go easy on", 65+, New phase 1 (no barbell) and home equipment; ▶ preview;
+// "Just today" (this workout only) or "Rest of this phase" (the programme); undo. Sets and reps stay, so weekly sets are unchanged.
+const SWAP_REASONS = [["hard", "Too hard"], ["easy", "Too easy"], ["busy", "Equipment busy"], ["feel", "Doesn't feel right"]];
+const EQ_NAME = { db: "Dumbbells", bb: "Barbell", cable: "Cable", machine: "Machine", bw: "Body weight" };
+function swapProfile() { return loadProfile()?.answers || null; }
+function swapOptions(e, reason) {
+  if (typeof EX === "undefined") return [];
+  const cur = EX[e.name] || EX[e.swappedFrom?.name] || {}, m = cur.m; if (!m || m === "cardio") return [];
+  const a = swapProfile() || {}, easy = new Set(a.easy || []), age = typeof obAge === "function" ? obAge(a) || 30 : 30, old = age >= 65, home = a.where === "Home", kit = new Set(a.kit || []);
+  const pi = phaseIndex(S.week), inWeek = new Set(Object.values(phaseOf(S.week).workouts).flatMap(w => w.exercises.map(x => x.name)));
+  const near = { shoulders: ["rear"], rear: ["shoulders"], thighs: ["ham", "glutes"], ham: ["glutes"], glutes: ["ham", "thighs"], biceps: [], triceps: [], chest: [], back: [], calves: [], core: [] };
+  const ok = n => { const x = EX[n]; if (!x || n === e.name || inWeek.has(n) || x.m === "cardio") return false;
+    if (easy.has("Knees") && x.knee) return false;
+    if (easy.has("Back") && (/Romanian deadlift|back squat|good-morning/i.test(n))) return false;
+    if (easy.has("Shoulders") && /shoulder press|overhead|pike|dip|Pull-up|push-up/i.test(n)) return false;
+    if (old && !home && x.floor) return false;
+    if (a.level === "New" && pi === 0 && x.eq === "bb") return false;
+    if (home && !(x.eq === "bw" || (x.eq === "db" && (kit.has("Dumbbells") || kit.has("Kettlebell"))))) return false;
+    return true; };
+  let list = Object.keys(EX).filter(n => EX[n].m === m && ok(n));
+  if (list.length < 3) list = list.concat(Object.keys(EX).filter(n => (near[m] || []).includes(EX[n].m) && ok(n) && !list.includes(n)));
+  const score = n => { const x = EX[n]; let s = 0;
+    if (reason === "hard") s += (x.eq === "machine" || x.eq === "cable" ? 3 : 0) + (/incline|supported|seated/i.test(n) ? 2 : 0) - (x.eq === "bb" ? 3 : 0);
+    if (reason === "easy") s += (x.eq === "bb" || x.eq === "db" ? 2 : 0) + (/single-leg|Bulgarian|deficit|decline|weighted/i.test(n) ? 2 : 0);
+    if (reason === "busy") s += x.eq !== cur.eq ? 3 : 0;
+    if (reason === "feel") s += (x.eq !== cur.eq ? 2 : 0) + (x.m === m ? 1 : 0);
+    s += x.m === m ? 2 : 0; s += typeof TWLIB !== "undefined" && TWLIB.find(x.lib || n) ? 1 : 0;   // same muscle first; with a guide
+    return s; };
+  return list.sort((p, q) => score(q) - score(p)).slice(0, 3);
+}
+function swapExFields(n, e) {
+  const x = EX[n] || {}, a = swapProfile() || {};
+  const kg = x.ratio && typeof startKg === "function" ? startKg(a, x) : 0;
+  return { name: n, lib: x.lib || n, unit: x.unit || "reps", reps: x.unit && x.unit !== e.unit ? (x.reps || e.reps) : (x.unit === "sec" ? (x.reps || e.reps) : e.reps), kg,
+    inc: x.inc || 0, ...(x.bw ? { bw: true } : { bw: false }), note: x.note || undefined };
+}
+function swapView() {
+  const sw = S.swap; if (!sw) return "";
+  const e = workout(S.week, S.wk).exercises.find(x => x.id === sw.ex); if (!e) return "";
+  const opts = swapOptions(e, sw.reason), pick = sw.pick && opts.includes(sw.pick) ? sw.pick : null;
+  const prev = n => { const c = TWLIB.find(EX[n]?.lib || n); if (!c) return `<p class="muted">No animation for this one yet.</p>`; const g = TWLIB.guide(c) || { steps: [] }, k = c.keys[0][1];
+    return `<div class="lib swprev"><svg class="anim" data-lk="${esc(k)}" viewBox="0 0 240 225" role="img" aria-label="Animation of ${esc(c.title)}">${TWLIB.frame(k, 0)}</svg><ol>${g.steps.slice(0, 2).map(t => `<li>${esc(t)}</li>`).join("")}</ol></div>`; };
+  return `<div class="swapsheet" role="dialog" aria-labelledby="sw-title"><div class="eyebrow">Swap</div><h2 id="sw-title">${esc(e.name)}</h2>
+    <div class="obchips">${SWAP_REASONS.map(([k, l]) => `<button type="button" class="obchip" data-act="swreason" data-v="${k}" aria-pressed="${sw.reason === k}">${l}</button>`).join("")}</div>
+    ${opts.length ? `<div class="swlist">${opts.map(n => `<div class="swopt ${pick === n ? "on" : ""}"><button type="button" class="swpick" data-act="swpick" data-v="${esc(n)}" aria-pressed="${pick === n}"><b>${esc(n)}</b><small>${esc([feelIn(n), EQ_NAME[EX[n].eq]].filter(Boolean).join(" · "))}</small></button>
+      <button type="button" class="swplay" data-act="swprev" data-v="${esc(n)}" aria-expanded="${sw.prev === n}" aria-label="Preview ${esc(n)}">▶</button>${sw.prev === n ? prev(n) : ""}</div>`).join("")}</div>`
+      : `<p class="muted">No other exercise fits here with your equipment and "go easy" choices.</p>`}
+    <p class="muted obsmall">Same sets and reps. A new exercise starts with "find your weight".</p>
+    <div class="swbtns"><button type="button" class="btn ghost" data-act="swclose">Cancel</button><button type="button" class="btn ghost" data-act="swapply" data-v="today" ${pick ? "" : "disabled"}>Just today</button><button type="button" class="btn" data-act="swapply" data-v="phase" ${pick ? "" : "disabled"}>Rest of this phase</button></div></div>`;
+}
+function swapRender() { const ov = document.getElementById("swapov"); if (!S.swap) { ov.hidden = true; ov.innerHTML = ""; return; } ov.hidden = false; ov.innerHTML = swapView(); startAnims(); }
+function swapApply(scope) {
+  const sw = S.swap, n = sw.pick, base = phaseOf(S.week).workouts[S.wk].exercises.find(x => x.id === sw.ex); if (!base || !n) return;
+  const l = ensureLog(S.week, S.wk), f = swapExFields(n, base);
+  if (scope === "today") { l.swaps = l.swaps || {}; l.swaps[base.id] = { ...f, swappedFrom: { name: base.name }, swapScope: "today" }; }
+  else { if (l.swaps) delete l.swaps[base.id]; base.swappedFrom = base.swappedFrom || { name: base.name, lib: base.lib, unit: base.unit, reps: base.reps, kg: base.kg, inc: base.inc, bw: !!base.bw, note: base.note };
+    Object.assign(base, f, { swapScope: "phase" }); if (!f.bw) delete base.bw; saveProgram(); }
+  l.names[base.id] = n;
+  l.sets[base.id].forEach(x => { if (!x.done) { x.kg = f.kg; x.reps = f.reps; x.target = f.reps; } });
+  saveLog(l); S.swap = null; swapRender(); render();
+  toast(scope === "today" ? `Swapped to ${n} for today.` : `Swapped to ${n} for the rest of this phase.`);
+}
+function swapUndo(id) {
+  const l = ensureLog(S.week, S.wk), base = phaseOf(S.week).workouts[S.wk].exercises.find(x => x.id === id); if (!base) return;
+  if (l.swaps?.[id]) delete l.swaps[id];
+  else if (base.swappedFrom) { const o = base.swappedFrom; Object.assign(base, o); if (!o.bw) delete base.bw; delete base.swappedFrom; delete base.swapScope; saveProgram(); }
+  const e = workout(S.week, S.wk).exercises.find(x => x.id === id), s = suggest(e, l.id);
+  l.names[id] = e.name; l.sets[id].forEach(x => { if (!x.done) { x.kg = s.kg; x.reps = e.reps; x.target = e.reps; } });
+  saveLog(l); render(); toast(`Back to ${e.name}.`);
+}
 let wake = null;
 async function keepAwake() { try { if (!wake && navigator.wakeLock) { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => wake = null); } } catch {} }
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.timer) keepAwake(); });
@@ -3120,6 +3242,14 @@ document.addEventListener("click", ev => {
       if (l.finished && !advanceIfWeekDone(S.week)) toast(`${wLabel(k)} marked done.`);
       render(); break;
     }
+    case "pcclose": { const v = pcClosed(); v[b.dataset.p] = true; try { localStorage.setItem(PC_KEY, JSON.stringify(v)); } catch {} render(); break; }
+    case "swopen": S.swap = { ex: b.dataset.ex, reason: null, pick: null, prev: null }; swapRender(); break;
+    case "swreason": S.swap.reason = S.swap.reason === b.dataset.v ? null : b.dataset.v; S.swap.pick = null; swapRender(); break;
+    case "swpick": S.swap.pick = b.dataset.v; swapRender(); break;
+    case "swprev": S.swap.prev = S.swap.prev === b.dataset.v ? null : b.dataset.v; swapRender(); break;
+    case "swclose": S.swap = null; swapRender(); break;
+    case "swapply": swapApply(b.dataset.v); break;
+    case "swundo": swapUndo(b.dataset.ex); break;
     case "tipok": closeTip(false); break;
     case "tipskip": closeTip(true); break;
     case "tipreset": { const v = {}; tipSave(v); toast("Tips will show again as you go."); render(); break; }
