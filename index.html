@@ -307,6 +307,7 @@ tr:last-child td{border-bottom:0}
 .phasecard{margin-bottom:14px;border:1.5px solid var(--accent)}.pchead{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.phasecard h2{font-family:var(--display);font-size:22px;margin:2px 0 6px}
 .pcaim{margin:0 0 6px;font-size:14px}.pclist{margin:4px 0;padding-left:18px;font-size:14px}.pcnew{font-size:14px;margin-top:6px}.pcchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .sshead{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:16px 4px 6px}
+.bbq{border:1.5px solid var(--accent);margin:14px 0 8px}.bbq p{margin:4px 0 10px;font-size:15px}.bbbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
 .howto{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.howto b{display:block;margin-bottom:2px}
 @keyframes cdflash{0%,50%{background:var(--fc)}25%,75%,100%{background:var(--surface)}}
 .timer.flash{animation:cdflash .8s ease-in-out 2}.timer.flash .clock,.timer.flash .lbl b{animation:cdflashtx .8s ease-in-out 2}
@@ -1603,13 +1604,14 @@ function todayView() {
       : complete ? `Found: ${kgWord(sets[sets.length - 1].kg)} is your starting weight next time.` : l && findState(l, e).found != null ? `Found: ${kgWord(findState(l, e).found)} – between too easy and too heavy. The rest of the sets stay here.` : `Set ${lastDone + 1}${feel === "light" ? " felt light" : feel === "heavy" ? " felt heavy" : ": no mark"} → next set ${kgWord(sets.find((x, i) => i > lastDone && !x.done)?.kg ?? kgNow)}.`}</div>` : "";
     const feelNote = finding ? findNote : feel && e.inc ? `<div class="feelnote">${feel === "light" ? `Felt light: next time ${kgWord(kgNow + e.inc)}.` : `Felt heavy: next time stay at ${kgWord(kgNow)}.`}</div>` : "";
     const exCls = [/^Warm-up/.test(e.name) ? "wu" : "", isFinding(e, w, id) ? "finding" : "", e.unit === "min" && !/^Warm-up$|^Cool-down$/.test(e.name) ? "cardio" : "", /stand|Tandem|Heel-to-toe|step and hold|star reach|Step switch|March|hop and stick|Skater|knee drive|Skipping|Toe stand|Calf-raise hold|Split-stance|RDL reach|Single-leg Pallof|Pistol/.test(e.name) && !e.inc ? "bal" : "", /ladder/i.test(e.name) ? "ladder" : "", /Barbell back squat/.test(e.name) ? "bbsquat" : "", e.unit === "sec" ? "timed" : ""].filter(Boolean).join(" ");
+    { const bo = bbOffer(e); if (bo) h += bbCard(e, bo); }
     if (e.ss && e.ss.endsWith("1") && nextSs && nextSs[0] === e.ss[0]) {          // superset header: "Superset A · incline bench" (approved)
       const spot = (e.note || "").match(/Superset at the ([^.]+)\./)?.[1], bal = /\bbal\b/.test(exCls);
       const n = wo.exercises.filter(x => x.ss && x.ss[0] === e.ss[0]).length;
       h += `<div class="sshead">${bal ? `Balance block · ${n} exercises, ${e.sets} rounds` : `Superset ${e.ss[0]}${spot ? " · " + esc(spot) : ""} · ${n} exercises`}</div>`;
     }
     h += `<section class="ex ${complete ? "complete" : ""} ${ssCls} ${exCls}">
-      <div class="exhead"><div class="exname">${e.ss ? `<span class="tag">${esc(e.ss)}</span>` : ""}${esc(e.name)}${typeof EX !== "undefined" && (EX[e.name] || EX[e.swappedFrom?.name]) && EX[e.name]?.m !== "cardio" && !/^Warm-up/.test(e.name) && !complete ? `<button type="button" class="swapbtn" data-act="swopen" data-ex="${e.id}">Swap</button>` : ""}${finding && w !== 1 ? `<span class="newtag">New – find your weight</span>` : ""}${e.swappedFrom ? `<div class="swapped">Swapped from ${esc(e.swappedFrom.name)}${e.swapScope === "today" ? " (today)" : " (this phase)"} · <button type="button" class="linkbtn inl" data-act="swundo" data-ex="${e.id}">Undo</button></div>` : ""}
+      <div class="exhead"><div class="exname">${e.ss ? `<span class="tag">${esc(e.ss)}</span>` : ""}${esc(e.name)}${typeof EX !== "undefined" && (EX[e.name] || EX[e.swappedFrom?.name]) && EX[e.name]?.m !== "cardio" && !/^Warm-up/.test(e.name) && !complete ? `<button type="button" class="swapbtn" data-act="swopen" data-ex="${e.id}">Swap</button>` : ""}${finding && w !== 1 ? `<span class="newtag">New – find your weight</span>` : ""}${e.swappedFrom ? `<div class="swapped">${e.swapScope === "barbell" ? `Barbell from now on · <button type="button" class="linkbtn inl" data-act="swundo" data-ex="${e.id}">Back to dumbbells</button>` : `Swapped from ${esc(e.swappedFrom.name)}${e.swapScope === "today" ? " (today)" : " (this phase)"} · <button type="button" class="linkbtn inl" data-act="swundo" data-ex="${e.id}">Undo</button>`}</div>` : ""}
         ${feelIn(e.name) ? `<div class="feelit">Feel it in: <b>${feelIn(e.name)}</b></div>` : ""}
         ${e.note ? `<div class="cue">${esc(e.note)}</div>` : ""}
 </div>
@@ -3211,10 +3213,73 @@ function swapApply(scope) {
 function swapUndo(id) {
   const l = ensureLog(S.week, S.wk), base = phaseOf(S.week).workouts[S.wk].exercises.find(x => x.id === id); if (!base) return;
   if (l.swaps?.[id]) delete l.swaps[id];
+  else if (base.swappedFrom?.name && base.swapScope === "barbell") {          // back to dumbbells: this phase and the rest of the programme
+    const to = base.name, from = base.swappedFrom.name, pi = phaseIndex(S.week);
+    S.program.phases.forEach((ph, i) => { if (i < pi) return; Object.values(ph.workouts).forEach(w => w.exercises.forEach(y => {
+      if (y.name === to && y.swappedFrom) { Object.assign(y, y.swappedFrom); delete y.swappedFrom; delete y.swapScope; }
+      if (y.name === "Warm-up sets: " + to) y.name = "Warm-up sets: " + from; })); });
+    const v = bbState(); v[from] = { notYet: bbHistory(from).length }; bbSave(v); saveProgram();
+  }
   else if (base.swappedFrom) { const o = base.swappedFrom; Object.assign(base, o); if (!o.bw) delete base.bw; delete base.swappedFrom; delete base.swapScope; saveProgram(); }
   const e = workout(S.week, S.wk).exercises.find(x => x.id === id), s = suggest(e, l.id);
   l.names[id] = e.name; l.sets[id].forEach(x => { if (!x.done) { x.kg = s.kg; x.reps = e.reps; x.target = e.reps; } });
   saveLog(l); render(); toast(`Back to ${e.name}.`);
+}
+if (typeof EX !== "undefined") Object.assign(EX, {
+  "Barbell bench press": { m: "chest", eq: "bb", ratio: .4, inc: 2.5, note: "Bar to lower chest, feet planted. Use a rack with safety bars." },
+  "Barbell overhead press": { m: "shoulders", eq: "bb", ratio: .3, inc: 2.5, note: "Squeeze glutes, no leaning back." },
+  "Barbell Romanian deadlift": { m: "ham", eq: "bb", ratio: .5, inc: 2.5, lower: true, note: "Soft knees, push the hips back, bar close to the legs." },
+  "Barbell bent-over row": { m: "back", eq: "bb", ratio: .45, inc: 2.5, note: "Hinge to about 45°, pull to the lower ribs." }
+});
+// ---- Dumbbell → barbell question (programme-rules D3, approved 2026-10-09; built 2026-10-31)
+// Asked from phase 2 (2-day plans: Experienced from phase 2, others from phase 3) once the dumbbell version has gone up 3 times and the last two
+// sessions were "just right" or "light" with all reps. Never for New in phase 1, never when "go easy on" covers the area, gym only.
+const BB_KEY = "twdev.barbell";
+const BB_MAP = {
+  "Dumbbell bench press": { to: "Barbell bench press", what: "dumbbell press", block: ["Shoulders", "Wrists"] },
+  "Seated dumbbell shoulder press": { to: "Barbell overhead press", what: "shoulder press", block: ["Shoulders", "Wrists"] },
+  "Romanian deadlift": { to: "Barbell Romanian deadlift", what: "Romanian deadlift", block: ["Back"] },
+  "One-arm dumbbell row": { to: "Barbell bent-over row", what: "dumbbell row", block: ["Back"] },
+  "Dumbbell hip thrust": { to: "Barbell hip thrust", what: "dumbbell hip thrust", block: [] },
+  "Goblet squat": { to: "Barbell back squat", what: "goblet squat", block: ["Knees", "Back"] }
+};
+const bbState = () => { try { return JSON.parse(localStorage.getItem(BB_KEY)) || {}; } catch { return {}; } };
+const bbSave = v => { try { localStorage.setItem(BB_KEY, JSON.stringify(v)); } catch {} };
+function bbHistory(name) {            // one entry per logged session of this exercise, oldest first
+  const out = [];
+  for (const id of Object.keys(S.logs).sort()) { const l = S.logs[id];
+    for (const [eid, sets] of Object.entries(l.sets || {})) { if ((l.names?.[eid] || "") !== name) continue; const d = sets.filter(x => x.done); if (!d.length) continue;
+      out.push({ id, kg: Math.max(...d.map(x => x.kg || 0)), allReps: d.length === sets.length && d.every(x => x.reps >= (x.target ?? x.reps)), feel: l.feel?.[eid] || null }); } }
+  return out;
+}
+function bbOffer(e) {
+  const m = BB_MAP[e.name]; if (!m) return null;
+  const a = loadProfile()?.answers; if (!a || a.where === "Home") return null;
+  const pi = phaseIndex(S.week), first = a.days === 2 && a.level !== "Experienced" ? 2 : 1;
+  if (pi < first || (a.level === "New" && pi === 0)) return null;
+  if (m.block.some(x => (a.easy || []).includes(x))) return null;
+  const st = bbState()[e.name] || {}; if (st.stay || st.tried) return null;
+  const h = bbHistory(e.name); if (st.notYet != null && h.length < st.notYet + 2) return null;
+  let ups = 0; for (let i = 1; i < h.length; i++) if (h[i].kg > h[i - 1].kg) ups++;
+  const last2 = h.slice(-2); if (ups < 3 || last2.length < 2 || !last2.every(x => x.allReps && x.feel !== "heavy")) return null;
+  const done = S.logs[logId(S.week, S.wk)]?.sets?.[e.id]?.some(x => x.done); if (done) return null;   // not in the middle of the exercise
+  return { ...m, from: e.name, kg: Math.max(20, Math.floor(2 * (h[h.length - 1].kg) / 2.5) * 2.5) };
+}
+function bbCard(e, o) {
+  return `<div class="card bbq"><div class="eyebrow">Ready for the barbell?</div><p>You've got strong on the ${esc(o.what)}. Want to try the <b>${esc(o.to.toLowerCase())}</b>? The first session starts at <b>${fmt(o.kg)} kg</b> and finds your weight.</p>
+    <div class="bbbtns"><button type="button" class="btn small" data-act="bbtry" data-ex="${e.id}">Try it</button><button type="button" class="btn ghost small" data-act="bbnot" data-ex="${e.id}">Not yet</button><button type="button" class="linkbtn" data-act="bbstay" data-ex="${e.id}">Stay with dumbbells</button></div>
+    <small class="muted">If the 20 kg bar feels too heavy, stay on dumbbells a while longer – many gyms also have lighter bars.</small></div>`;
+}
+function bbTry(id) {
+  const e = workout(S.week, S.wk).exercises.find(x => x.id === id), o = e && bbOffer(e); if (!o) return;
+  const x = EX[o.to] || { inc: 2.5 }, pi = phaseIndex(S.week);
+  S.program.phases.forEach((ph, i) => { if (i < pi) return; Object.values(ph.workouts).forEach(w => w.exercises.forEach(y => {   // this phase and the rest of the programme
+    if (y.name === o.from) { y.swappedFrom = { name: y.name, lib: y.lib, kg: y.kg, inc: y.inc, note: y.note }; y.name = o.to; y.lib = x.lib || o.to; y.kg = o.kg; y.inc = x.inc || 2.5; y.note = x.note; y.swapScope = "barbell"; }
+    if (y.name === "Warm-up sets: " + o.from) { y.name = "Warm-up sets: " + o.to; y.lib = x.lib || o.to; y.kg = 20; y.inc = 2.5; } })); });
+  saveProgram();
+  const l = ensureLog(S.week, S.wk); for (const y of workout(S.week, S.wk).exercises) { if (y.name === o.to || y.name === "Warm-up sets: " + o.to) { l.names[y.id] = y.name; l.sets[y.id]?.forEach(s => { if (!s.done) s.kg = y.kg; }); } }
+  saveLog(l); const v = bbState(); v[o.from] = { tried: true }; bbSave(v);
+  render(); toast(`Barbell it is – first session finds your weight from ${fmt(o.kg)} kg.`);
 }
 let wake = null;
 async function keepAwake() { try { if (!wake && navigator.wakeLock) { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => wake = null); } } catch {} }
@@ -3245,6 +3310,9 @@ document.addEventListener("click", ev => {
       render(); break;
     }
     case "pcclose": { const v = pcClosed(); v[b.dataset.p] = true; try { localStorage.setItem(PC_KEY, JSON.stringify(v)); } catch {} render(); break; }
+    case "bbtry": bbTry(b.dataset.ex); break;
+    case "bbnot": { const e = workout(S.week, S.wk).exercises.find(x => x.id === b.dataset.ex), v = bbState(); v[e.name] = { notYet: bbHistory(e.name).length }; bbSave(v); render(); toast("OK – we'll ask again in a couple of sessions."); break; }
+    case "bbstay": { const e = workout(S.week, S.wk).exercises.find(x => x.id === b.dataset.ex), v = bbState(); v[e.name] = { stay: true }; bbSave(v); render(); toast("Staying with dumbbells for this programme."); break; }
     case "swopen": S.swap = { ex: b.dataset.ex, reason: null, pick: null, prev: null }; swapRender(); break;
     case "swreason": S.swap.reason = S.swap.reason === b.dataset.v ? null : b.dataset.v; S.swap.pick = null; swapRender(); break;
     case "swpick": S.swap.pick = b.dataset.v; swapRender(); break;
