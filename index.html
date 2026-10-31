@@ -294,11 +294,12 @@ tr:last-child td{border-bottom:0}
 .tipsheet h2{font-family:var(--display);font-size:24px;margin:2px 0 6px}.tipbody{font-size:15px;line-height:1.45}.tipbtns{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
 .tipicons{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}.tipicons li{display:flex;gap:8px;align-items:center;font-size:14px}
 .ti{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none;border:1.5px solid var(--line)}.ti.light{background:var(--accent);color:#fff;border-color:var(--accent)}.ti.heavy{background:var(--warn);color:#fff;border-color:var(--warn)}
-.swapbtn{margin-left:8px;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-soft);border:0;border-radius:8px;padding:3px 9px;vertical-align:middle}
+.tcol{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
+.swapbtn{font-size:13px;font-weight:700;color:#fff;background:var(--warn);border:0;border-radius:999px;padding:5px 14px;min-height:30px}
 .swapped{font-size:12px;color:var(--muted);font-weight:400}.linkbtn.inl{padding:0;font-size:12px}
 #swapov{position:fixed;inset:0;z-index:60;background:rgba(10,14,20,.55);display:flex;align-items:flex-end;justify-content:center}#swapov[hidden]{display:none}
 .swapsheet{background:var(--surface);color:var(--ink);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px 20px}
-.swapsheet h2{font-family:var(--display);font-size:24px;margin:2px 0 10px}.swlist{display:grid;gap:8px;margin:12px 0 6px}
+.swapsheet h2{font-family:var(--display);font-size:24px;margin:2px 0 4px}.swq{margin:0 0 8px;font-weight:600;font-size:15px}.swlist{display:grid;gap:8px;margin:12px 0 6px}
 .swopt{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;border:1.5px solid var(--line);border-radius:12px;padding:6px}.swopt.on{border:2px solid var(--accent);background:var(--accent-soft)}
 .swpick{background:none;border:0;text-align:left;display:grid;gap:2px;padding:6px;color:inherit}.swpick small{color:var(--muted);font-size:12px}
 .swplay{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--bg);font-size:16px}.swprev{grid-column:1/-1}.swprev svg{max-width:220px}.swprev ol{margin:6px 0 4px;padding-left:20px;font-size:14px}
@@ -1608,11 +1609,11 @@ function todayView() {
       h += `<div class="sshead">${bal ? `Balance block · ${n} exercises, ${e.sets} rounds` : `Superset ${e.ss[0]}${spot ? " · " + esc(spot) : ""} · ${n} exercises`}</div>`;
     }
     h += `<section class="ex ${complete ? "complete" : ""} ${ssCls} ${exCls}">
-      <div class="exhead"><div class="exname">${e.ss ? `<span class="tag">${esc(e.ss)}</span>` : ""}${esc(e.name)}${finding && w !== 1 ? `<span class="newtag">New – find your weight</span>` : ""}${typeof EX !== "undefined" && (EX[e.name] || EX[e.swappedFrom?.name]) && EX[e.name]?.m !== "cardio" && !/^Warm-up/.test(e.name) && !complete ? `<button type="button" class="swapbtn" data-act="swopen" data-ex="${e.id}">Swap</button>` : ""}${e.swappedFrom ? `<div class="swapped">Swapped from ${esc(e.swappedFrom.name)}${e.swapScope === "today" ? " (today)" : " (this phase)"} · <button type="button" class="linkbtn inl" data-act="swundo" data-ex="${e.id}">Undo</button></div>` : ""}
+      <div class="exhead"><div class="exname">${e.ss ? `<span class="tag">${esc(e.ss)}</span>` : ""}${esc(e.name)}${finding && w !== 1 ? `<span class="newtag">New – find your weight</span>` : ""}${e.swappedFrom ? `<div class="swapped">Swapped from ${esc(e.swappedFrom.name)}${e.swapScope === "today" ? " (today)" : " (this phase)"} · <button type="button" class="linkbtn inl" data-act="swundo" data-ex="${e.id}">Undo</button></div>` : ""}
         ${feelIn(e.name) ? `<div class="feelit">Feel it in: <b>${feelIn(e.name)}</b></div>` : ""}
         ${e.note ? `<div class="cue">${esc(e.note)}</div>` : ""}
 </div>
-        <div class="target num">${e.sets} × ${e.reps}${unit ? " " + unit : ""}</div></div>
+        <div class="tcol"><div class="target num">${e.sets} × ${e.reps}${unit ? " " + unit : ""}</div>${typeof EX !== "undefined" && (EX[e.name] || EX[e.swappedFrom?.name]) && EX[e.name]?.m !== "cardio" && !/^Warm-up/.test(e.name) && !complete ? `<button type="button" class="swapbtn" data-act="swopen" data-ex="${e.id}">Swap</button>` : ""}</div></div>
       <div class="exbody"><div class="setcol">${lastRow}
         <div class="sets" style="${cols}">${sets.map((x, j) => `<div class="setbox ${x.done ? "done" : ""}${S.cd && S.cd.ex === e.id && S.cd.i === j ? " cd" : ""}">
           <button class="arr up" data-act="reps" data-ex="${e.id}" data-i="${j}" data-d="1" aria-label="Set ${j + 1}: more">${ARROW_UP}</button>
@@ -3187,6 +3188,7 @@ function swapView() {
   const prev = n => { const c = TWLIB.find(EX[n]?.lib || n); if (!c) return `<p class="muted">No animation for this one yet.</p>`; const g = TWLIB.guide(c) || { steps: [] }, k = c.keys[0][1];
     return `<div class="lib swprev"><svg class="anim" data-lk="${esc(k)}" viewBox="0 0 240 225" role="img" aria-label="Animation of ${esc(c.title)}">${TWLIB.frame(k, 0)}</svg><ol>${g.steps.slice(0, 2).map(t => `<li>${esc(t)}</li>`).join("")}</ol></div>`; };
   return `<div class="swapsheet" role="dialog" aria-labelledby="sw-title"><div class="eyebrow">Swap</div><h2 id="sw-title">${esc(e.name)}</h2>
+    <p class="swq">Why do you wish to swap?</p>
     <div class="obchips">${SWAP_REASONS.map(([k, l]) => `<button type="button" class="obchip" data-act="swreason" data-v="${k}" aria-pressed="${sw.reason === k}">${l}</button>`).join("")}</div>
     ${opts.length ? `<div class="swlist">${opts.map(n => `<div class="swopt ${pick === n ? "on" : ""}"><button type="button" class="swpick" data-act="swpick" data-v="${esc(n)}" aria-pressed="${pick === n}"><b>${esc(n)}</b><small>${esc([feelIn(n), EQ_NAME[EX[n].eq]].filter(Boolean).join(" · "))}</small></button>
       <button type="button" class="swplay" data-act="swprev" data-v="${esc(n)}" aria-expanded="${sw.prev === n}" aria-label="Preview ${esc(n)}">▶</button>${sw.prev === n ? prev(n) : ""}</div>`).join("")}</div>`
