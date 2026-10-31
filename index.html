@@ -316,7 +316,7 @@ tr:last-child td{border-bottom:0}
 .badges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:18px}
 .badge{border:1.5px dashed var(--line);border-radius:14px;padding:10px 6px;text-align:center;display:grid;gap:4px;justify-items:center;opacity:.6}.badge b{font-size:13px;line-height:1.2}.badge small{font-size:11px;color:var(--muted);line-height:1.25}
 .badge .bico{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--sunk);color:var(--muted)}
-.badge .bdate{color:var(--done);font-weight:700}.badge.got{opacity:1;border:1.5px solid var(--line);background:var(--surface)}.badge.got.streak .bico{background:#fde7d9;color:#d9611a}.badge.got.phase .bico{background:var(--accent-soft);color:var(--accent)}.badge.got.pb .bico{background:#fbf0c9;color:#a87900}.badge.got.mile .bico{background:var(--done-bg);color:var(--done)}
+.badge .bdate{color:var(--done);font-weight:700}.badge.got{opacity:1;border:1.5px solid var(--line);background:var(--surface)}.badge.got.streak .bico{background:#fde7d9;color:#d9611a}.badge.got.phase .bico{background:var(--accent-soft);color:var(--accent)}.badge.got.pb .bico{background:#fbf0c9;color:#a87900}.badge.got.mile .bico{background:var(--done-bg);color:var(--done)}.badge.got.gift .bico{background:#f3e3cf;color:#8a5a2b}
 .howto{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.howto b{display:block;margin-bottom:2px}
 @keyframes cdflash{0%,50%{background:var(--fc)}25%,75%,100%{background:var(--surface)}}
 .timer.flash{animation:cdflash .8s ease-in-out 2}.timer.flash .clock,.timer.flash .lbl b{animation:cdflashtx .8s ease-in-out 2}
@@ -3357,6 +3357,7 @@ const BADGE_ICON = {
   streak: `<path d="M12 3c1 3 4 4.5 4 8.5A4 4 0 0 1 8 11c0-1.4.6-2.4 1.4-3.2C9.6 9.4 10.6 10 11 10c0-2.6.2-4.6 1-7z" fill="currentColor"/><path d="M8 16h8v2H8z" fill="currentColor"/>`,
   phase: `<path d="M6 21V4h10l-1.6 3L16 10H8v11z" fill="currentColor"/>`,
   pb: `<path d="M7 4h10v3a5 5 0 0 1-10 0zM5 5h2v2a2 2 0 0 1-2-2zm12 0h2a2 2 0 0 1-2 2zM11 12h2v4h3v3H8v-3h3z" fill="currentColor"/>`,
+  gift: `<g fill="currentColor"><rect x="3" y="18" width="17" height="1.8" rx=".6"/><circle cx="6" cy="21.4" r="1.6"/><circle cx="17" cy="21.4" r="1.6"/><rect x="6" y="14" width="2" height="4"/><rect x="15" y="14" width="2" height="4"/><rect x="5" y="9.5" width="13" height="5" rx="1.5"/><path d="M14 10.5L16.6 4.6 19.4 5.6 17.6 10.5z"/><path d="M16.4 3.6l5 1.6-.6 2.6-3.4-1z"/><path d="M5.2 10.6L2.4 14l1 .7 2.6-2.6z"/></g><rect x="9" y="11" width="3" height="2.4" rx=".4" fill="#000" opacity=".3"/>`,
   mile: `<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6-4.5-4.1 6-.7z" fill="currentColor"/>`
 };
 function sessionsByExercise() {                  // name → [{id, kg}] oldest first (loaded exercises, done sets only)
@@ -3406,7 +3407,7 @@ function badgeList() {
     ["kg500k", "mile", "Half a Million", "Lift 500 000 kg in total.", kgAll >= 500000],
     ["kg1m", "mile", "Million Club", "Lift 1 000 000 kg in total.", kgAll >= 1000000],
     ["j-vasa", "mile", "Mora to Sälen", "9 hours of cardio – time enough to cover the classic ski-race track, about 90 km, at 10 km/h.", cmin >= 540],
-    ["j-sparta", "mile", "Athens to Sparta", "25 hours of cardio – time enough to run from Athens to Sparta, about 250 km, at 10 km/h.", cmin >= 1500],
+    ["j-sparta", "gift", "Delivering a Gift", "25 hours of cardio – time enough to run about 250 km, as far as Athens to Sparta, at 10 km/h. From Greece with love.", cmin >= 1500],
     ["j-gbg", "mile", "Stockholm to Gothenburg", "47 hours of cardio – time enough to run from Stockholm to Gothenburg, about 470 km, at 10 km/h.", cmin >= 2820],
     ["j-camino", "mile", "Camino", "80 hours of cardio – time enough to run the Camino de Santiago, about 800 km, at 10 km/h.", cmin >= 4800],
     ["j-berlin", "mile", "Paris to Berlin", "105 hours of cardio – time enough to run from Paris to Berlin, about 1 050 km, at 10 km/h.", cmin >= 6300],
