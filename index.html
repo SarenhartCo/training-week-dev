@@ -3376,6 +3376,12 @@ function badgeList() {
   // a personal best only counts outside "find your weight" sessions – those just set the starting point (Christian 2026-10-31)
   for (const [n, a] of Object.entries(sx)) { let top = a[0].kg; for (let i = 1; i < a.length; i++) { if (a[i].finding) { top = Math.max(top, a[i].kg); continue; } if (a[i].kg > top) { top = a[i].kg; pbs++; pbList.push(n); } } }
   const pullFree = Object.entries(sx).some(([n, a]) => /pull-up/i.test(n) && a.some((x, i) => i > 0 && x.kg >= 0 && a.slice(0, i).some(y => y.kg < 0)));
+  // lifetime totals: this programme's logs + the summaries of finished programmes (kept on the phone by the 12-week wrap-up, when that's built)
+  const past = jget("twdev.history"), progs = (past.programmes || []).length + 1;
+  let cmin = 0; for (const [id, l] of Object.entries(S.logs)) { const w = +id.slice(1, 3), k = id.split("-")[1], wo = workout(w, k); if (!wo) continue;
+    for (const e of wo.exercises) if (e.unit === "min" && !/^(Warm-up|Cool-down)$/.test(e.name)) for (const x of l.sets?.[e.id] || []) if (x.done) cmin += x.reps || 0; }
+  cmin += past.cardioMin || 0;
+  const kgAll = kg + (past.kg || 0), workoutsAll = workouts + (past.workouts || 0);
   const cardio = typeof isCardioPlan === "function" && isCardioPlan(), week150 = cardio && Array.from({ length: tw }, (_, i) => i + 1).some(w => weekMinutes(w) >= cardioTarget(w));
   const PH = ["Groundwork", "Level Up", "Heavy Hitter", "Programme Finisher"];   // snappier names (Christian 2026-10-31); phase 4 = the whole programme
   const B = [
@@ -3389,10 +3395,21 @@ function badgeList() {
     ["pb1", "pb", "New Record", "Lift more than ever before on an exercise.", pbs >= 1],
     ["pb10", "pb", "Record Breaker", "Ten personal bests.", pbs >= 10],
     ["pb25", "pb", "Hall of Fame", "Twenty-five personal bests.", pbs >= 25],
-    ["w10", "mile", "Double Digits", "Finish 10 workouts.", workouts >= 10],
-    ["w25", "mile", "Quarter Century", "Finish 25 workouts.", workouts >= 25],
-    ["kg10k", "mile", "Ten Tonner", "Lift 10 000 kg in total.", kg >= 10000],
-    ["kg100k", "mile", "Mountain Mover", "Lift 100 000 kg in total.", kg >= 100000],
+    ["w10", "mile", "Double Digits", "Finish 10 workouts.", workoutsAll >= 10],
+    ["w25", "mile", "Quarter Century", "Finish 25 workouts.", workoutsAll >= 25],
+    ["w50", "mile", "Half Century", "Finish 50 workouts.", workoutsAll >= 50],
+    ["w100", "mile", "Century Club", "Finish 100 workouts.", workoutsAll >= 100],
+    ["kg10k", "mile", "Ten Tonner", "Lift 10 000 kg in total.", kgAll >= 10000],
+    ["kg100k", "mile", "Mountain Mover", "Lift 100 000 kg in total.", kgAll >= 100000],
+    ["kg250k", "mile", "Heavy Lifter", "Lift 250 000 kg in total.", kgAll >= 250000],
+    ["kg500k", "mile", "Half a Million", "Lift 500 000 kg in total.", kgAll >= 500000],
+    ["kg1m", "mile", "Million Club", "Lift 1 000 000 kg in total.", kgAll >= 1000000],
+    ["c10h", "mile", "Ten Hours In", "10 hours of cardio in total.", cmin >= 600],
+    ["c50h", "mile", "Endurance Engine", "50 hours of cardio.", cmin >= 3000],
+    ["c100h", "mile", "Centurion", "100 hours of cardio.", cmin >= 6000],
+    ["coast", "mile", "Coast to Coast", "1 684 320 minutes of cardio – a run across America and back, over and over, for three years.", cmin >= 1684320],
+    ["prog2", "phase", "Not Done Yet", "Start your second programme after the first 12 weeks.", progs >= 2],
+    ["prog5", "phase", "Lifer", "Start your fifth programme.", progs >= 5],
     ...(Object.keys(sx).some(n => /pull-up/i.test(n)) || pullFree ? [["pullfree", "mile", "Lift-Off", "Your first pull-up with no machine help.", pullFree]] : []),
     ...(cardio ? [["c150", "mile", "150 Club", "Reach your weekly cardio minutes.", week150]] : [])
   ];
