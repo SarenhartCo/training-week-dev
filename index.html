@@ -3415,6 +3415,7 @@ function badgeList() {
     for (const e of wo.exercises) if (e.unit === "min") for (const x of l.sets?.[e.id] || []) if (x.done) cmin += x.reps || 0; }
   for (const [k, b] of Object.entries(jget(BONUS_KEY))) if (k !== "off" && b?.done && !b.skipped) cmin += b.min || 0;   // bonus easy sessions count too
   cmin += past.cardioMin || 0;
+  const onProg = n => progs > n || (progs === n && workouts >= 1);
   const kgAll = kg + (past.kg || 0), workoutsAll = workouts + (past.workouts || 0);
   const cardio = typeof isCardioPlan === "function" && isCardioPlan(), week150 = Array.from({ length: tw }, (_, i) => i + 1).some(w => weekMinutes(w) >= (cardio ? cardioTarget(w) : 150));   // every badge is open to every plan (Christian 2026-10-31)
   const PH = ["Groundwork", "Level Up", "Heavy Hitter", "Programme Finisher"];   // snappier names (Christian 2026-10-31); phase 4 = the whole programme
@@ -3439,8 +3440,12 @@ function badgeList() {
     ["kg500k", "mile", "Half a Million", "Lift 500 000 kg in total.", kgAll >= 500000],
     ["kg1m", "mile", "Million Club", "Lift 1 000 000 kg in total.", kgAll >= 1000000],
     ...journeyBadges(cmin),
-    ["prog2", "phase", "Not Done Yet", "Start your second programme after the first 12 weeks.", progs >= 2],
-    ["prog5", "phase", "Lifer", "Start your fifth programme.", progs >= 5],
+    // programme badges: earned with the first finished workout of that programme (Christian 2026-10-31)
+    ["prog2", "phase", "Not Done Yet", "Finish the first workout of your second programme.", onProg(2)],
+    ["prog3", "phase", "Hat Trick", "Finish the first workout of your third programme.", onProg(3)],
+    ["prog4", "phase", "Full Circle", "Finish the first workout of your fourth programme – about a year of training.", onProg(4)],
+    ["prog5", "phase", "Lifer", "Finish the first workout of your fifth programme.", onProg(5)],
+    ["prog10", "phase", "Living Legend", "Finish the first workout of your tenth programme.", onProg(10)],
     ["pullfree", "mile", "Lift-Off", "Your first pull-up with no machine help.", pullFree],
     ["c150", "mile", "150 Club", "Reach 150 cardio minutes in a week (or your build-up target on a Cardio plan).", week150]
   ];
