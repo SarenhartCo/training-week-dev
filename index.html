@@ -1516,7 +1516,7 @@ function stats(l) {
 // ---- render
 const app = document.getElementById("app");
 function render() {
-  { const g = typeof loadProfile === "function" ? loadProfile()?.answers?.goal : null;   // plan colour
+  { const g = S.ob ? S.ob.a?.goal : typeof loadProfile === "function" ? loadProfile()?.answers?.goal : null;   // plan colour – follows the goal as soon as it's picked in setup
     if (g === "Cardio" || g === "Balance") document.documentElement.dataset.goal = g; else delete document.documentElement.dataset.goal; }
   queueMicrotask(checkTips);                       // first-timer tips look at the finished screen
   const f = document.activeElement, fid = f && f.id, sel = f && "selectionStart" in f ? (() => { try { return [f.selectionStart, f.selectionEnd]; } catch { return null; } })() : null;
