@@ -3359,6 +3359,7 @@ function weekDoneClose(next) {
 const BADGE_KEY = "twdev.badges";
 // one icon per badge (Christian 2026-10-31); regional journey stops use the art key from JOURNEY_HOME
 const BADGE_ART = {
+  "gravity": "<rect x=\"2\" y=\"7.2\" width=\"20\" height=\"1.8\" rx=\".9\"/><rect x=\"2\" y=\"5\" width=\"1.6\" height=\"17\" rx=\".6\" opacity=\".5\"/><rect x=\"20.4\" y=\"5\" width=\"1.6\" height=\"17\" rx=\".6\" opacity=\".5\"/><circle cx=\"12\" cy=\"5\" r=\"2.3\"/><path d=\"M8.2 8.1l.6 3.4 2 1.2M15.8 8.1l-.6 3.4-2 1.2M12 9.6v6.4M12 16l-1.6 4.4M12 16l1.6 4.4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M5.6 13v-3M5.6 10l-1.2 1.2M5.6 10l1.2 1.2M18.4 15v-3M18.4 12l-1.2 1.2M18.4 12l1.2 1.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.1\" stroke-linecap=\"round\" opacity=\".7\"/>",
   "kg1500": "<path d=\"M2 15.2c0-1.4.8-2.2 2-2.5l2.6-.6 2.6-3.4c.5-.6 1.2-1 2-1h4.6c.8 0 1.5.3 2 .9l2.7 3.4 1.4.3c1.2.3 2.1 1.3 2.1 2.6v1.9c0 .5-.4.9-.9.9H2.9c-.5 0-.9-.4-.9-.9z\"/><path d=\"M8.6 12l2-2.6h2.8V12zM14.8 12V9.4h1.6c.3 0 .6.1.8.4L19 12z\" fill=\"#fff\" opacity=\".9\"/><circle cx=\"7\" cy=\"17.6\" r=\"2.4\"/><circle cx=\"17.4\" cy=\"17.6\" r=\"2.4\"/><circle cx=\"7\" cy=\"17.6\" r=\".9\" fill=\"#fff\" opacity=\".9\"/><circle cx=\"17.4\" cy=\"17.6\" r=\".9\" fill=\"#fff\" opacity=\".9\"/>",
   "kg6k": "<path d=\"M4 18.5V12c0-3.6 2.8-6 6.6-6 2.2 0 3.6.7 4.6 1.7.8-1 2-1.6 3.4-1.6 2 0 3.4 1.6 3.4 3.8v3.3c0 1.4-.6 2.6-1.4 3.4.3 1 .9 1.6 1.6 1.7v1.4c-1.8 0-3.4-1.4-3.8-3.6l-.1-.8h-1.2v4.8h-2.6v-3.8H9.6v3.8H7v-3.8c-.8-.3-1.4-1-1.6-1.6-.4 1-.9 2.4-1.4 3.8z\"/><path d=\"M14.8 8.2c.8.8 1.2 2 1.2 3.4 0 1.4-.6 2.4-1.4 3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke=\"#000\" stroke-opacity=\".28\"/><circle cx=\"18.4\" cy=\"9.6\" r=\".6\" fill=\"#000\" opacity=\".28\"/>",
   "kg40k": "<rect x=\"1.5\" y=\"6\" width=\"13.5\" height=\"9.5\" rx=\".8\"/><path d=\"M15.8 9h3.6c.5 0 1 .3 1.2.7l1.7 3c.1.2.2.5.2.8v2H15.8z\"/><path d=\"M16.8 10.2h2.5l1.2 2.3h-3.7z\" fill=\"#fff\" opacity=\".9\"/><rect x=\"1.5\" y=\"15.5\" width=\"21\" height=\"1.3\"/><circle cx=\"5\" cy=\"18.4\" r=\"1.9\"/><circle cx=\"9.2\" cy=\"18.4\" r=\"1.9\"/><circle cx=\"18.6\" cy=\"18.4\" r=\"1.9\"/><path d=\"M3.4 8.4h9.6M3.4 10.6h9.6M3.4 12.8h9.6\" stroke=\"#fff\" stroke-opacity=\".45\" stroke-width=\".8\"/>",
@@ -3514,6 +3515,10 @@ function badgeList() {
   const bodyDates = Object.keys(S.body || {}).sort(); let checks = 0, lastCheck = null;
   for (const d of bodyDates) if (!lastCheck || (new Date(d) - new Date(lastCheck)) / 864e5 >= 28) { checks++; lastCheck = d; }
   let backups = 0; try { backups = +localStorage.getItem("twdev.backupCount") || (localStorage.getItem("twdev.lastBackup") ? 1 : 0); } catch {}
+  // Defying Gravity (Christian 2026-11-03): one whole pull-up set – every planned rep – with no machine help
+  let gravity = false;
+  for (const [id, l] of Object.entries(S.logs)) { const wo = workout(+id.slice(1, 3), id.split("-")[1]); if (!wo) continue;
+    for (const e of wo.exercises) if (/pull-up|chin-up/i.test(e.name)) for (const x of l.sets?.[e.id] || []) if (x.done && (x.kg ?? 0) >= 0 && (x.reps || 0) >= (x.target || e.reps || 1)) gravity = true; }
   const onProg = n => progs > n || (progs === n && workouts >= 1);
   const kgAll = kg + (past.kg || 0), workoutsAll = workouts + (past.workouts || 0);
   const cardio = typeof isCardioPlan === "function" && isCardioPlan(), week150 = Array.from({ length: tw }, (_, i) => i + 1).some(w => weekMinutes(w) >= (cardio ? cardioTarget(w) : 150));   // every badge is open to every plan (Christian 2026-10-31)
@@ -3572,6 +3577,7 @@ function badgeList() {
     ["safe", "mile", "Safe Keeper", "Save your first backup file.", backups >= 1],
     ["safe6", "mile", "Safe Keeper+", "Save 6 backup files.", backups >= 6],
     ["pullfree", "mile", "Lift-Off", "Your first pull-up with no machine help.", pullFree],
+    ["gravity", "mile", "Defying Gravity", "A whole set of pull-ups – every rep – with no machine help.", gravity],
     ["c150", "mile", "150 Club", "Reach 150 cardio minutes in a week (or your build-up target on a Cardio plan).", week150]
   ];
   return { list: B.map(([id, icon, title, how, got, art]) => ({ id, icon, title, how, got, art })), pbs, best, workouts };
