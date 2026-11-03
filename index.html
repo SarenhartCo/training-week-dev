@@ -35,13 +35,16 @@
   --done:#43cf7f; --done-bg:#15291e; --warn:#ff8a4c; --swapbg:#000; color-scheme:dark}
 
 /* Plan colours (Christian 2026-11-03): Strength blue (default), Cardio orange, Balance pink – celebrations follow the plan colour */
-:root[data-goal="Cardio"]{--accent:#c2410c;--accent-ink:#ffffff;--accent-soft:#fde4d6}
-:root[data-goal="Balance"]{--accent:#c2187a;--accent-ink:#ffffff;--accent-soft:#fbe0ee}
+:root[data-accent="orange"]{--accent:#c2410c;--accent-ink:#ffffff;--accent-soft:#fde4d6}
+:root[data-accent="pink"]{--accent:#c2187a;--accent-ink:#ffffff;--accent-soft:#fbe0ee}
 @media (prefers-color-scheme: dark){
-  :root[data-goal="Cardio"]:not([data-theme="light"]){--accent:#ff8a4c;--accent-ink:#1a0c04;--accent-soft:#3d2418}
-  :root[data-goal="Balance"]:not([data-theme="light"]){--accent:#ff4fa3;--accent-ink:#1a0610;--accent-soft:#3d1a2e}}
-:root[data-theme="dark"][data-goal="Cardio"]{--accent:#ff8a4c;--accent-ink:#1a0c04;--accent-soft:#3d2418}
-:root[data-theme="dark"][data-goal="Balance"]{--accent:#ff4fa3;--accent-ink:#1a0610;--accent-soft:#3d1a2e}
+  :root[data-accent="orange"]:not([data-theme="light"]){--accent:#ff8a4c;--accent-ink:#1a0c04;--accent-soft:#3d2418}
+  :root[data-accent="pink"]:not([data-theme="light"]){--accent:#ff4fa3;--accent-ink:#1a0610;--accent-soft:#3d1a2e}}
+:root[data-theme="dark"][data-accent="orange"]{--accent:#ff8a4c;--accent-ink:#1a0c04;--accent-soft:#3d2418}
+:root[data-theme="dark"][data-accent="pink"]{--accent:#ff4fa3;--accent-ink:#1a0610;--accent-soft:#3d1a2e}
+.colcard{display:grid;gap:10px;margin:14px 0}.colrow{display:flex;flex-wrap:wrap;gap:8px}
+.colchip{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:600;font-size:14px}
+.colchip i{width:14px;height:14px;border-radius:50%;flex:none}.colchip[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);font-weight:700}
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
 .confetti i{position:absolute;top:-20px;width:8px;height:14px;border-radius:2px;animation:conf 2.6s cubic-bezier(.2,.6,.4,1) forwards}
 @keyframes conf{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
@@ -1516,8 +1519,7 @@ function stats(l) {
 // ---- render
 const app = document.getElementById("app");
 function render() {
-  { const g = S.ob ? S.ob.a?.goal : typeof loadProfile === "function" ? loadProfile()?.answers?.goal : null;   // plan colour – follows the goal as soon as it's picked in setup
-    if (g === "Cardio" || g === "Balance") document.documentElement.dataset.goal = g; else delete document.documentElement.dataset.goal; }
+  { const c = accentNow(); if (c === "blue") delete document.documentElement.dataset.accent; else document.documentElement.dataset.accent = c; }
   queueMicrotask(checkTips);                       // first-timer tips look at the finished screen
   const f = document.activeElement, fid = f && f.id, sel = f && "selectionStart" in f ? (() => { try { return [f.selectionStart, f.selectionEnd]; } catch { return null; } })() : null;
   ["today","plan","body","history","lib"].forEach(t => document.getElementById("tab-" + t).setAttribute("aria-current", S.tab === t ? "page" : "false"));
@@ -2824,6 +2826,7 @@ function planView() {
   const prof = loadProfile();
   h += `<div class="card obsum"><div><b>Your answers</b><small>${prof && prof.answers ? esc([prof.answers.goal, prof.answers.shape, prof.answers.days + " days", prof.answers.time, prof.answers.where].join(" · ")) + (prof.direction ? " · " + esc(prof.direction) : "") : "Setup skipped"}</small></div><button type="button" class="btn ghost small" data-act="obedit">Change my answers</button></div>`;
   h += tipsCard();
+  h += colourCard();
   h += `<p class="muted" style="margin:0 0 14px">Four phases of three weeks. Each phase repeats the same workouts so you can add weight week to week. Edits save as you type.</p>`;
   P.phases.forEach((ph, pi) => {
     const pk = "p" + pi, open = S.open === pk;
@@ -3178,6 +3181,24 @@ function closeTip(skipAll) {
   if (t?.back && S.tab !== t.back) { S.tab = t.back; window.scrollTo(0, 0); render(); return; }
   if (!skipAll && t?.next) { const n = TIPS.find(x => x.id === t.next), el = n && !seen[n.id] && n.when() && document.querySelector(n.sel); if (el) return showTip(n, el); }
   setTimeout(checkTips, 300);
+}
+// App colour (Christian 2026-11-03): the plan colour is standard (Strength blue, Cardio orange, Balance pink) and follows the goal
+// as soon as it's picked in setup; once the programme is set, the user can override it on the Programme tab.
+const COLOUR_KEY = "twdev.colour", GOAL_COLOUR = { Strength: "blue", Cardio: "orange", Balance: "pink" };
+function planColour() { const g = typeof loadProfile === "function" ? loadProfile()?.answers?.goal : null; return GOAL_COLOUR[g] || "blue"; }
+function accentNow() {
+  if (S.ob) return GOAL_COLOUR[S.ob.a?.goal] || "blue";
+  let o = null; try { o = localStorage.getItem(COLOUR_KEY); } catch {}
+  return ["blue", "orange", "pink"].includes(o) ? o : planColour();
+}
+function colourCard() {
+  let o = null; try { o = localStorage.getItem(COLOUR_KEY); } catch {}
+  const cur = ["blue", "orange", "pink"].includes(o) ? o : "plan", pc = planColour(), name = { blue: "Blue", orange: "Orange", pink: "Pink" };
+  const sw = { blue: "#6693ff", orange: "#ff8a4c", pink: "#ff4fa3" };
+  const chip = (v, label, c) => `<button type="button" class="colchip" data-act="colour" data-v="${v}" aria-pressed="${cur === v}"><i style="background:${c}"></i>${label}</button>`;
+  return `<div class="card colcard"><div class="eyebrow">App colour</div>
+    <div class="colrow">${chip("plan", `Plan colour · ${name[pc]}`, sw[pc])}${["blue", "orange", "pink"].filter(c => c !== pc).map(c => chip(c, name[c], sw[c])).join("")}</div>
+    <small class="muted">Your plan's colour is the standard. Pick another one if you prefer.</small></div>`;
 }
 function tipsCard() {      // Settings on the Programme tab: How the app works + Show tips again (P5)
   const open = S.open === "howto";
@@ -3673,6 +3694,7 @@ document.addEventListener("click", ev => {
     case "swundo": swapUndo(b.dataset.ex); break;
     case "tipok": closeTip(false); break;
     case "tipskip": closeTip(true); break;
+    case "colour": { const v = b.dataset.v; try { if (v === "plan") localStorage.removeItem(COLOUR_KEY); else localStorage.setItem(COLOUR_KEY, v); } catch {} render(); break; }
     case "tipreset": { const v = {}; tipSave(v); toast("Tips will show again as you go."); render(); break; }
     case "cdpause": cdPause(); break;
     case "cddone": cdFinish(false); break;
