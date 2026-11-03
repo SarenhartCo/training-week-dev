@@ -34,6 +34,19 @@
   --accent:#6693ff; --accent-ink:#0a1020; --accent-soft:#1c2a4a;
   --done:#43cf7f; --done-bg:#15291e; --warn:#ff8a4c; --swapbg:#000; color-scheme:dark}
 
+/* Plan colours (Christian 2026-11-03): Strength blue (default), Cardio orange, Balance pink – celebrations follow the plan colour */
+:root[data-goal="Cardio"]{--accent:#c2410c;--accent-ink:#ffffff;--accent-soft:#fde4d6}
+:root[data-goal="Balance"]{--accent:#c2187a;--accent-ink:#ffffff;--accent-soft:#fbe0ee}
+@media (prefers-color-scheme: dark){
+  :root[data-goal="Cardio"]:not([data-theme="light"]){--accent:#ff8a4c;--accent-ink:#1a0c04;--accent-soft:#3d2418}
+  :root[data-goal="Balance"]:not([data-theme="light"]){--accent:#ff4fa3;--accent-ink:#1a0610;--accent-soft:#3d1a2e}}
+:root[data-theme="dark"][data-goal="Cardio"]{--accent:#ff8a4c;--accent-ink:#1a0c04;--accent-soft:#3d2418}
+:root[data-theme="dark"][data-goal="Balance"]{--accent:#ff4fa3;--accent-ink:#1a0610;--accent-soft:#3d1a2e}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+.confetti i{position:absolute;top:-20px;width:8px;height:14px;border-radius:2px;animation:conf 2.6s cubic-bezier(.2,.6,.4,1) forwards}
+@keyframes conf{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
+@media (prefers-reduced-motion: reduce){.confetti{display:none}}
+
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
   padding:0 16px;padding-block:0 180px;-webkit-tap-highlight-color:transparent}
@@ -1503,6 +1516,8 @@ function stats(l) {
 // ---- render
 const app = document.getElementById("app");
 function render() {
+  { const g = typeof loadProfile === "function" ? loadProfile()?.answers?.goal : null;   // plan colour
+    if (g === "Cardio" || g === "Balance") document.documentElement.dataset.goal = g; else delete document.documentElement.dataset.goal; }
   queueMicrotask(checkTips);                       // first-timer tips look at the finished screen
   const f = document.activeElement, fid = f && f.id, sel = f && "selectionStart" in f ? (() => { try { return [f.selectionStart, f.selectionEnd]; } catch { return null; } })() : null;
   ["today","plan","body","history","lib"].forEach(t => document.getElementById("tab-" + t).setAttribute("aria-current", S.tab === t ? "page" : "false"));
@@ -3000,7 +3015,7 @@ function phaseCardHtml(n, closable) {
 // ---- in-app countdown (round 4, approved by Christian 2026-10-27)
 // Timed sets (seconds): tap → 5 s "get ready" → countdown (left / 5 s switch / right for "per side") → buzz + sound → set turns green, rest timer starts.
 // Cardio blocks (minutes): tap → guided session through the parts of the block, colour + name per intensity, sound + buzz only when the intensity changes.
-const CD_KIND = { ready: ["Get ready", "#5b6672"], switch: ["Switch sides", "#5b6672"], work: ["Hold", "#d9611a"], easy: ["Easy", "#1d7f47"], steady: ["Steady", "#b88a00"], hard: ["Hard", "#d9611a"] };
+const CD_KIND = { ready: ["Get ready", "#5b6672"], switch: ["Switch sides", "#5b6672"], work: ["Hold", "#d9611a"], easy: ["Easy", "#1d7f47"], steady: ["Steady", "#b88a00"], hard: ["Hard", "#d6332b"] };
 const CD_HINT = { easy: "Full sentences", steady: "Short sentences", hard: "Only a few words" };
 function cdSegments(e, set) {
   if (e.unit === "sec") {
@@ -3351,7 +3366,14 @@ function weekDoneView() {
     <div class="wdbtns">${btns.map(([a, l], i) => `<button type="button" class="btn ${i ? "ghost" : ""}" data-act="${a.split(":")[0]}" data-v="${a.split(":")[1] || ""}">${l}</button>`).join("")}</div>
     ${isCardioPlan() && !jget(BONUS_KEY).off ? `<button type="button" class="linkbtn" data-act="bonusoff">Don't offer bonus sessions</button>` : ""}</div>`;
 }
-function weekDoneRender() { const ov = document.getElementById("wdov"); if (!S.weekDone) { ov.hidden = true; ov.innerHTML = ""; return; } ov.hidden = false; ov.innerHTML = weekDoneView(); }
+function weekDoneRender() { const ov = document.getElementById("wdov"); if (!S.weekDone) { ov.hidden = true; ov.innerHTML = ""; return; } const first = ov.hidden; ov.hidden = false; ov.innerHTML = weekDoneView(); if (first) confetti(); }
+// Confetti in all three plan colours, on every plan (Christian 2026-11-03)
+function confetti() {
+  const box = document.createElement("div"); box.className = "confetti"; const cols = ["#6693ff", "#ff8a4c", "#ff4fa3"];
+  for (let i = 0; i < 46; i++) { const c = document.createElement("i"); c.style.left = Math.random() * 100 + "%"; c.style.background = cols[i % 3];
+    c.style.animationDelay = (Math.random() * .6).toFixed(2) + "s"; c.style.transform = `rotate(${Math.round(Math.random() * 360)}deg)`; box.appendChild(c); }
+  document.body.appendChild(box); setTimeout(() => box.remove(), 3600);
+}
 function weekDoneClose(next) {
   const w = S.weekDone; S.weekDone = null; weekDoneRender();
   if (next) { const cw = currentWeek(); S.week = cw > w ? cw : Math.min(w + 1, totalWeeks()); S.wk = nextWorkout(S.week); toast(`Week ${S.week} is ready.`); }
