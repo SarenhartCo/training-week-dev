@@ -3372,6 +3372,20 @@ function bbTry(id) {
   saveLog(l); const v = bbState(); v[o.from] = { tried: true }; bbSave(v);
   render(); toast(`Barbell it is – first session finds your weight from ${fmt(o.kg)} kg.`);
 }
+// Week-done headline (Christian 2026-11-05: "Nice week!" got repetitive). One per week, fixed for that week, no repeats within
+// a programme; halfway and the last week get their own.
+const CHEERS = ["Nice week!", "Excellent!", "You vs Excuses: 1–0", "This week has been slayed", "Crushed it!", "Week conquered!",
+  "Another one in the bag", "Nailed it!", "That's how it's done", "Showing up pays off", "High five!", "Consistency looks good on you",
+  "Week done. You: stronger.", "Unstoppable!", "Look at you go!"];
+function weekCheer(w) {
+  const tw = totalWeeks();
+  if (w === tw) return "That's the last week – done!";
+  if (w === Math.ceil(tw / 2)) return "Halfway there!";
+  if (w === 1) return "Week one: done!";
+  const seed = (S.program?.start || "").split("").reduce((t, c) => t + c.charCodeAt(0), 0);   // a different order for each programme
+  const order = CHEERS.slice(); let r = seed || 1; for (let i = order.length - 1; i > 0; i--) { r = (r * 1103515245 + 12345) % 2147483648; const j = r % (i + 1); [order[i], order[j]] = [order[j], order[i]]; }
+  return order[(w - 2) % order.length];
+}
 // ---- Weekly cardio minutes + "Nice week!" (cardio-workouts J5/J10, backlog 2026-10-10; Christian 2026-10-27: one pop-up for both)
 // WHO counting: Hard minutes count double, warm-ups and cool-downs count. New users build up 120 → 130 → 140 → 150 by phase 4.
 const WD_KEY = "twdev.weekdone", BONUS_KEY = "twdev.bonus";
@@ -3414,7 +3428,7 @@ function weekDoneView() {
     else btns = [["wdnext", "Next week"]];
   } else if (WK.includes("c") && !extraDone) { body += `<p>Do you plan to do the extra session this week?</p>`; btns = [["wdstay", "Yes, this week"], ["wdnext", "No – next week"]]; }
   else btns = [["wdnext", "Next week"]];
-  return `<div class="wdsheet" role="dialog" aria-labelledby="wd-title"><div class="eyebrow">Week ${w}</div><h2 id="wd-title">Nice week!</h2>${body}
+  return `<div class="wdsheet" role="dialog" aria-labelledby="wd-title"><div class="eyebrow">Week ${w}</div><h2 id="wd-title">${esc(weekCheer(w))}</h2>${body}
     <div class="wdbtns">${btns.map(([a, l], i) => `<button type="button" class="btn ${i ? "ghost" : ""}" data-act="${a.split(":")[0]}" data-v="${a.split(":")[1] || ""}">${l}</button>`).join("")}</div>
     ${isCardioPlan() && !jget(BONUS_KEY).off ? `<button type="button" class="linkbtn" data-act="bonusoff">Don't offer bonus sessions</button>` : ""}</div>`;
 }
