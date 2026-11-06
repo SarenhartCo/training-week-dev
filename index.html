@@ -354,10 +354,12 @@ header.top{padding-top:12px!important}
 </style>
 </head>
 <body>
-<div class="devbar" role="note"><b>DEV</b><span>Separate from your real app</span><span class="sp"></span><button type="button" id="devreset">Reset</button></div>
+<div class="devbar" role="note"><b>DEV</b><span>Separate from your real app</span><span class="sp"></span><button type="button" id="devweek">Week pop-up</button><button type="button" id="devreset">Reset</button></div>
 <script>
 // To test with real data: save a backup file in the main app and restore it here (Progress tab).
 // Reset: wipes everything the DEV app has saved (programme, logs, body data, seen tips) – as a brand-new user.
+// Week pop-up: shows the week-done pop-up with the next headline each tap (all 38, specials first) – nothing is saved
+document.getElementById("devweek").addEventListener("click", () => window.dispatchEvent(new Event("twdev:weekpop")));
 document.getElementById("devreset").addEventListener("click", e => {
   const b = e.currentTarget;
   if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Tap again to wipe DEV"; setTimeout(() => { delete b.dataset.armed; b.textContent = "Reset"; }, 4000); return; }
@@ -3383,6 +3385,7 @@ const CHEERS = ["Nice week!", "Excellent!", "You vs Excuses: 1–0", "This week 
   "Ready for the next level", "Front runner", "New and improved",
   "Game, set and match", "Touchdown!", "Slam dunk!", "Hole in one!", "Back of the net!", "Home run!", "Knockout week!", "Bullseye!", "10s across the board!", "Victory lap!"];   // "Moving mountains" dropped – too close to the Mountain Mover badge   // "Unstoppable!" removed – it's a badge
 function weekCheer(w) {
+  if (S.wdPrevOn) { const all = ["Week one: done!", "Halfway there!", "That's a wrap!", ...CHEERS]; return all[S.wdPreview % all.length]; }
   const tw = totalWeeks();
   if (w === tw) return "That's a wrap!";   // leads into the 12-week wrap-up
   if (w === Math.ceil(tw / 2)) return "Halfway there!";
@@ -3433,7 +3436,7 @@ function weekDoneView() {
     else btns = [["wdnext", "Next week"]];
   } else if (WK.includes("c") && !extraDone) { body += `<p>Do you plan to do the extra session this week?</p>`; btns = [["wdstay", "Yes, this week"], ["wdnext", "No – next week"]]; }
   else btns = [["wdnext", "Next week"]];
-  return `<div class="wdsheet" role="dialog" aria-labelledby="wd-title"><div class="eyebrow">Week ${w}</div><h2 id="wd-title">${esc(weekCheer(w))}</h2>${body}
+  return `<div class="wdsheet" role="dialog" aria-labelledby="wd-title"><div class="eyebrow">Week ${w}${S.wdPrevOn ? ` · preview ${S.wdPreview % (CHEERS.length + 3) + 1}/${CHEERS.length + 3}` : ""}</div><h2 id="wd-title">${esc(weekCheer(w))}</h2>${body}
     <div class="wdbtns">${btns.map(([a, l], i) => `<button type="button" class="btn ${i ? "ghost" : ""}" data-act="${a.split(":")[0]}" data-v="${a.split(":")[1] || ""}">${l}</button>`).join("")}</div>
     ${isCardioPlan() && !jget(BONUS_KEY).off ? `<button type="button" class="linkbtn" data-act="bonusoff">Don't offer bonus sessions</button>` : ""}</div>`;
 }
@@ -3445,7 +3448,12 @@ function confetti() {
     c.style.animationDelay = (Math.random() * .6).toFixed(2) + "s"; c.style.transform = `rotate(${Math.round(Math.random() * 360)}deg)`; box.appendChild(c); }
   document.body.appendChild(box); setTimeout(() => box.remove(), 3600);
 }
+window.addEventListener("twdev:weekpop", () => {          // DEV preview (Christian 2026-11-06)
+  if (!S.program || S.ob) return; S.wdPreview = S.wdPreview == null ? 0 : S.wdPreview + 1; S.wdPrevOn = true;
+  S.weekDone = null; weekDoneRender(); S.weekDone = S.week || currentWeek(); weekDoneRender();
+});
 function weekDoneClose(next) {
+  if (S.wdPrevOn) { S.wdPrevOn = false; S.weekDone = null; weekDoneRender(); return; }   // a preview changes nothing
   const w = S.weekDone; S.weekDone = null; weekDoneRender();
   if (next) { const cw = currentWeek(); S.week = cw > w ? cw : Math.min(w + 1, totalWeeks()); S.wk = nextWorkout(S.week); toast(`Week ${S.week} is ready.`); }
   else if (WK.includes("c")) S.wk = "c";
