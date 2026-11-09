@@ -1637,7 +1637,7 @@ function backupReminder() {
   return `<div class="card bkrem" role="note"><b>${due.last ? `It's been ${due.days} days since your last backup.` : "You haven't saved a backup yet."}</b>
     <p>Your workouts are only stored on this phone.</p>
     <div class="row"><button type="button" class="btn" data-act="backup">Save backup now</button><button type="button" class="btn ghost" data-act="bklater">Later</button></div>
-    <small class="muted">Then move the file to Google Drive or email it to yourself, so it survives if the phone is lost.</small></div>`;
+    <small class="muted">Pick Google Drive and a “Backup Training Week” folder in the share menu, so it survives if the phone is lost.</small></div>`;
 }
 function todayView() {
   const w = S.week, k = S.wk, ph = phaseOf(w), pi = phaseIndex(w), wo = workout(w, k), tw = totalWeeks(), cur = currentWeek();
@@ -3896,6 +3896,7 @@ document.addEventListener("click", ev => {
     case "up": { const ex = S.program.phases[+b.dataset.p].workouts[b.dataset.k].exercises, i = ex.findIndex(e => e.id === b.dataset.ex);
       if (i > 0) { [ex[i - 1], ex[i]] = [ex[i], ex[i - 1]]; saveProgram(); render(); } break; }
     case "metric": S.metric = b.dataset.m; render(); break;
+    case "bkdl": doDownload(); break;
     case "backup": doBackup(); break;
     case "bkdemo": S.bkDemo = true; S.tab = "today"; window.scrollTo(0, 0); render(); break;
     case "bklater": { S.bkDemo = false; const d = new Date(); d.setDate(d.getDate() + 3); try { localStorage.setItem("twdev.backupSnooze", isoDate(d)); } catch {} render(); break; }
@@ -3934,19 +3935,36 @@ function backupCard() {
   let last = null; try { last = localStorage.getItem("twdev.lastBackup"); } catch {}
   return `<h2 class="sec">Backup</h2><div class="card" style="display:grid;gap:10px">
     <div class="muted" style="font-size:14px">Everything is stored on this phone. Save a backup now and then, and after big changes, so nothing is lost if the phone is reset or replaced.${last ? ` Last backup: ${shortDate(last)}.` : " No backup saved yet."}</div>
-    <div class="row"><button class="btn" data-act="backup" id="b-backup">Save backup file</button>
+    <div class="row"><button class="btn" data-act="backup" id="b-backup">Save backup</button>
     <label class="btn ghost" for="b-restore" style="cursor:pointer">Restore from file</label>
     <input type="file" id="b-restore" accept="application/json,.json" hidden></div>
     <button type="button" class="linkbtn" data-act="bkdemo">DEV: preview the backup reminder</button>
-    <small class="muted">The file lands in Downloads. Move it to Google Drive or email it to yourself, so it survives if the phone is lost.</small></div>`;
+    <button type="button" class="linkbtn" data-act="bkdl">Download instead</button>
+    <small class="muted">“Save backup” opens your phone's share menu – pick Google Drive and a folder like “Backup Training Week” (Drive remembers it next time), or Files or email. Keep it off the phone, so it survives if the phone is lost.</small></div>`;
 }
-function doBackup() {
+// Backup (Christian 2026-11-09): a web app can't pick a folder, so "Save backup" opens the phone's share menu with the file –
+// Google Drive (a "Backup Training Week" folder, remembered next time), Files or email. "Download instead" keeps the old way.
+function backupFile() {
   const data = { app: "training-week", version: 1, savedAt: new Date().toISOString(), program: S.program, logs: S.logs, body: S.body };
-  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `training-week-DEV-backup-${today()}.json`;
+  return new File([JSON.stringify(data)], `Training Week DEV backup ${today()}.json`, { type: "application/json" });
+}
+function backupSaved(msg) {
+  try { localStorage.setItem("twdev.lastBackup", today()); localStorage.removeItem("twdev.backupSnooze"); localStorage.setItem("twdev.backupCount", String((+localStorage.getItem("twdev.backupCount") || 0) + 1)); } catch {}
+  S.bkDemo = false; toast(msg); render(); setTimeout(badgeAnnounce, 300);
+}
+function doDownload() {
+  const f = backupFile(), a = document.createElement("a"); a.href = URL.createObjectURL(f); a.download = f.name;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-  try { localStorage.setItem("twdev.lastBackup", today()); localStorage.removeItem("twdev.backupSnooze"); localStorage.setItem("twdev.backupCount", String((+localStorage.getItem("twdev.backupCount") || 0) + 1)); } catch {} S.bkDemo = false; setTimeout(badgeAnnounce, 300);
-  toast("Backup saved to your Downloads folder."); render();
+  backupSaved("Backup saved to your Downloads folder.");
+}
+async function doBackup() {
+  const f = backupFile();
+  if (navigator.canShare && navigator.canShare({ files: [f] })) {
+    try { await navigator.share({ files: [f], title: f.name, text: "Training Week backup – save it in a \"Backup Training Week\" folder in Google Drive." }); backupSaved("Backup shared."); }
+    catch (e) { if (e && e.name !== "AbortError") doDownload(); }      // cancelled = nothing saved; anything else → download instead
+    return;
+  }
+  doDownload();
 }
 document.addEventListener("change", ev => {
   if (!["b-restore", "ob-restore"].includes(ev.target.id) || !ev.target.files[0]) return;
