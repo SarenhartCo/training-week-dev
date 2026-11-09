@@ -359,11 +359,12 @@ header.top{padding-top:12px!important}
 </style>
 </head>
 <body>
-<div class="devbar" role="note"><b>DEV</b><span>Separate from your real app</span><span class="sp"></span><button type="button" id="devweek">Week pop-up</button><button type="button" id="devreset">Reset</button></div>
+<div class="devbar" role="note"><b>DEV</b><span>Separate from your real app <small id="devver" style="opacity:.8"></small></span><span class="sp"></span><button type="button" id="devweek">Week pop-up</button><button type="button" id="devreset">Reset</button></div>
 <script>
 // To test with real data: save a backup file in the main app and restore it here (Progress tab).
 // Reset: wipes everything the DEV app has saved (programme, logs, body data, seen tips) – as a brand-new user.
 // Week pop-up: shows the week-done pop-up with the next headline each tap (all 38, specials first) – nothing is saved
+try { caches.keys().then(k => { const v = k.find(x => x.startsWith("training-week-dev-")); if (v) document.getElementById("devver").textContent = "· " + v.replace("training-week-dev-", ""); }); } catch {}
 document.getElementById("devweek").addEventListener("click", () => window.dispatchEvent(new Event("twdev:weekpop")));
 document.getElementById("devreset").addEventListener("click", e => {
   const b = e.currentTarget;
@@ -3953,19 +3954,19 @@ function backupSaved(msg) {
   try { localStorage.setItem("twdev.lastBackup", today()); localStorage.removeItem("twdev.backupSnooze"); localStorage.setItem("twdev.backupCount", String((+localStorage.getItem("twdev.backupCount") || 0) + 1)); } catch {}
   S.bkDemo = false; toast(msg); render(); setTimeout(badgeAnnounce, 300);
 }
-function doDownload() {
+function doDownload(why) {
   const f = backupFile(), a = document.createElement("a"); a.href = URL.createObjectURL(f); a.download = f.name;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-  backupSaved("Backup saved to your Downloads folder.");
+  backupSaved(why ? `Saved to Downloads (${why}).` : "Backup saved to your Downloads folder.");
 }
 async function doBackup() {
   const f = backupFile();
   if (navigator.canShare && navigator.canShare({ files: [f] })) {
     try { await navigator.share({ files: [f], title: f.name, text: "Training Week backup – save it in a \"Backup Training Week\" folder in Google Drive." }); backupSaved("Backup shared."); }
-    catch (e) { if (e && e.name !== "AbortError") doDownload(); }      // cancelled = nothing saved; anything else → download instead
+    catch (e) { if (e && e.name !== "AbortError") doDownload("sharing failed: " + (e.name || "error")); }      // cancelled = nothing saved; anything else → download instead
     return;
   }
-  doDownload();
+  doDownload(!navigator.share ? "this browser can't share" : !navigator.canShare ? "this browser can't share files" : "the share menu won't take this file");
 }
 document.addEventListener("change", ev => {
   if (!["b-restore", "ob-restore"].includes(ev.target.id) || !ev.target.files[0]) return;
