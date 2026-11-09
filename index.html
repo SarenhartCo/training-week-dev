@@ -1396,6 +1396,38 @@ function migrate() {
     p.phases.forEach(ph => Object.values(ph.workouts || {}).forEach(w => (w.exercises || []).forEach(e => { if (/^pull-up$/i.test(e.name.trim()) && e.inc === 2.5) e.inc = 0.25; })));
     p.mig = 2; saveProgram();
   }
+  // mig 3–6 ported from the main app (2026-11-02 … 11-09) so a restored backup gets the same fixes
+  if (p.mig < 3) {              // 2026-11-02 (Christian): parallel bar dips are a phase-4 exercise – before that, the assisted dip machine
+    p.phases.forEach((ph, pi) => { if (pi >= 3) return; Object.values(ph.workouts || {}).forEach(w => (w.exercises || []).forEach(e => {
+      if (/^parallel bar dips$/i.test(e.name.trim())) { e.name = "Assisted parallel bar dips"; e.kg = -25; e.inc = 0.25; e.bw = true;
+        e.note = "Dip handles on the assisted machine – machine help shown as minus kg. Feather = less help next time."; } })); });
+    p.mig = 3; saveProgram();
+  }
+  if (p.mig < 4) {              // 2026-11-06 (Christian): no weighted pull-ups before you can do them without help – plain pull-ups,
+    const ids = new Set();      // which follow the machine help from your last pull-up session and only add belt weight once you're past body weight
+    p.phases.forEach(ph => Object.values(ph.workouts || {}).forEach(w => (w.exercises || []).forEach(e => {
+      if (/^weighted pull-up$/i.test(e.name.trim())) { ids.add(e.id); e.name = "Pull-up"; e.kg = -20; e.inc = 0.25; e.bw = true;
+        e.note = "Use the assisted machine until all reps go without help – then a belt adds weight."; } })));
+    for (const l of Object.values(S.logs || {})) for (const id of ids) {          // a workout opened but not started yet gets the new suggestion
+      if (!l.sets?.[id]) continue; if (l.names) l.names[id] = "Pull-up";
+      if (!l.sets[id].some(x => x.done)) delete l.sets[id]; }
+    p.mig = 4; saveProgram(); saveLocal();
+  }
+  if (p.mig < 5 && p.title === "12-week upper-body focus") {              // 2026-11-06 (Christian): phase 3 Pull superset A2 – barbell curl → dumbbell curl
+    const w = p.phases[2]?.workouts?.["3"], e = w?.exercises?.find(x => /^barbell curl$/i.test(x.name));
+    if (e) { e.name = "Dumbbell curl"; e.kg = 10; e.inc = 2; e.note = "kg per dumbbell.";
+      for (const l of Object.values(S.logs || {})) if (l.sets?.[e.id]) { if (l.names) l.names[e.id] = "Dumbbell curl"; if (!l.sets[e.id].some(x => x.done)) delete l.sets[e.id]; } }
+    p.mig = 5; saveProgram(); saveLocal();
+  }
+  if (p.mig < 5) p.mig = 5;
+  if (p.mig < 6) {              // 2026-11-09 (Christian): barbell 2.5 kg, machines and cables 1 kg, dumbbells 1 kg to 10 kg then 2 kg (stepOf)
+    p.phases.forEach(ph => Object.values(ph.workouts || {}).forEach(w => (w.exercises || []).forEach(e => {
+      if (!e.inc || e.bw || /kettlebell/i.test(e.name)) return;
+      if (/barbell|ez-bar|^romanian deadlift$/i.test(e.name)) e.inc = 2.5;
+      else if (isDb(e)) { e.db = true; e.inc = 2; }
+      else if (e.inc === 2.5) e.inc = 1; })));
+    p.mig = 6; saveProgram();
+  }
 }
 function mergeColl(snap, prefix, current) {
   const next = {};
@@ -1827,7 +1859,8 @@ function obView() {
       <ol class="obsteps"><li><b>About you</b><span>Year of birth, plus optional weight, height and measurements</span></li><li><b>Your goal and body type</b><span>What you want to train for and look like</span></li><li><b>Your week</b><span>Days, time, focus areas and anything to go easy on</span></li></ol>
       <button type="button" class="btn wide" data-act="obnext">Get started</button>
       <p class="muted obsmall">About 2 minutes. Everything stays on your phone.</p>
-      ${o.edit ? `<button type="button" class="btn ghost wide" data-act="obcancel">Cancel – keep my answers</button>` : `<button type="button" class="linkbtn" data-act="obskip">DEV: skip setup and keep my current programme</button>`}`;
+      ${o.edit ? `<button type="button" class="btn ghost wide" data-act="obcancel">Cancel – keep my answers</button>` : `<label class="linkbtn" for="ob-restore" style="cursor:pointer">Moving from another phone? Restore a backup file</label><input type="file" id="ob-restore" accept="application/json,.json" hidden>
+        <button type="button" class="linkbtn" data-act="obskip">DEV: skip setup and keep my current programme</button>`}`;
   } else if (step === "about") {
     h += `<header class="top"><div>${stepTag}<h1>About you</h1></div><button type="button" class="infobtn" data-act="obinfo" aria-expanded="${!!o.info}" aria-label="Privacy">i</button></header>
       <p class="obp">Weight and height are optional. They help set your starting weights and become your baseline in the Body tab.</p>
@@ -1938,7 +1971,7 @@ function obFinish(skipped) {
     b.weight = Math.round(m.kg * 10) / 10;
     const imp = a.units === "imperial";
     for (const k of ["waist", "chest", "arm", "shoulder", "thigh", "fat"]) { const v = num(a.meas[k]); if (v != null) b[k] = k === "fat" || !imp ? v : Math.round(v * 2.54 * 10) / 10; }
-    S.body[d] = b; try { saveLocal(); } catch {} setTimeout(badgeAnnounce, 300);
+    S.body[d] = b; try { saveLocal(); } catch {}
   }
   if (!skipped && typeof genSupported === "function" && genSupported(a)) {      // round 3: build the plan from the answers
     S.program = generatePlan(a); S.logs = {}; syncKeys(); S.week = null; S.wk = null; S.guides = new Set();
@@ -3715,7 +3748,7 @@ function inWorkout() { const l = S.week && S.wk ? S.logs[logId(S.week, S.wk)] : 
 function badgeAnnounce() {
   if (!S.program) return; badgesCheck();
   const saved = jget(BADGE_KEY); let seen = null; try { seen = JSON.parse(localStorage.getItem(BADGE_SEEN)); } catch {}
-  if (!seen) { seen = {}; for (const id of Object.keys(saved)) seen[id] = 1; try { localStorage.setItem(BADGE_SEEN, JSON.stringify(seen)); } catch {} }   // badges from before the pop-up existed: no flood
+  if (!seen) seen = {};   // Christian 2026-11-09: badges already earned when the pop-up arrives are celebrated too
   if (inWorkout() || S.badgePop) return;
   const list = badgeList().list.filter(b => b.got && saved[b.id] && !seen[b.id]); if (!list.length) return;
   S.badgePop = { list, i: 0 }; setTimeout(() => { badgePopRender(true); }, 400);
@@ -3727,7 +3760,7 @@ function badgePopRender(first) {
   const ico = `<svg viewBox="0 0 24 24" width="64" height="64" fill="currentColor" aria-hidden="true">${BADGE_ART[b.art || b.id] || BADGE_ICON[b.icon]}</svg>`;
   ov.innerHTML = `<div class="bdsheet" role="dialog" aria-labelledby="bd-title"><div class="eyebrow">Badge earned${n > 1 ? ` · ${P.i + 1} of ${n}` : ""}</div>
     <div class="badge got ${b.icon} bdbig"><span class="bico">${ico}</span></div><h2 id="bd-title">${esc(b.title)}</h2><p class="muted">${esc(b.how)}</p>
-    <button type="button" class="btn" data-act="bdnext">${last ? "Nice!" : "Next badge"}</button></div>`;
+    <button type="button" class="btn" data-act="bdnext">${last ? "Nice!" : "Next badge"}</button>${n - P.i > 3 ? `<button type="button" class="linkbtn" data-act="bdskip">Skip the rest – see them on Progress</button>` : ""}</div>`;
   ov.hidden = false; if (first) confetti();
 }
 function badgePopNext() {
@@ -3792,6 +3825,7 @@ document.addEventListener("click", ev => {
     case "tipskip": closeTip(true); break;
     case "colour": { const v = b.dataset.v; try { if (v === "plan") localStorage.removeItem(COLOUR_KEY); else localStorage.setItem(COLOUR_KEY, v); } catch {} render(); break; }
     case "bdnext": badgePopNext(); break;
+    case "bdskip": { const P = S.badgePop; if (P) { let seen = {}; try { seen = JSON.parse(localStorage.getItem(BADGE_SEEN)) || {}; } catch {} P.list.forEach(b => seen[b.id] = 1); try { localStorage.setItem(BADGE_SEEN, JSON.stringify(seen)); } catch {} S.badgePop = null; badgePopRender(false); } break; }
     case "tipreset": { const v = {}; tipSave(v); toast("Tips will show again as you go."); render(); break; }
     case "cdpause": cdPause(); break;
     case "cddone": cdFinish(false); break;
@@ -3915,14 +3949,16 @@ function doBackup() {
   toast("Backup saved to your Downloads folder."); render();
 }
 document.addEventListener("change", ev => {
-  if (ev.target.id !== "b-restore" || !ev.target.files[0]) return;
+  if (!["b-restore", "ob-restore"].includes(ev.target.id) || !ev.target.files[0]) return;
   const r = new FileReader();
   r.onload = () => {
     try {
       const d = JSON.parse(r.result);
       if (d.app !== "training-week" || !d.program) throw new Error("wrong file");
       S.program = d.program; S.logs = d.logs || {}; S.body = d.body || {}; migrate(); syncKeys(); saveLocal();
-      S.week = null; toast("Backup restored."); render();
+      // a restored programme counts as set up (no setup questions); someone moving their data already knows the app → tips off ("Show tips again" on Programme)
+      if (!loadProfile()) { saveProfile({ skipped: true, restored: today() }); try { localStorage.setItem("twdev.tips", JSON.stringify({ skipAll: true })); } catch {} }
+      S.ob = null; S.tab = "today"; S.week = null; toast("Backup restored."); render(); setTimeout(badgeAnnounce, 800);
     } catch { toast("That file isn't a Training Week backup."); }
   };
   r.readAsText(ev.target.files[0]);
