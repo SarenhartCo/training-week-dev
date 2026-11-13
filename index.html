@@ -440,7 +440,7 @@ body.wuopen{overflow:hidden}
 .wucr{transform-origin:150px 18px;transform:scale(0)}.wustage.hit .wucr{animation:wucrk .4s cubic-bezier(.2,1.3,.4,1) forwards}@keyframes wucrk{0%{transform:scale(.1)}100%{transform:scale(1)}}
 .wustage .wuwt{top:10px;transition:top .5s cubic-bezier(.55,0,1,.45)}.wustage .wuwt.drop{top:calc(100% - 224px)}
 .wustage .wushadow{bottom:68px;width:330px;height:330px;margin-left:-165px;z-index:0}
-.wuwowbox{margin-top:26px;position:relative;text-align:center}.wuwowbox .wuwow{font-size:104px}.wuwowbox .wuwow span{animation-delay:calc(var(--wd) + var(--i) * 90ms)}
+.wuwowbox{margin-top:26px;position:relative;text-align:center}.wuwowbox .wuwow{font-size:min(92px,22vw);letter-spacing:-.02em}.wuwowbox .wuwow span{animation-delay:calc(var(--wd) + var(--i) * 90ms)}
 .wuwowbox .wusub{animation:wufade .6s calc(var(--wd) + 450ms) both}
 .wugps{display:block;width:100%;height:auto;max-height:350px;margin-top:2px;position:relative;overflow:visible}
 .wutrophy{overflow:visible}.wurim{stroke-dasharray:.3 2;stroke-dashoffset:.3;opacity:0}.wutrophywrap.shine .wurim{opacity:1;animation:wurimgo .65s ease-in forwards}@keyframes wurimgo{to{stroke-dashoffset:-1}}
@@ -3141,7 +3141,7 @@ function wuCards(s) {
     } });
   // 2 · stronger: the bars swoosh in first, "Wow!" lands last
   const w = s.lifts.filter(l => !l.help), maxp = Math.max(1, ...w.map(l => l.pct));
-  const word = w.length ? (w[0].pct >= 15 ? "Wow!" : "Nice!") : "Solid!";
+  const word = w.length ? (w[0].pct >= 15 ? "WOW!" : "NICE!") : "SOLID!";   // caps (Christian 2026-11-13)
   const R0 = 700, RS = 480, wowAt = R0 + s.lifts.length * RS + 450;
   const row = (l, i) => { const r = l.help ? `−${fmt(l.b - l.a)} kg help` : `+${l.pct} %`, wd = l.help ? Math.min(100, Math.round((1 - l.b / l.a) * 100)) : Math.round(l.pct / maxp * 90);
     return `<div class="wurow" style="--d:${R0 + i * RS}ms"><div><span>${esc(l.help ? l.n.replace(/^Assisted /, "") + " help" : l.n)}</span><b style="color:${WU_GREEN}">${r}</b></div><i><span style="width:${Math.max(6, wd)}%;background:${WU_GREEN};box-shadow:0 0 10px ${WU_GREEN}"></span></i></div>`; };
