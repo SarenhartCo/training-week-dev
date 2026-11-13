@@ -331,6 +331,43 @@ tr:last-child td{border-bottom:0}
 .bdsheet h2{font-family:var(--display);font-size:32px;margin:2px 0 0}.bdsheet p{margin:0 0 6px}.bdsheet .btn{width:100%}
 .bdbig{border:0!important;background:none!important;padding:6px!important}.bdbig .bico{width:112px!important;height:112px!important;animation:bdpop .5s cubic-bezier(.2,1.6,.4,1)}
 @keyframes bdpop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+/* 12-week wrap-up (Christian 2026-11-03 "Neon night", 2026-11-13) */
+#wuov{position:fixed;inset:0;z-index:56;background:rgba(5,7,10,.88);display:flex;align-items:center;justify-content:center;padding:max(10px,env(safe-area-inset-top,0px)) 10px 10px;overflow:auto}#wuov[hidden]{display:none}
+body.wuopen{overflow:hidden}
+.wuph{width:100%;max-width:400px;height:min(720px,calc(100dvh - 20px));border-radius:30px;overflow:hidden;position:relative;color:#fff;background:#0b0d12;padding:26px 22px;box-shadow:0 10px 30px rgba(0,0,0,.45);cursor:pointer;-webkit-user-select:none;user-select:none;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wuph.wuscroll{height:auto;max-height:none;cursor:default;padding:0 0 22px;margin:auto 0}
+.wubars{position:absolute;top:12px;left:14px;right:52px;display:flex;gap:4px}.wubars i{flex:1;height:3px;border-radius:2px}
+.wux{position:absolute;top:4px;right:10px;width:40px;height:40px;border:0;background:none;color:#9aa0b0;font-size:20px;z-index:3}
+.wuk{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:800;margin-top:26px;position:relative}.wuk.c,.wusub.c,.wudim.c{text-align:center}
+.wubig{font-size:92px;font-weight:900;line-height:.9;letter-spacing:-.05em;margin-top:14px;position:relative;white-space:nowrap}.wubig.plus::before{content:"+"}
+.wuu{font-size:22px;font-weight:800;letter-spacing:0;color:#fff;text-shadow:none}
+.wusub{font-size:16px;line-height:1.4;margin-top:14px;color:#c9ccd6;position:relative}.wusub b{color:#fff}
+.wuglow{position:absolute;width:340px;height:340px;border-radius:50%;filter:blur(60px);opacity:.35;top:-120px;right:-140px;pointer-events:none}
+.wuchip{display:inline-block;border:1.5px solid;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;margin:4px 4px 0 0;letter-spacing:.04em;text-transform:uppercase}
+.wubot{position:absolute;left:22px;right:22px;bottom:22px}
+.wuart{position:absolute;left:50%;bottom:60px;width:190px;height:190px;transform:translateX(-50%)}.wuart.sm{position:static;display:block;margin:24px auto 0;width:140px;height:140px;transform:none}
+.wurows{margin-top:6px;position:relative}.wurow{margin-top:14px}.wurow div{display:flex;justify-content:space-between;font-size:13px;font-weight:700}
+.wurow i,.wubar{display:block;height:8px;border-radius:5px;background:#232734;margin-top:6px}.wurow i span,.wubar span{display:block;height:100%;border-radius:5px;animation:wugrow 1s ease-out}
+@keyframes wugrow{from{width:0}}
+.wuring{display:block;width:190px;height:190px;margin:20px auto 0;position:relative}.wuarc{animation:wuarc 1.1s ease-out}@keyframes wuarc{from{stroke-dasharray:0 400}}
+.wugrid{display:flex;gap:4px;justify-content:center;margin-top:16px;flex-wrap:wrap;position:relative}.wugrid i{width:16px;height:16px;border-radius:4px;background:#2a2e3a}.wugrid i.g1{background:#fff;opacity:.85}
+.wunext{font-size:12px;color:#9aa0b0;font-weight:700;letter-spacing:.06em;text-transform:uppercase}.wubar{margin-top:8px}
+.wutrophy{display:block;width:110px;height:110px;margin:22px auto 0;animation:bdpop .6s cubic-bezier(.2,1.6,.4,1)}
+.wufin{text-align:center;font-size:44px;font-weight:900;margin-top:10px;letter-spacing:-.03em}.wufin .dim{color:#6b7080}
+.wuchips{text-align:center;margin-top:14px}
+.wucta{display:block;width:100%;border:0;border-radius:14px;padding:15px;text-align:center;font-weight:900;font-size:16px;color:#fff;font-family:inherit}
+.wughost{display:block;width:100%;border:1px solid #2a2e3a;background:none;border-radius:14px;padding:13px;font-weight:700;color:#c9ccd6;font-size:15px;font-family:inherit}
+.wusumtop{position:relative;padding:40px 22px 22px;text-align:center;overflow:hidden}.wusumtop h2{font-size:26px;font-weight:900;margin:14px 0 0;position:relative}
+.wumedal{width:120px;height:120px;margin:0 auto;border-radius:50%;border:3px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}.wumedal b{font-size:46px;line-height:1}.wumedal small{font-size:10px;font-weight:800;letter-spacing:.2em}
+.wudim{color:#9aa0b0;font-size:13px;margin-top:4px;position:relative}
+.wutiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 14px}.wutile{background:#151822;border-radius:14px;padding:12px;border:1px solid #232734}.wutile b{display:block;font-size:24px}.wutile span{font-size:11px;color:#9aa0b0;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.wusec{font-size:11px;letter-spacing:.2em;color:#9aa0b0;font-weight:800;margin:16px 14px 8px;text-transform:uppercase}
+.wuline{display:flex;justify-content:space-between;gap:10px;background:#151822;border:1px solid #232734;border-radius:12px;padding:10px 12px;margin:0 14px 6px;font-size:14px}
+.wubtns{display:grid;gap:10px;margin:18px 14px 0}
+.npsheet{background:var(--surface);color:var(--ink);border-radius:18px;padding:20px;max-width:420px;width:100%;margin:auto 0}.npsheet h2{font-family:var(--display);font-size:28px;margin:4px 0 6px}.npsheet .obchips{margin:10px 0 12px}.npsheet .note{margin:12px 0 0}
+.wucard{border:1.5px solid var(--accent);margin-bottom:14px}.wucard h2{font-family:var(--display);font-size:24px;margin:2px 0 12px}
+.nplink{text-align:center;margin:22px 0 8px}
+.histp{width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer}
 #wdov{position:fixed;inset:0;z-index:55;background:rgba(10,14,20,.55);display:flex;align-items:center;justify-content:center;padding:16px}#wdov[hidden]{display:none}
 .wdsheet{background:var(--surface);color:var(--ink);border-radius:18px;padding:20px;max-width:420px;width:100%;text-align:center}.wdsheet h2{font-family:var(--display);font-size:32px;margin:4px 0 8px}.wdsheet p{margin:6px 0}
 .wdbtns{display:grid;gap:8px;margin:14px 0 6px}.wdline{margin:2px 0 !important}.wdline+p:not(.wdline){margin-top:12px !important}
@@ -359,13 +396,14 @@ header.top{padding-top:12px!important}
 </style>
 </head>
 <body>
-<div class="devbar" role="note"><b>DEV</b><span>Separate from your real app <small id="devver" style="opacity:.8"></small></span><span class="sp"></span><button type="button" id="devweek">Week pop-up</button><button type="button" id="devreset">Reset</button></div>
+<div class="devbar" role="note"><b>DEV</b><span>Separate from your real app <small id="devver" style="opacity:.8"></small></span><span class="sp"></span><button type="button" id="devweek">Week pop-up</button><button type="button" id="devwrap">Wrap-up</button><button type="button" id="devreset">Reset</button></div>
 <script>
 // To test with real data: save a backup file in the main app and restore it here (Progress tab).
 // Reset: wipes everything the DEV app has saved (programme, logs, body data, seen tips) – as a brand-new user.
 // Week pop-up: shows the week-done pop-up with the next headline each tap (all 38, specials first) – nothing is saved
 try { caches.keys().then(k => { const v = k.find(x => x.startsWith("training-week-dev-")); if (v) document.getElementById("devver").textContent = "· " + v.replace("training-week-dev-", ""); }); } catch {}
 document.getElementById("devweek").addEventListener("click", () => window.dispatchEvent(new Event("twdev:weekpop")));
+document.getElementById("devwrap").addEventListener("click", () => window.dispatchEvent(new Event("twdev:wrappop")));
 document.getElementById("devreset").addEventListener("click", e => {
   const b = e.currentTarget;
   if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Tap again to wipe DEV"; setTimeout(() => { delete b.dataset.armed; b.textContent = "Reset"; }, 4000); return; }
@@ -381,6 +419,7 @@ document.getElementById("devreset").addEventListener("click", e => {
   <div id="swapov" hidden></div>
   <div id="wdov" hidden></div>
   <div id="bdov" hidden></div>
+  <div id="wuov" hidden></div>
   <nav class="tabs" aria-label="Sections">
     <button class="tab" data-tab="today" id="tab-today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h2M19 12h2M6 8v8M18 8v8M9 6v12M15 6v12M9 12h6"/></svg>Workout</button>
     <button class="tab" data-tab="plan" id="tab-plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Programme</button>
@@ -1448,7 +1487,7 @@ async function connect() {
   // An existing user (programme + logged workouts, no setup answers – e.g. the main app before round 4): counts as set up, tips off
   if (!loadProfile() && S.program && Object.keys(S.logs || {}).length) { saveProfile({ skipped: true, existing: today() }); try { if (!localStorage.getItem("twdev.tips")) localStorage.setItem("twdev.tips", JSON.stringify({ skipAll: true })); } catch {} }
   if (!loadProfile()) { obStart(false); return; }
-  render(); badgeAnnounce();
+  render(); badgeAnnounce(); setTimeout(() => { if (!S.badgePop) wrapCheck(); }, 600);
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch {}
 }
 const SEED = {"program": {"title": "12-week upper-body focus", "start": "2026-09-29", "phases": [{"name": "Foundation", "weeks": [1, 2, 3], "about": "Learn the lifts and find your working weights. Stop each set with 2-3 reps left in the tank.", "workouts": {"1": {"name": "Upper · Push", "exercises": [{"name": "Barbell bench press", "sets": 3, "reps": 10, "kg": 35, "rest": 120, "inc": 2.5, "unit": "reps", "note": "Bar to lower chest, feet planted.", "id": "p11-barbell-bench-press"}, {"name": "Barbell overhead press", "sets": 3, "reps": 10, "kg": 30, "rest": 120, "inc": 2.5, "unit": "reps", "note": "Squeeze glutes, no leaning back.", "id": "p11-barbell-overhead-press"}, {"name": "Incline dumbbell press", "sets": 3, "reps": 12, "kg": 14, "rest": 90, "inc": 2, "unit": "reps", "note": "kg per dumbbell.", "id": "p11-incline-dumbbell-press"}, {"name": "Dumbbell lateral raise", "sets": 3, "reps": 12, "kg": 6, "rest": 0, "inc": 1, "unit": "reps", "ss": "A1", "note": "Go straight to A2.", "id": "p11-dumbbell-lateral-raise"}, {"name": "Overhead dumbbell triceps extension", "sets": 3, "reps": 12, "kg": 14, "rest": 75, "inc": 2, "unit": "reps", "ss": "A2", "id": "p11-overhead-dumbbell-tricep"}]}, "2": {"name": "Lower · Knee-friendly", "exercises": [{"name": "Romanian deadlift", "sets": 3, "reps": 10, "kg": 50, "rest": 120, "inc": 2.5, "unit": "reps", "note": "Soft knees, push hips back. Knees barely bend.", "id": "p12-romanian-deadlift"}, {"name": "Barbell hip thrust", "sets": 3, "reps": 12, "kg": 50, "rest": 90, "inc": 2.5, "unit": "reps", "note": "Shins vertical at the top.", "id": "p12-barbell-hip-thrust"}, {"name": "Lying hamstring curl", "sets": 3, "reps": 12, "kg": 25, "rest": 75, "inc": 1, "unit": "reps", "note": "Stop if the knee complains.", "id": "p12-lying-hamstring-curl"}, {"name": "Standing calf raise", "sets": 3, "reps": 15, "kg": 40, "rest": 60, "inc": 2.5, "unit": "reps", "id": "p12-standing-calf-raise"}, {"name": "Dead bug", "sets": 3, "reps": 10, "kg": 0, "rest": 0, "inc": 0, "unit": "reps", "ss": "A1", "note": "Reps per side. Go straight to A2.", "id": "p12-dead-bug"}, {"name": "Pallof press", "sets": 3, "reps": 12, "kg": 10, "rest": 60, "inc": 2.5, "unit": "reps", "ss": "A2", "note": "Cable, reps per side.", "id": "p12-pallof-press"}]}, "3": {"name": "Full body · Pull", "exercises": [{"name": "Pull-up", "sets": 3, "reps": 10, "kg": 0, "rest": 120, "inc": 0.25, "unit": "reps", "bw": true, "note": "Full hang to chin over bar.", "id": "p13-pull-up"}, {"name": "Machine row", "sets": 3, "reps": 12, "kg": 45, "rest": 90, "inc": 2.5, "unit": "reps", "note": "Total on the machine (both sides).", "id": "p13-machine-row"}, {"name": "Face pull", "sets": 3, "reps": 15, "kg": 15, "rest": 60, "inc": 2.5, "unit": "reps", "note": "Cable, pull to forehead, elbows high.", "id": "p13-face-pull"}, {"name": "Dumbbell hammer curl", "sets": 3, "reps": 12, "kg": 10, "rest": 60, "inc": 2, "unit": "reps", "id": "p13-dumbbell-hammer-curl"}, {"name": "Kettlebell swing", "sets": 3, "reps": 15, "kg": 16, "rest": 60, "inc": 4, "unit": "reps", "note": "Hip snap, not a squat.", "id": "p13-kettlebell-swing"}]}, "c": {"name": "Cardio (optional)", "exercises": [{"name": "Bike, rower or incline walk", "sets": 1, "reps": 30, "kg": 0, "rest": 0, "inc": 0, "unit": "min", "note": "Easy pace, you can still talk.", "id": "p1c-bike-rower-or-incline-wa"}]}}}, {"name": "Build", "weeks": [4, 5, 6], "about": "More sets for chest, back and shoulders. Add weight when you get every rep.", "workouts": {"1": {"name": "Upper · Push", "exercises": [{"name": "Barbell bench press", "sets": 4, "reps": 8, "kg": 40, "rest": 120, "inc": 2.5, "unit": "reps", "id": "p21-barbell-bench-press"}, {"name": "Standing dumbbell shoulder press", "sets": 4, "reps": 10, "kg": 14, "rest": 90, "inc": 2, "unit": "reps", "note": "kg per dumbbell.", "id": "p21-standing-dumbbell-should"}, {"name": "Incline dumbbell press", "sets": 3, "reps": 10, "kg": 16, "rest": 90, "inc": 2, "unit": "reps", "id": "p21-incline-dumbbell-press"}, {"name": "Dumbbell lateral raise", "sets": 3, "reps": 15, "kg": 7, "rest": 0, "inc": 1, "unit": "reps", "ss": "A1", "note": "Go straight to A2.", "id": "p21-dumbbell-lateral-raise"}, {"name": "Close-grip push-up", "sets": 3, "reps": 12, "kg": 0, "rest": 75, "inc": 0, "unit": "reps", "bw": true, "ss": "A2", "id": "p21-close-grip-push-up"}]}, "2": {"name": "Lower · Knee-friendly", "exercises": [{"name": "Romanian deadlift", "sets": 4, "reps": 8, "kg": 55, "rest": 120, "inc": 2.5, "unit": "reps", "id": "p22-romanian-deadlift"}, {"name": "Barbell hip thrust", "sets": 4, "reps": 10, "kg": 60, "rest": 90, "inc": 2.5, "unit": "reps", "id": "p22-barbell-hip-thrust"}, {"name": "Cable pull-through", "sets": 3, "reps": 12, "kg": 25, "rest": 75, "inc": 2.5, "unit": "reps", "id": "p22-cable-pull-through"}, {"name": "Seated calf raise", "sets": 3, "reps": 15, "kg": 30, "rest": 60, "inc": 2.5, "unit": "reps", "id": "p22-seated-calf-raise"}, {"name": "Hanging knee raise", "sets": 3, "reps": 12, "kg": 0, "rest": 0, "inc": 0, "unit": "reps", "bw": true, "ss": "A1", "note": "Go straight to A2.", "id": "p22-hanging-knee-raise"}, {"name": "Side plank", "sets": 3, "reps": 30, "kg": 0, "rest": 60, "inc": 0, "unit": "sec", "ss": "A2", "note": "Seconds per side.", "id": "p22-side-plank"}]}, "3": {"name": "Full body · Pull", "exercises": [{"name": "Pull-up", "sets": 4, "reps": 8, "kg": 0, "rest": 120, "inc": 0.25, "unit": "reps", "bw": true, "note": "Add a light weight belt when 4 × 10 feels easy.", "id": "p23-pull-up"}, {"name": "Barbell bent-over row", "sets": 4, "reps": 8, "kg": 45, "rest": 120, "inc": 2.5, "unit": "reps", "id": "p23-barbell-bent-over-row"}, {"name": "One-arm dumbbell row", "sets": 3, "reps": 10, "kg": 22, "rest": 75, "inc": 2, "unit": "reps", "note": "kg per dumbbell, reps per side.", "id": "p23-one-arm-dumbbell-row"}, {"name": "Rear-delt dumbbell fly", "sets": 3, "reps": 15, "kg": 6, "rest": 0, "inc": 1, "unit": "reps", "ss": "A1", "note": "Go straight to A2.", "id": "p23-rear-delt-dumbbell-fly"}, {"name": "EZ-bar curl", "sets": 3, "reps": 10, "kg": 20, "rest": 75, "inc": 2.5, "unit": "reps", "ss": "A2", "id": "p23-ez-bar-curl"}, {"name": "Kettlebell swing", "sets": 3, "reps": 15, "kg": 20, "rest": 60, "inc": 4, "unit": "reps", "id": "p23-kettlebell-swing"}]}, "c": {"name": "Cardio (optional)", "exercises": [{"name": "Bike, rower or incline walk", "sets": 1, "reps": 35, "kg": 0, "rest": 0, "inc": 0, "unit": "min", "note": "Easy pace.", "id": "p2c-bike-rower-or-incline-wa"}]}}}, {"name": "Strength", "weeks": [7, 8, 9], "about": "Heavier main lifts with longer rests. Leave 1-2 reps in the tank.", "workouts": {"1": {"name": "Upper · Push", "exercises": [{"name": "Barbell bench press", "sets": 4, "reps": 6, "kg": 45, "rest": 150, "inc": 2.5, "unit": "reps", "id": "p31-barbell-bench-press"}, {"name": "Barbell overhead press", "sets": 4, "reps": 6, "kg": 37.5, "rest": 150, "inc": 2.5, "unit": "reps", "id": "p31-barbell-overhead-press"}, {"name": "Parallel bar dips", "sets": 3, "reps": 8, "kg": 0, "rest": 90, "inc": 2.5, "unit": "reps", "bw": true, "note": "Slight forward lean. Add weight later.", "id": "p31-parallel-bar-dips"}, {"name": "Incline dumbbell press", "sets": 3, "reps": 8, "kg": 18, "rest": 90, "inc": 2, "unit": "reps", "id": "p31-incline-dumbbell-press"}, {"name": "Dumbbell lateral raise", "sets": 3, "reps": 12, "kg": 8, "rest": 60, "inc": 1, "unit": "reps", "id": "p31-dumbbell-lateral-raise"}]}, "2": {"name": "Lower · Knee-friendly", "exercises": [{"name": "Romanian deadlift", "sets": 4, "reps": 6, "kg": 65, "rest": 150, "inc": 2.5, "unit": "reps", "id": "p32-romanian-deadlift"}, {"name": "Barbell hip thrust", "sets": 4, "reps": 8, "kg": 75, "rest": 120, "inc": 2.5, "unit": "reps", "id": "p32-barbell-hip-thrust"}, {"name": "Lying hamstring curl", "sets": 3, "reps": 10, "kg": 30, "rest": 75, "inc": 1, "unit": "reps", "id": "p32-lying-hamstring-curl"}, {"name": "Standing calf raise", "sets": 3, "reps": 12, "kg": 50, "rest": 60, "inc": 2.5, "unit": "reps", "id": "p32-standing-calf-raise"}, {"name": "Ab wheel rollout", "sets": 3, "reps": 8, "kg": 0, "rest": 60, "inc": 0, "unit": "reps", "bw": true, "note": "From the knees.", "id": "p32-ab-wheel-rollout"}]}, "3": {"name": "Full body · Pull", "exercises": [{"name": "Weighted pull-up", "sets": 4, "reps": 6, "kg": 5, "rest": 150, "inc": 2.5, "unit": "reps", "bw": true, "note": "kg added on a belt.", "id": "p33-weighted-pull-up"}, {"name": "Barbell bent-over row", "sets": 4, "reps": 6, "kg": 52.5, "rest": 120, "inc": 2.5, "unit": "reps", "id": "p33-barbell-bent-over-row"}, {"name": "Machine row", "sets": 3, "reps": 10, "kg": 54, "rest": 90, "inc": 2.5, "unit": "reps", "id": "p33-machine-row"}, {"name": "Face pull", "sets": 3, "reps": 15, "kg": 17.5, "rest": 0, "inc": 2.5, "unit": "reps", "ss": "A1", "note": "Go straight to A2.", "id": "p33-face-pull"}, {"name": "Barbell curl", "sets": 3, "reps": 8, "kg": 25, "rest": 75, "inc": 2.5, "unit": "reps", "ss": "A2", "id": "p33-barbell-curl"}, {"name": "Farmer's carry", "sets": 3, "reps": 40, "kg": 26, "rest": 75, "inc": 2, "unit": "m", "note": "kg per hand.", "id": "p33-farmer-s-carry"}]}, "c": {"name": "Cardio (optional)", "exercises": [{"name": "Bike or rower", "sets": 1, "reps": 35, "kg": 0, "rest": 0, "inc": 0, "unit": "min", "note": "Easy pace, last 5 min a bit harder.", "id": "p3c-bike-or-rower"}]}}}, {"name": "Strong & lean", "weeks": [10, 11, 12], "about": "Keep the heavy lift first, then supersets with short rests to raise the tempo.", "workouts": {"1": {"name": "Upper · Push", "exercises": [{"name": "Barbell bench press", "sets": 4, "reps": 6, "kg": 47.5, "rest": 150, "inc": 2.5, "unit": "reps", "id": "p41-barbell-bench-press"}, {"name": "Seated dumbbell shoulder press", "sets": 3, "reps": 10, "kg": 16, "rest": 0, "inc": 2, "unit": "reps", "ss": "A1", "note": "Go straight to A2.", "id": "p41-seated-dumbbell-shoulder"}, {"name": "Chest-supported dumbbell row", "sets": 3, "reps": 10, "kg": 22, "rest": 75, "inc": 2, "unit": "reps", "ss": "A2", "id": "p41-chest-supported-dumbbell"}, {"name": "Incline dumbbell press", "sets": 3, "reps": 10, "kg": 18, "rest": 0, "inc": 2, "unit": "reps", "ss": "B1", "note": "Go straight to B2.", "id": "p41-incline-dumbbell-press"}, {"name": "Dumbbell lateral raise", "sets": 3, "reps": 15, "kg": 8, "rest": 60, "inc": 1, "unit": "reps", "ss": "B2", "id": "p41-dumbbell-lateral-raise"}, {"name": "EZ-bar skull crusher", "sets": 3, "reps": 10, "kg": 20, "rest": 60, "inc": 2.5, "unit": "reps", "id": "p41-ez-bar-skull-crusher"}]}, "2": {"name": "Lower · Knee-friendly", "exercises": [{"name": "Romanian deadlift", "sets": 3, "reps": 8, "kg": 65, "rest": 120, "inc": 2.5, "unit": "reps", "id": "p42-romanian-deadlift"}, {"name": "Barbell hip thrust", "sets": 3, "reps": 10, "kg": 75, "rest": 0, "inc": 2.5, "unit": "reps", "ss": "A1", "note": "Go straight to A2.", "id": "p42-barbell-hip-thrust"}, {"name": "Hanging knee raise", "sets": 3, "reps": 12, "kg": 0, "rest": 75, "inc": 0, "unit": "reps", "bw": true, "ss": "A2", "id": "p42-hanging-knee-raise"}, {"name": "Lying hamstring curl", "sets": 3, "reps": 12, "kg": 30, "rest": 60, "inc": 1, "unit": "reps", "id": "p42-lying-hamstring-curl"}, {"name": "Kettlebell swing", "sets": 3, "reps": 20, "kg": 20, "rest": 60, "inc": 4, "unit": "reps", "note": "Fast and crisp. Conditioning finisher.", "id": "p42-kettlebell-swing"}]}, "3": {"name": "Full body · Pull", "exercises": [{"name": "Weighted pull-up", "sets": 4, "reps": 5, "kg": 7.5, "rest": 150, "inc": 2.5, "unit": "reps", "bw": true, "note": "kg added on a belt.", "id": "p43-weighted-pull-up"}, {"name": "Barbell bent-over row", "sets": 3, "reps": 8, "kg": 52.5, "rest": 0, "inc": 2.5, "unit": "reps", "ss": "A1", "note": "Go straight to A2.", "id": "p43-barbell-bent-over-row"}, {"name": "Push-up", "sets": 3, "reps": 15, "kg": 0, "rest": 75, "inc": 0, "unit": "reps", "bw": true, "ss": "A2", "id": "p43-push-up"}, {"name": "Face pull", "sets": 3, "reps": 15, "kg": 17.5, "rest": 0, "inc": 2.5, "unit": "reps", "ss": "B1", "note": "Go straight to B2.", "id": "p43-face-pull"}, {"name": "Dumbbell hammer curl", "sets": 3, "reps": 10, "kg": 12, "rest": 60, "inc": 2, "unit": "reps", "ss": "B2", "id": "p43-dumbbell-hammer-curl"}, {"name": "Farmer's carry", "sets": 3, "reps": 40, "kg": 28, "rest": 75, "inc": 2, "unit": "m", "note": "kg per hand.", "id": "p43-farmer-s-carry"}]}, "c": {"name": "Cardio (optional)", "exercises": [{"name": "Bike intervals", "sets": 1, "reps": 25, "kg": 0, "rest": 0, "inc": 0, "unit": "min", "note": "5 min easy, 10 × 30 s hard / 60 s easy, 5 min easy.", "id": "p4c-bike-intervals"}]}}}]}, "logs": {}, "body": {"2026-09-29": {"date": "2026-09-29", "weight": 83, "fat": 24.5, "muscle": 55.9, "waist": 101, "chest": 101, "arm": 36, "shoulder": 45, "thigh": 51}}};
@@ -1511,7 +1550,7 @@ function suggest(e, id) {
 }
 // ---- "Finding your weight" (programme-rules D2 + M8, round 4): week 1, and the first session of any exercise not done before.
 // The feather / kettlebell then apply to the set just ticked: feather → next sets +2 steps, kettlebell → −1 step, no mark → same weight.
-function isFinding(e, w, id) { return !!e.inc && !/^Warm-up sets/.test(e.name) && (w === 1 || !prevBest(e.name, id)); }
+function isFinding(e, w, id) { return !!e.inc && !/^Warm-up sets/.test(e.name) && !e.carried && (w === 1 || !prevBest(e.name, id)); }   // e.carried: weight from the last programme
 // The session remembers what it learned (Christian 2026-10-30): never back up to a weight marked too heavy, never down to one marked too easy.
 // Feather: ≈ +20 %, but stay below the lightest "too heavy" weight. Kettlebell: ≈ −10 %, but not below the heaviest "too easy" weight.
 // When "too easy" and "too heavy" are one step apart, the lighter one is the found weight.
@@ -1660,7 +1699,7 @@ function backupReminder() {
 }
 function todayView() {
   const w = S.week, k = S.wk, ph = phaseOf(w), pi = phaseIndex(w), wo = workout(w, k), tw = totalWeeks(), cur = currentWeek();
-  let h = head(`Week ${w} of ${tw} · Phase ${pi + 1} ${ph.name}`, wo.name) + backupReminder();
+  let h = head(`Week ${w} of ${tw} · Phase ${pi + 1} ${ph.name}`, wo.name) + wrapCard() + backupReminder();
   // week checklist
   h += `<div class="weekcard"><div class="weeknav">
       <span class="wt">Week ${w}${w === cur ? "<small>this week</small>" : w < cur ? "<small>done</small>" : ""}</span>
@@ -1676,7 +1715,7 @@ function todayView() {
   h += `</div>`;
   if (S.program?.phases?.[pi] && !pcClosed()[pi]) h += phaseCardHtml(phaseNews(pi), true);   // shown during the phase until closed
   if (isCardioPlan()) h += minutesCard(w);
-  if (w === 1) h += `<div class="note findban"><b>Week 1: finding your weights.</b> The starting weights are a safe first guess. After each set, ask yourself: <i>how many more could I have done with good form?</i> 4 or more → tap the <b>feather</b> (next set about 20 % heavier). None, or you didn't finish → the <b>kettlebell</b> (about 10 % lighter). 1–3 → no mark, same weight. Your last set becomes next week's weight.</div>`;
+  if (w === 1 && !S.program.carried) h += `<div class="note findban"><b>Week 1: finding your weights.</b> The starting weights are a safe first guess. After each set, ask yourself: <i>how many more could I have done with good form?</i> 4 or more → tap the <b>feather</b> (next set about 20 % heavier). None, or you didn't finish → the <b>kettlebell</b> (about 10 % lighter). 1–3 → no mark, same weight. Your last set becomes next week's weight.</div>`;
 
   const id = logId(w, k), l = S.logs[id];
   const st = l ? stats(l) : { done: 0, total: wo.exercises.reduce((a, e) => a + e.sets, 0), vol: 0 };
@@ -1708,7 +1747,7 @@ function todayView() {
       h += `<div class="sshead">${bal ? `Balance block · ${n} exercises, ${e.sets} rounds` : `Superset ${e.ss[0]}${spot ? " · " + esc(spot) : ""} · ${n} exercises`}</div>`;
     }
     h += `<section class="ex ${complete ? "complete" : ""} ${ssCls} ${exCls}">
-      <div class="exhead"><div class="exname">${e.ss ? `<span class="tag">${esc(e.ss)}</span>` : ""}${esc(e.name)}${typeof EX !== "undefined" && (EX[e.name] || EX[e.swappedFrom?.name]) && EX[e.name]?.m !== "cardio" && !/^Warm-up/.test(e.name) && !complete ? `<button type="button" class="swapbtn" data-act="swopen" data-ex="${e.id}">Swap</button>` : ""}${finding && w !== 1 ? `<span class="newtag">New – find your weight</span>` : ""}${e.swappedFrom ? `<div class="swapped">${e.swapScope === "barbell" ? `Barbell from now on · <button type="button" class="linkbtn inl" data-act="swundo" data-ex="${e.id}">Back to dumbbells</button>` : `Swapped from ${esc(e.swappedFrom.name)}${e.swapScope === "today" ? " (today)" : " (this phase)"} · <button type="button" class="linkbtn inl" data-act="swundo" data-ex="${e.id}">Undo</button>`}</div>` : ""}
+      <div class="exhead"><div class="exname">${e.ss ? `<span class="tag">${esc(e.ss)}</span>` : ""}${esc(e.name)}${typeof EX !== "undefined" && (EX[e.name] || EX[e.swappedFrom?.name]) && EX[e.name]?.m !== "cardio" && !/^Warm-up/.test(e.name) && !complete ? `<button type="button" class="swapbtn" data-act="swopen" data-ex="${e.id}">Swap</button>` : ""}${finding && (w !== 1 || S.program.carried) ? `<span class="newtag">New – find your weight</span>` : ""}${e.swappedFrom ? `<div class="swapped">${e.swapScope === "barbell" ? `Barbell from now on · <button type="button" class="linkbtn inl" data-act="swundo" data-ex="${e.id}">Back to dumbbells</button>` : `Swapped from ${esc(e.swappedFrom.name)}${e.swapScope === "today" ? " (today)" : " (this phase)"} · <button type="button" class="linkbtn inl" data-act="swundo" data-ex="${e.id}">Undo</button>`}</div>` : ""}
         ${feelIn(e.name) ? `<div class="feelit">Feel it in: <b>${feelIn(e.name)}</b></div>` : ""}
         ${e.note ? `<div class="cue">${esc(e.note)}</div>` : ""}
 </div>
@@ -1778,7 +1817,7 @@ const PROFILE_KEY = "twdev.profile";
 const OB_DEV = PROFILE_KEY.indexOf("twdev") === 0;   // false in the main app (tools/promote.py turns the keys into tw.*)
 // Main app: someone with logged workouts keeps their programme when they change their answers – no rebuild, no lost history
 // (the next programme is built from the answers – 12-week wrap-up). DEV rebuilds and clears its test logs on purpose.
-function obKeepsProgramme() { return !OB_DEV && Object.keys(S.logs || {}).length > 0; }
+function obKeepsProgramme() { return !OB_DEV && !S.ob?.newProg && Object.keys(S.logs || {}).length > 0; }   // a new programme (wrap-up / Programme tab) always builds
 const OB_STEPS = ["welcome", "about", "goal", "shape", "week", "home", "focus", "plan"];
 const MUSCLES = [["chest", "Chest", true], ["back", "Upper back", true], ["shoulders", "Shoulders"], ["arms", "Arms"], ["glutes", "Glutes", true], ["thighs", "Thighs", true], ["calves", "Calves"], ["core", "Core"]];
 const KIT = [
@@ -1876,7 +1915,12 @@ function obView() {
     <button type="button" class="btn" data-act="obnext" ${obCanGo(step, a) ? "" : "disabled"}>${label}</button></div>`;
   const imp = a.units === "imperial";
   let h = `<div class="ob">`;
-  if (step === "welcome") {
+  if (step === "welcome" && o.newProg) {
+    h += `<header class="top"><div><div class="eyebrow">New programme</div><h1>Build your next 12 weeks</h1></div></header>
+      <p class="obp">Go through the questions again and change anything you like. Your answers from last time are filled in.</p>
+      <button type="button" class="btn wide" data-act="obnext">Get started</button>
+      <button type="button" class="btn ghost wide" data-act="obcancel">Cancel – keep my current programme</button>`;
+  } else if (step === "welcome") {
     h += `<header class="top"><div><div class="eyebrow">Welcome</div><h1>Your 12-week plan, built around you</h1></div></header>
       <p class="obp">Answer a few quick questions and the app sets up your workouts, starting weights and weekly schedule.</p>
       <ol class="obsteps"><li><b>About you</b><span>Year of birth, plus optional weight, height and measurements</span></li><li><b>Your goal and body type</b><span>What you want to train for and look like</span></li><li><b>Your week</b><span>Days, time, focus areas and anything to go easy on</span></li></ol>
@@ -1953,9 +1997,10 @@ function obView() {
       ${a.goal === "Balance" && (obAge(a) || 0) >= 65 ? `<div class="obfit" role="note"><p>${esc(balanceWeekText(a))}</p></div>` : ""}
       <div class="card"><div class="eyebrow">Each week</div><ol class="obweek">${names.map((nm, i) => `<li><b>Workout ${i + 1}</b><span>${esc(nm)}</span></li>`).join("")}<li><b>Extra</b><span>${esc(EXTRA_TEXT[a.goal])}</span></li></ol></div>
       <div class="card"><div class="eyebrow">Four phases</div><ol class="obweek"><li><b>Phase 1</b><span>Weeks 1–3 · learn the movements, find your weights</span></li><li><b>Phase 2</b><span>Weeks 4–6 · more sets, new variations</span></li><li><b>Phase 3</b><span>Weeks 7–9 · heavier main lifts</span></li><li><b>Phase 4</b><span>Weeks 10–12 · build strength</span></li></ol></div>
-      ${obKeepsProgramme() ? `<div class="note">Your answers are saved. Your current programme carries on with all your history – your next programme will be built from these answers.</div>`
+      ${o.newProg ? `<div class="note">Your current programme is saved in your history on the Progress tab. Your badges and totals stay.</div>`
+        : obKeepsProgramme() ? `<div class="note">Your answers are saved. Your current programme carries on with all your history – your next programme will be built from these answers.</div>`
         : OB_DEV ? `<div class="note">${typeof genSupported === "function" && genSupported(a) ? "DEV: \"Start week 1\" builds this plan and clears the workouts logged in DEV. Your main app is not touched." : "DEV: plans for " + (a.where === "Home" ? "home training" : a.goal) + " come in the next part of round 3. Until then your current programme is kept – your answers are saved."}</div>` : ""}
-      <div class="obnav"><button type="button" class="btn ghost" data-act="obback">Change my answers</button><button type="button" class="btn" data-act="obdone">${obKeepsProgramme() ? "Save my answers" : "Start week 1"}</button></div>`;
+      <div class="obnav"><button type="button" class="btn ghost" data-act="obback">Change my answers</button><button type="button" class="btn" data-act="obdone">${o.newProg ? "Start my new programme" : obKeepsProgramme() ? "Save my answers" : "Start week 1"}</button></div>`;
   }
   return h + `</div>`;
 }
@@ -1997,7 +2042,8 @@ function obFinish(skipped) {
     for (const k of ["waist", "chest", "arm", "shoulder", "thigh", "fat"]) { const v = num(a.meas[k]); if (v != null) b[k] = k === "fat" || !imp ? v : Math.round(v * 2.54 * 10) / 10; }
     S.body[d] = b; try { saveLocal(); } catch {}
   }
-  if (!skipped && !obKeepsProgramme() && typeof genSupported === "function" && genSupported(a)) {      // round 3: build the plan from the answers
+  if (!skipped && S.ob.newProg && typeof npBuild === "function") npBuild(a);    // wrap-up / "Start new programme": history saved, weights carried
+  else if (!skipped && !obKeepsProgramme() && typeof genSupported === "function" && genSupported(a)) {      // round 3: build the plan from the answers
     S.program = generatePlan(a); S.logs = {}; syncKeys(); S.week = null; S.wk = null; S.guides = new Set();
     try { saveLocal(); } catch {}
   }
@@ -2893,6 +2939,269 @@ const _genBeforeFinal = generatePlan;
 generatePlan = function (a) { return finalizePlan(_genBeforeFinal(a), a); };
 
 // generator>>
+// <<wrapup
+// ===== 12-week wrap-up + "Start new programme" (Christian 2026-11-03 design, 2026-11-13 decisions)
+// Five story cards (tap through, numbers count up) → summary page. The summary numbers of each programme are kept on the phone
+// in HIST_KEY (not the workouts themselves). Lifetime totals for badges = this programme's logs + every other programme's summary.
+const HIST_KEY = "twdev.history";
+const WU_COL = { blue: "#6693ff", orange: "#ff8a4c", pink: "#ff4fa3" }, WU_GREEN = "#43cf7f";
+const progKey = P => (P = P || S.program) ? P.pid || (P.start + "|" + P.title) : "";
+function histList() { const h = jget(HIST_KEY); return Array.isArray(h.programmes) ? h.programmes.filter(p => p && typeof p === "object") : []; }
+function histSave(list) { jset(HIST_KEY, { programmes: list }); }
+function histUpsert(sum) { const list = histList().filter(p => p.key !== sum.key); list.push(sum); list.sort((a, b) => (a.start || "").localeCompare(b.start || "")); histSave(list); }
+// totals of every programme except the one running now (so a wrapped-up programme that's still on the phone isn't counted twice)
+function histPast() {
+  const cur = progKey(), t = { programmes: [], kg: 0, workouts: 0, cardioMin: 0, extras: 0, balBlocks: 0, holdSec: 0 };
+  for (const p of histList()) { if (p.key === cur) continue; t.programmes.push(p.key); for (const k of ["kg", "workouts", "cardioMin", "extras", "balBlocks", "holdSec"]) t[k] += +p[k] || 0; }
+  return t;
+}
+const nsp = n => Math.round(n).toLocaleString("en").replace(/,/g, " ");
+
+// ---- the numbers of the programme on the phone now
+function wrapSummary() {
+  const P = S.program, tw = totalWeeks(), full = w => REQ.every(k => isDone(w, k)), bl = badgeList(), here = bl.here || {};
+  const logs = Object.values(S.logs), fin = logs.filter(l => l.finished);
+  const workouts = fin.filter(l => l.workout !== "c").length, extras = fin.filter(l => l.workout === "c").length;
+  let sets = 0, kg = 0; for (const l of logs) { const st = stats(l); sets += st.done; kg += st.vol; }
+  const grid = Array.from({ length: tw }, (_, i) => full(i + 1) ? 2 : REQ.some(k => isDone(i + 1, k)) ? 1 : 0);
+  // stronger: first real weight (after a "find your weight" session) → last weight, per exercise with at least 3 sessions
+  const lifts = [];
+  for (const [n, a] of Object.entries(sessionsByExercise())) {
+    let i = 0; while (i < a.length - 1 && a[i].finding) i++;
+    const first = a[i]?.finding && i + 1 < a.length ? a[i + 1] : a[i], last = a[a.length - 1];
+    if (!first || a.length < 3 || first === last) continue;
+    if (first.kg < 0 && /pull-up|chin-up|dip/i.test(n)) { if (last.kg > first.kg) lifts.push({ n, a: first.kg, b: last.kg, help: true, pct: 0 }); continue; }
+    if (first.kg > 0 && last.kg > first.kg) lifts.push({ n, a: first.kg, b: last.kg, pct: Math.round((last.kg - first.kg) / first.kg * 100) });
+  }
+  // main lifts first (the first loaded exercise of each workout – bench press, RDL …), then the rest
+  const main = new Set(); P.phases.forEach(ph => Object.values(ph.workouts || {}).forEach(w => { const e = (w.exercises || []).find(x => x.inc && !x.bw && !/^Warm-up/.test(x.name)); if (e) main.add(e.name); }));
+  lifts.forEach(l => l.main = main.has(l.n));
+  lifts.sort((x, y) => (x.help - y.help) || (y.main - x.main) || y.pct - x.pct || y.b - x.b);
+  const top = lifts.filter(l => !l.help).slice(0, 4).concat(lifts.filter(l => l.help).slice(0, 1));
+  // body: the entry nearest before the start (else the first after it) → the latest one
+  const bd = Object.values(S.body || {}).filter(b => b && b.date).sort((a, b) => a.date.localeCompare(b.date));
+  const b0 = bd.filter(b => b.date <= P.start).pop() || bd[0], b1 = bd[bd.length - 1], body = [];
+  if (b0 && b1 && b0 !== b1) for (const m of METRICS) { const x = +b0[m.k], y = +b1[m.k]; if (x && y && Math.abs(y - x) >= 0.1) body.push({ k: m.k, n: m.n, u: m.u, a: x, b: y }); }
+  const saved = jget(BADGE_KEY), badges = Object.values(saved).filter(d => d >= P.start).length;
+  const dates = fin.map(l => (l.finishedAt || "").slice(0, 10) || l.date).filter(Boolean).sort();
+  return { key: progKey(), title: P.title || "Programme", goal: loadProfile()?.answers?.goal || null, start: P.start, end: dates[dates.length - 1] || today(),
+    weeks: tw, planned: tw * REQ.length, workouts, extras, extraPlanned: WK.includes("c") ? tw : 0, sets, kg: Math.round(kg),
+    pbs: bl.pbs || 0, best: bl.best || 0, grid, cardioMin: here.cmin || 0, balBlocks: here.balBlocks || 0, holdSec: here.holdSec || 0,
+    lifts: top, body, badges, stopped: null, reason: null };
+}
+// Wrap-up is due after the last planned workout of the last week – or a week after that week was started, if it's never completed
+function wrapDue() {
+  if (!S.program) return false; const tw = totalWeeks();
+  if (REQ.every(k => isDone(tw, k))) return true;
+  const d = REQ.map(k => S.logs[logId(tw, k)]).filter(l => l && l.finished).map(l => (l.finishedAt || "").slice(0, 10) || l.date).sort()[0];
+  return !!d && (new Date(today()) - new Date(d)) / 864e5 >= 7;
+}
+// on opening the app and after a workout: show it once by itself (the Programme and Workout tabs keep a way back to it)
+function wrapCheck() {
+  if (!wrapDue() || S.program.wrapShown || S.ob || S.weekDone || S.wrap) return false;
+  if (inWorkout()) return false;
+  wrapOpen(false); return true;
+}
+function wrapOpen(preview, sum, startAt) {
+  sum = sum || wrapSummary();
+  if (!preview && sum.key === progKey()) { histUpsert(sum); if (!S.program.wrapShown) { S.program.wrapShown = today(); saveProgram(); } }
+  S.wrap = { sum, i: startAt || 0, preview: !!preview, current: sum.key === progKey() };
+  wrapRender(true);
+}
+function wrapClose() { S.wrap = null; wrapRender(); render(); }
+
+// ---- story cards
+function wuColours(goal) {
+  const order = ["blue", "orange", "pink"], c = (S.wrap?.current && typeof accentNow === "function") ? accentNow() : (GOAL_COLOUR[goal] || "blue");
+  const rest = order.filter(x => x !== c); return [WU_COL[c], WU_COL[rest[0]], WU_COL[rest[1]]];
+}
+function wuCompare(kg) {
+  const L = [[1500, "a family car", "family cars", "kg1500"], [6000, "an elephant", "elephants", "kg6k"], [40000, "a loaded truck", "loaded trucks", "kg40k"],
+    [150000, "a blue whale", "blue whales", "kg150k"], [400000, "a jumbo jet", "jumbo jets", "kg400k"]];
+  let pick = L[0]; for (const o of L) if (kg >= o[0] * 0.8) pick = o;
+  const r = kg / pick[0], txt = r < 1 ? `Almost ${pick[1]}.` : r < 1.15 ? `As heavy as ${pick[1]}.` : r < 2 ? `More than ${pick[1]}.` : `As heavy as ${Math.floor(r)} ${pick[2]}.`;
+  return { txt, art: pick[3] };
+}
+function wuCards(s) {
+  const [P, O, O2] = wuColours(s.goal), cards = [];
+  const big = (v, u, c, dec) => `<div class="wubig" style="color:${c};text-shadow:0 0 24px ${c}88"><span data-count="${v}" data-dec="${dec || 0}">${dec ? String(v).replace(".", ",") : nsp(v)}</span><span class="wuu">${u}</span></div>`;
+  const chip = (t, c) => `<span class="wuchip" style="color:${c}">${t}</span>`;
+  const glow = c => `<div class="wuglow" style="background:${c}"></div>`;
+  // 1 · kg lifted
+  const t = s.kg >= 10000, cmp = wuCompare(s.kg);
+  cards.push({ c: P, h: `${glow(P)}<div class="wuk" style="color:${P}">Your ${s.weeks} weeks</div>${t ? big(Math.round(s.kg / 1000), " t", P) : big(s.kg, " kg", P)}
+    <div class="wusub">${nsp(s.kg)} kg lifted.<br><b>${esc(cmp.txt)}</b></div>
+    <svg class="wuart" viewBox="0 0 24 24" fill="currentColor" style="color:${P};filter:drop-shadow(0 0 12px ${P}88)">${BADGE_ART[cmp.art] || ""}</svg>` });
+  // 2 · stronger
+  const w = s.lifts.filter(l => !l.help), maxp = Math.max(1, ...w.map(l => l.pct)), row = (l) => {
+    const r = l.help ? `−${fmt(l.b - l.a)} kg help` : `+${l.pct} %`, wd = l.help ? Math.min(100, Math.round((1 - l.b / l.a) * 100)) : Math.round(l.pct / maxp * 90);
+    return `<div class="wurow"><div><span>${esc(l.help ? l.n.replace(/^Assisted /, "") + " help" : l.n)}</span><b style="color:${WU_GREEN}">${r}</b></div><i><span style="width:${Math.max(6, wd)}%;background:${WU_GREEN};box-shadow:0 0 10px ${WU_GREEN}"></span></i></div>`; };
+  cards.push({ c: WU_GREEN, h: `${glow(WU_GREEN)}<div class="wuk" style="color:${WU_GREEN}">Stronger</div>` + (w.length
+    ? `${big(w[0].pct, "%", WU_GREEN).replace('class="wubig"', 'class="wubig plus"')}<div class="wusub">${esc(w[0].n)} <b>${fmt(w[0].a)} → ${fmt(w[0].b)} kg</b></div><div class="wurows">${s.lifts.map(row).join("")}</div>`
+    : `${big(s.sets, "", WU_GREEN)}<div class="wusub">sets done – <b>every one of them counts.</b></div>`) +
+    `<div class="wubot">${s.pbs ? chip(`${s.pbs} personal best${s.pbs > 1 ? "s" : ""}`, WU_GREEN) : ""}${chip(`${nsp(s.sets)} sets`, WU_GREEN)}</div>` });
+  // 3 · showing up
+  const circ = 2 * Math.PI * 50, frac = s.weeks ? s.best / s.weeks : 0;
+  cards.push({ c: O, h: `${glow(O)}<div class="wuk" style="color:${O}">Showing up</div>
+    <svg class="wuring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="none" stroke="#232734" stroke-width="12"/><circle class="wuarc" cx="60" cy="60" r="50" fill="none" stroke="${O}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${(circ * frac).toFixed(1)} 400" transform="rotate(-90 60 60)" style="filter:drop-shadow(0 0 6px ${O})"/>
+    <text x="60" y="66" text-anchor="middle" font-size="44" font-weight="900" fill="#fff" data-count="${s.best}">${s.best}</text><text x="60" y="82" text-anchor="middle" font-size="7" font-weight="700" fill="#9aa0b0" letter-spacing=".6">WEEK${s.best === 1 ? "" : "S"} IN A ROW</text></svg>
+    <div class="wusub c">${s.best >= s.weeks ? `Every planned workout, <b>all ${s.weeks} weeks.</b>` : s.best > 1 ? `Every planned workout, <b>${s.best} weeks straight.</b>` : s.best === 1 ? `<b>A full week</b> of every planned workout.` : `<b>${s.workouts} workouts</b> done.`}</div>
+    <div class="wugrid">${s.grid.map(g => `<i class="g${g}" style="${g === 2 ? `background:${O};box-shadow:0 0 8px ${O}` : ""}"></i>`).join("")}</div>
+    <div class="wubot">${chip(`${s.workouts}/${s.planned} workouts`, O)}${s.extras ? chip(`+${s.extras} extra${s.extras > 1 ? "s" : ""}`, O) : ""}</div>` });
+  // 4 · on the move (only with some cardio) – the journey uses lifetime minutes, like the badges
+  if (s.cardioMin >= 30) {
+    const life = s.cardioMin + (s.key === progKey() ? histPast().cardioMin : 0), J = journeyBadges(life), got = J.filter(j => j[4]), next = J.find(j => !j[4]);
+    const hrs = s.cardioMin / 60, nh = next ? Math.round(parseFloat(next[3].replace(/[ ,]/g, ""))) : 0;
+    cards.push({ c: P, h: `${glow(P)}<div class="wuk" style="color:${P}">On the move</div>${hrs >= 1 ? big(Math.round(hrs), " h", P) : big(s.cardioMin, " min", P)}
+      <div class="wusub">of cardio${got.length ? ` – you've made it <b>${esc(got[got.length - 1][2])}</b>.` : "."}</div>
+      <svg class="wuart sm" viewBox="0 0 24 24" fill="currentColor" style="color:${P};filter:drop-shadow(0 0 10px ${P}88)">${BADGE_ART[(got[got.length - 1] || J[0])[5] || (got[got.length - 1] || J[0])[0]] || BADGE_ICON.mile}</svg>
+      ${next ? `<div class="wubot"><div class="wunext">Next stop · ${esc(next[2])} · ${Math.max(1, Math.ceil(nh - life / 60))} h</div><i class="wubar"><span style="width:${Math.min(100, Math.round(life / 60 / nh * 100))}%;background:${P};box-shadow:0 0 10px ${P}"></span></i></div>` : ""}` });
+  }
+  // 5 · finale
+  const bchips = s.body.filter(b => ["weight", "waist", "arm", "chest", "thigh"].includes(b.k)).slice(0, 3).map((b, i) => {
+    const d = Math.round((b.b - b.a) * 10) / 10, nm = b.k === "weight" ? "" : b.n.replace(" (flexed)", "") + " ";
+    return chip(`${esc(nm)}${d > 0 ? "+" : "−"}${fmt(Math.abs(d))} ${b.u}`, [P, WU_GREEN, O][i]); }).join("");
+  cards.push({ c: O, h: `${glow(O)}<div class="wuk c" style="color:${P}">Programme complete</div>
+    <svg class="wutrophy" viewBox="0 0 24 24" fill="${O}" style="filter:drop-shadow(0 0 18px ${O})"><path d="M7 3h10v3a5 5 0 0 1-10 0zM4.5 4H7v2.4A2.6 2.6 0 0 1 4.5 4zm15 0H17v2.4A2.6 2.6 0 0 0 19.5 4zM11 11.5h2v4h3.5v3.5h-9v-3.5H11z"/></svg>
+    <div class="wufin"><span data-count="${s.workouts}">${s.workouts}</span><span class="dim">/${s.planned}</span></div>
+    <div class="wusub c">workouts${s.extras ? ` · +${s.extras} extra${s.extras > 1 ? "s" : ""}` : ""} · ${s.badges} badge${s.badges === 1 ? "" : "s"}</div>
+    <div class="wuchips">${bchips}</div>
+    <div class="wubot"><button type="button" class="wucta" data-act="wusum" style="background:${P};box-shadow:0 0 20px ${P}88">See your summary →</button></div>` });
+  return cards;
+}
+// ---- summary page (also what's opened from "Your programmes" on Progress)
+function wuSummaryHtml(s) {
+  const [P, O] = wuColours(s.goal), d = iso => iso ? shortDate(iso) : "";
+  const tile = (v, l, c) => `<div class="wutile"><b style="color:${c}">${v}</b><span>${l}</span></div>`;
+  const cmin = s.cardioMin || 0, cardio = cmin >= 60 ? Math.round(cmin / 60) + " h" : cmin + " min";
+  const tiles = [tile(`${s.workouts}/${s.planned}`, "Workouts", P), tile(`+${s.extras || 0}`, "Extras", P), tile(s.kg >= 10000 ? Math.round(s.kg / 1000) + " t" : nsp(s.kg) + " kg", "Lifted", WU_GREEN),
+    tile(s.pbs || 0, "Personal bests", WU_GREEN), tile(`${s.best} wk`, "Best streak", O), cmin ? tile(cardio, "Cardio", WU_GREEN) : tile(nsp(s.sets || 0), "Sets", WU_GREEN)];
+  const rows = (arr, f) => arr.map(f).join("");
+  const lift = l => `<div class="wuline"><span>${esc(l.help ? l.n.replace(/^Assisted /, "") + " help" : l.n)}</span><span>${l.help ? `${fmt(-l.a)} → ${fmt(-l.b)}` : `${fmt(l.a)} → ${fmt(l.b)}`} <b style="color:${WU_GREEN}">${l.help ? `−${fmt(l.b - l.a)} kg` : `+${l.pct} %`}</b></span></div>`;
+  const bod = b => { const dd = Math.round((b.b - b.a) * 10) / 10; return `<div class="wuline"><span>${esc(b.n)}</span><span>${fmt(b.a)} → ${fmt(b.b)} <b style="color:${WU_GREEN}">${dd > 0 ? "+" : "−"}${fmt(Math.abs(dd))} ${b.u}</b></span></div>`; };
+  const stopped = s.stopped != null;
+  return `<div class="wusum"><div class="wusumtop">${`<div class="wuglow" style="background:${P};top:-160px;left:-10px"></div>`}
+    <div class="wumedal" style="border-color:${P};box-shadow:0 0 30px ${P}88,inset 0 0 20px ${P}55;color:${P}"><b>${stopped ? s.stopped : s.weeks}</b><small>${stopped ? "WEEKS" : "WEEKS"}</small></div>
+    <h2>${stopped ? "Stopped in week " + s.stopped : "You did it!"}</h2><div class="wudim">${esc(s.title)} · ${d(s.start)} – ${d(s.end)}</div></div>
+    <div class="wutiles">${tiles.join("")}</div>
+    ${s.lifts?.length ? `<div class="wusec">Stronger</div>${rows(s.lifts, lift)}` : ""}
+    ${s.body?.length ? `<div class="wusec">Your body</div>${rows(s.body, bod)}` : ""}
+    ${s.badges ? `<div class="wusec">Badges</div><div class="wuline"><span>Earned during the programme</span><b>${s.badges}</b></div>` : ""}
+    <div class="wubtns">${S.wrap?.current && !S.wrap.preview ? `<button type="button" class="wucta" data-act="npstart" style="background:${P};box-shadow:0 0 20px ${P}88">Start your next programme →</button>` : ""}
+    ${S.wrap?.preview ? `<div class="wudim c">DEV preview – nothing saved.</div>` : ""}
+    <button type="button" class="wughost" data-act="wuclose">Close</button></div></div>`;
+}
+function wrapRender(first) {
+  const ov = document.getElementById("wuov"), W = S.wrap; if (!ov) return;
+  if (!W) { ov.hidden = true; ov.innerHTML = ""; document.body.classList.remove("wuopen"); return; }
+  const cards = wuCards(W.sum), n = cards.length, sum = W.i >= n;
+  document.body.classList.add("wuopen"); ov.hidden = false;
+  if (sum) { ov.innerHTML = `<div class="wuph wuscroll">${wuSummaryHtml(W.sum)}</div>`; ov.scrollTop = 0; if (first || W.justSum) confetti(); W.justSum = false; return; }
+  const c = cards[W.i];
+  ov.innerHTML = `<div class="wuph" data-act="wutap"><div class="wubars">${cards.map((x, i) => `<i style="background:${i <= W.i ? c.c : "#2a2e3a"}"></i>`).join("")}</div>
+    <button type="button" class="wux" data-act="wuclose" aria-label="Close">✕</button>${c.h}</div>`;
+  wuCount(ov);
+}
+function wuCount(root) {                                      // numbers count up
+  const els = root.querySelectorAll("[data-count]"), t0 = performance.now(), D = 900;
+  els.forEach(el => { el.dataset.to = el.dataset.count; el.textContent = "0"; });
+  const step = t => { const p = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - p, 3);
+    els.forEach(el => { const to = +el.dataset.to, dec = +el.dataset.dec || 0, v = to * e; el.textContent = dec ? fmt(Math.round(v * 10 ** dec) / 10 ** dec) : nsp(v); });
+    if (p < 1 && S.wrap) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function wrapTap(ev) {
+  const W = S.wrap; if (!W) return; const n = wuCards(W.sum).length;
+  const x = ev.clientX / window.innerWidth;
+  if (x < 0.3) { if (W.i > 0) W.i--; } else { W.i++; if (W.i >= n) W.justSum = true; }
+  wrapRender(false);
+}
+
+// ---- Start new programme
+const NP_REASONS = ["Too hard", "Too easy", "Pain or injury", "New goal", "Less time to train", "Changed gym or training at home", "Want something new"];
+function npOpen() {
+  if (wrapDue()) { npSetup(null); return; }                   // after the last week: straight to the questions
+  S.np = { reasons: [], other: "", otherOn: false }; npRender();
+}
+function npRender() {
+  const ov = document.getElementById("wuov"), N = S.np; if (!ov) return;
+  if (!N) { if (!S.wrap) { ov.hidden = true; ov.innerHTML = ""; document.body.classList.remove("wuopen"); } return; }
+  const cw = currentWeek(), ok = N.reasons.length || (N.otherOn && N.other.trim());
+  ov.hidden = false;
+  ov.innerHTML = `<div class="npsheet" role="dialog" aria-labelledby="np-title"><div class="eyebrow">Week ${cw} of ${totalWeeks()}</div><h2 id="np-title">Start a new programme?</h2>
+    <p class="muted">Why do you want to change? Pick one or more.</p>
+    <div class="obchips">${NP_REASONS.map(r => `<button type="button" class="obchip" data-act="npreason" data-v="${esc(r)}" aria-pressed="${N.reasons.includes(r)}">${esc(r)}</button>`).join("")}
+      <button type="button" class="obchip" data-act="npother" aria-pressed="${N.otherOn}">Other</button></div>
+    ${N.otherOn ? `<label class="f">Your reason<input type="text" id="np-other" data-np="other" value="${esc(N.other)}" maxlength="200" placeholder="Tell us in your own words"></label>` : ""}
+    <div class="note">This programme is saved in your history as <b>Stopped in week ${cw}</b>. Your badges and totals so far are kept, and your weights carry over.</div>
+    <div class="wdbtns"><button type="button" class="btn" data-act="npgo" ${ok ? "" : "disabled"}>Continue</button><button type="button" class="btn ghost" data-act="npcancel">Keep my programme</button></div></div>`;
+}
+function npSetup(reason) {
+  S.np = null; S.wrap = null; wrapRender();
+  const goal = loadProfile()?.answers?.goal || null;
+  obStart(true); S.ob.newProg = { stopped: wrapDue() ? null : currentWeek(), reason, goal }; render();
+}
+// the old programme's last weights, 10 % lighter (Christian 2026-11-13: app logic only, no message) – the normal rules take it back up
+function carryWeights() {
+  const out = {};
+  for (const n of Object.keys(sessionsByExercise())) { const l = prevBest(n, "w99"); if (l) out[n.toLowerCase()] = l.finding ? l.lastKg : l.kg; }
+  return out;
+}
+function carryApply(P, carry) {
+  const bw = bodyWeightOn(today()); let n = 0;
+  P.phases.forEach(ph => Object.values(ph.workouts || {}).forEach(w => (w.exercises || []).forEach(e => {
+    if (!e.inc || /^Warm-up sets/.test(e.name)) return; const kg = carry[e.name.toLowerCase()]; if (kg == null) return;
+    let v;
+    if (e.bw) v = bw ? Math.max(-80, Math.round((kg - 0.1 * (bw + kg)) / e.inc) * e.inc) : kg;    // assisted: 10 % less of the load you lift = a little more help
+    else v = Math.max(0, snapKg(e, kg * 0.9));
+    e.kg = Math.round(v * 100) / 100; e.carried = true; n++; })));
+  return n;
+}
+function npBuild(a) {                                       // called from obFinish when the setup was opened for a new programme
+  const np = S.ob.newProg; badgesCheck();
+  const sum = wrapSummary(); sum.goal = np.goal; if (np.stopped) { sum.stopped = np.stopped; sum.reason = np.reason; } histUpsert(sum);
+  const carry = carryWeights(), P = generatePlan(a); P.pid = "p" + Date.now().toString(36);
+  if (carryApply(P, carry)) P.carried = true;
+  S.program = P; S.logs = {}; syncKeys(); S.week = null; S.wk = null; S.guides = new Set();
+  for (const k of [WD_KEY, PC_KEY, BB_KEY]) try { localStorage.removeItem(k); } catch {}
+  const bo = jget(BONUS_KEY); jset(BONUS_KEY, bo.off ? { off: true } : {});
+  try { saveLocal(); } catch {}
+  toast("Your new programme is ready. Week 1 starts now.");
+}
+// cards on the Workout and Programme tabs
+function wrapCard(where) {
+  if (!S.program || !wrapDue()) return "";
+  return `<div class="card wucard"><div class="eyebrow">Programme complete</div><h2>Your ${totalWeeks()} weeks are done</h2>
+    <div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" class="btn" data-act="npstart">Start your next programme</button><button type="button" class="btn ghost" data-act="wuopen">See your wrap-up</button></div></div>`;
+}
+function npLink() { return S.program && !wrapDue() ? `<div class="nplink"><button type="button" class="linkbtn" data-act="npstart">Start a new programme</button></div>` : ""; }
+function histHtml() {
+  const list = histList().filter(p => p.key !== progKey() || p.stopped != null).slice().reverse(); if (!list.length) return "";
+  return `<h2 class="sec">Your programmes</h2>` + list.map(p => `<button type="button" class="hist histp" data-act="wuhist" data-k="${esc(p.key)}"><div><div class="d">${shortDate(p.start)} – ${shortDate(p.end)}</div><div class="t">${esc(p.title)}</div></div>
+    <div class="v num">${p.stopped != null ? `Stopped wk ${p.stopped}` : `${p.weeks} weeks`}<small>${p.workouts}/${p.planned} workouts · ${p.kg >= 10000 ? Math.round(p.kg / 1000) + " t" : nsp(p.kg) + " kg"}</small></div></button>`).join("");
+}
+function wrapClick(a, b, ev) {
+  switch (a) {
+    case "wutap": if (ev.target.closest("button")) return true; wrapTap(ev); return true;
+    case "wusum": S.wrap.i = 99; S.wrap.justSum = true; wrapRender(false); return true;
+    case "wuclose": wrapClose(); return true;
+    case "wuopen": wrapOpen(false); return true;
+    case "wuhist": { const s = histList().find(p => p.key === b.dataset.k); if (s) { S.wrap = { sum: s, i: 99, preview: false, current: false }; wrapRender(true); } return true; }
+    case "npstart": npOpen(); return true;
+    case "npreason": { const v = b.dataset.v, R = S.np.reasons; S.np.reasons = R.includes(v) ? R.filter(x => x !== v) : R.concat(v); npRender(); return true; }
+    case "npother": S.np.otherOn = !S.np.otherOn; npRender(); if (S.np.otherOn) document.getElementById("np-other")?.focus(); return true;
+    case "npcancel": S.np = null; npRender(); return true;
+    case "npgo": { const N = S.np; npSetup({ list: N.reasons.slice(), other: N.otherOn ? N.other.trim() : "" }); return true; }
+  }
+  return false;
+}
+document.addEventListener("input", ev => {                 // typing the own reason must not redraw (keeps the phone keyboard)
+  const t = ev.target; if (!S.np || t.dataset.np !== "other") return;
+  S.np.other = t.value; const go = document.querySelector('[data-act="npgo"]'); if (go) go.disabled = !(S.np.reasons.length || S.np.other.trim());
+});
+window.addEventListener("twdev:wrappop", () => { if (!S.program || S.ob) return; S.np = null; wrapOpen(true); });   // DEV preview
+
+// wrapup>>
 function libView() {
   const q = S.libQ.trim().toLowerCase(), cards = TWLIB.cards.filter(c => !q || (c.title + " " + c.fam + " " + c.section + " " + feelIn(c.title)).toLowerCase().includes(q));
   let h = head(TWLIB.cards.length + " exercises", "Library") + `<label class="f libsearch">Search<input type="text" id="libq" value="${esc(S.libQ)}" placeholder="e.g. chest, band, balance" autocomplete="off"></label>`;
@@ -2926,7 +3235,7 @@ function advanceIfWeekDone(prevWeek) {
 
 function planView() {
   const P = S.program, cur = currentWeek();
-  let h = head(P.title || "Programme", "Programme");
+  let h = head(P.title || "Programme", "Programme") + wrapCard();
   const prof = loadProfile();
   h += `<div class="card obsum"><div><b>Your answers</b><small>${prof && prof.answers ? esc([prof.answers.goal, prof.answers.shape, prof.answers.days + " days", prof.answers.time, prof.answers.where].join(" · ")) + (prof.direction ? " · " + esc(prof.direction) : "") : "Setup skipped"}</small></div><button type="button" class="btn ghost small" data-act="obedit">Change my answers</button></div>`;
   h += tipsCard();
@@ -2968,7 +3277,7 @@ function planView() {
     }
     h += `</div>`;
   });
-  return h;
+  return h + npLink();
 }
 
 function bodyEntries() { return Object.values(S.body).filter(b => b && b.date).sort((a, b) => a.date.localeCompare(b.date)); }
@@ -3037,7 +3346,7 @@ function wireChart() {
 }
 function niceStep(raw) { const p = Math.pow(10, Math.floor(Math.log10(raw))); const n = raw / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p; }
 
-function historyView() { badgesCheck(); return historyInner() + badgesHtml() + backupCard(); }
+function historyView() { badgesCheck(); return historyInner() + histHtml() + badgesHtml() + backupCard(); }
 function historyInner() {
   let h = head("12-week overview", "Progress");
   const P = S.program;
@@ -3526,6 +3835,7 @@ function weekDoneView() {
     else btns = [["wdnext", "Next week"]];
   } else if (WK.includes("c") && !extraDone) { body += `<p>Do you plan to do the extra session this week?</p>`; btns = [["wdstay", "Yes, this week"], ["wdnext", "No – next week"]]; }
   else btns = [["wdnext", "Next week"]];
+  if (w === totalWeeks() && !S.wdPrevOn) btns = WK.includes("c") && !extraDone && !isCardioPlan() ? [["wdwrap", `See your ${w} weeks →`], ["wdstay", "Do the extra session first"]] : [["wdwrap", `See your ${w} weeks →`]];
   return `<div class="wdsheet" role="dialog" aria-labelledby="wd-title"><div class="eyebrow">Week ${w}${S.wdPrevOn ? ` · preview ${S.wdPreview % (CHEERS.length + 3) + 1}/${CHEERS.length + 3}` : ""}</div><h2 id="wd-title">${esc(weekCheer(w))}</h2>${body}
     <div class="wdbtns">${btns.map(([a, l], i) => `<button type="button" class="btn ${i ? "ghost" : ""}" data-act="${a.split(":")[0]}" data-v="${a.split(":")[1] || ""}">${l}</button>`).join("")}</div>
     ${isCardioPlan() && !jget(BONUS_KEY).off ? `<button type="button" class="linkbtn" data-act="bonusoff">Don't offer bonus sessions</button>` : ""}</div>`;
@@ -3689,14 +3999,15 @@ function badgeList() {
   for (const [n, a] of Object.entries(sx)) { let top = a[0].kg; for (let i = 1; i < a.length; i++) { if (a[i].finding) { top = Math.max(top, a[i].kg); continue; } if (a[i].kg > top) { top = a[i].kg; pbs++; pbList.push(n); } } }
   const pullFree = Object.entries(sx).some(([n, a]) => /pull-up/i.test(n) && a.some((x, i) => i > 0 && x.kg >= 0 && a.slice(0, i).some(y => y.kg < 0)));
   // lifetime totals: this programme's logs + the summaries of finished programmes (kept on the phone by the 12-week wrap-up, when that's built)
-  const past = jget("twdev.history"), progs = (past.programmes || []).length + 1;
+  const past = typeof histPast === "function" ? histPast() : { programmes: [] }, progs = past.programmes.length + 1;
   let cmin = 0; for (const [id, l] of Object.entries(S.logs)) { const w = +id.slice(1, 3), k = id.split("-")[1], wo = workout(w, k); if (!wo) continue;
     for (const e of wo.exercises) if (e.unit === "min") for (const x of l.sets?.[e.id] || []) if (x.done) cmin += x.reps || 0; }
   for (const [k, b] of Object.entries(jget(BONUS_KEY))) if (k !== "off" && b?.done && !b.skipped) cmin += b.min || 0;   // bonus easy sessions count too
+  const here = { cmin };   // this programme only – for its wrap-up
   cmin += past.cardioMin || 0;
   // second badge round (Christian 2026-10-31)
   const weeks = Array.from({ length: tw }, (_, i) => i + 1), hasC = !!S.program.phases[0]?.workouts?.c;
-  const extraDone = w => hasC && isDone(w, "c"), extras = weeks.filter(extraDone).length + (past.extras || 0);
+  const extraDone = w => hasC && isDone(w, "c"); here.extras = weeks.filter(extraDone).length; const extras = here.extras + (past.extras || 0);
   const gymRat = weeks.some(w => full(w) && extraDone(w)), teachersPet = hasC && S.program.phases.some(ph => ph.weeks.every(extraDone)), aholic = hasC && weeks.every(extraDone);
   const calibrated = full(1) && REQ.some(k => Object.keys(S.logs[logId(1, k)]?.finding || {}).length);
   const barbell = Object.keys(sx).some(n => /barbell/i.test(n));
@@ -3707,6 +4018,7 @@ function badgeList() {
   for (const [id, l] of Object.entries(S.logs)) { const wo = workout(+id.slice(1, 3), id.split("-")[1]); if (!wo) continue;
     if (wo.exercises.some(e => /^Balance block/.test(e.note || "") && (l.sets?.[e.id] || []).some(x => x.done))) balBlocks++;
     for (const e of wo.exercises) if (e.unit === "sec" && !/stretch|rocks|rotation|switch/i.test(e.name)) for (const x of l.sets?.[e.id] || []) if (x.done) holdSec += x.reps || 0; }
+  here.balBlocks = balBlocks; here.holdSec = holdSec;
   balBlocks += past.balBlocks || 0; holdSec += past.holdSec || 0;
   const bodyDates = Object.keys(S.body || {}).sort(); let checks = 0, lastCheck = null;
   for (const d of bodyDates) if (!lastCheck || (new Date(d) - new Date(lastCheck)) / 864e5 >= 28) { checks++; lastCheck = d; }
@@ -3777,7 +4089,8 @@ function badgeList() {
     ["gravity", "mile", "Defying Gravity", "A whole set of pull-ups – every rep – with no machine help.", gravity],
     ["c150", "mile", "150 Club", "Reach 150 cardio minutes in a week (or your build-up target on a Cardio plan).", week150]
   ];
-  return { list: B.map(([id, icon, title, how, got, art]) => ({ id, icon, title, how, got, art })), pbs, best, workouts };
+  const saved = jget(BADGE_KEY);   // earned stays earned – also after a new programme starts (Christian 2026-10-31)
+  return { list: B.map(([id, icon, title, how, got, art]) => ({ id, icon, title, how, got: !!got || !!saved[id], art })), pbs, best, workouts, here };
 }
 function badgesCheck() {                         // remember first-earned dates; return the new ones
   if (!S.program) return [];
@@ -3811,7 +4124,7 @@ function badgePopRender(first) {
 function badgePopNext() {
   const P = S.badgePop; if (!P) return; let seen = {}; try { seen = JSON.parse(localStorage.getItem(BADGE_SEEN)) || {}; } catch {}
   seen[P.list[P.i].id] = 1; try { localStorage.setItem(BADGE_SEEN, JSON.stringify(seen)); } catch {}
-  if (P.i < P.list.length - 1) { P.i++; badgePopRender(false); } else { S.badgePop = null; badgePopRender(false); }
+  if (P.i < P.list.length - 1) { P.i++; badgePopRender(false); } else { S.badgePop = null; badgePopRender(false); setTimeout(wrapCheck, 300); }
 }
 function badgesHtml() {
   const { list } = badgeList(), saved = jget(BADGE_KEY), got = list.filter(b => b.got).length;
@@ -3833,6 +4146,7 @@ document.addEventListener("click", ev => {
   if (b.dataset.tab) { S.tab = b.dataset.tab; try { localStorage.setItem("twdev.tab", S.tab); } catch {} window.scrollTo(0, 0); render(); return; }
   const a = b.dataset.act;
   if (S.ob && obClick(a, b)) return;
+  if (wrapClick(a, b, ev)) return;
   if (a === "obedit") { obStart(true); return; }
   if (a !== "del") S.confirmDel = null;
   if (a !== "bdel") S.confirmB = null;
@@ -3846,7 +4160,7 @@ document.addEventListener("click", ev => {
       saveLog(l);
       if (l.finished && !advanceIfWeekDone(S.week)) toast(`${wLabel(k)} marked done.`);
       if (l.finished) badgeAnnounce();
-      render(); break;
+      render(); if (l.finished && k === "c") wrapCheck(); break;
     }
     case "pcclose": { const v = pcClosed(); v[b.dataset.p] = true; try { localStorage.setItem(PC_KEY, JSON.stringify(v)); } catch {} render(); break; }
     case "bbtry": bbTry(b.dataset.ex); break;
@@ -3854,6 +4168,7 @@ document.addEventListener("click", ev => {
     case "bbstay": { const e = workout(S.week, S.wk).exercises.find(x => x.id === b.dataset.ex), v = bbState(); v[e.name] = { stay: true }; bbSave(v); render(); toast("Staying with dumbbells for this programme."); break; }
     case "wdstay": weekDoneClose(false); break;
     case "wdnext": weekDoneClose(true); break;
+    case "wdwrap": S.weekDone = null; weekDoneRender(); wrapOpen(false); break;
     case "wdbonus": { const v = jget(BONUS_KEY); v[S.weekDone] = { min: +b.dataset.v, done: false }; jset(BONUS_KEY, v); weekDoneClose(false); toast("Bonus session added – tick it on the minutes card when it's done."); break; }
     case "bonusoff": { const v = jget(BONUS_KEY); v.off = true; jset(BONUS_KEY, v); weekDoneRender(); break; }
     case "bonusdone": { const v = jget(BONUS_KEY); if (v[b.dataset.w]) v[b.dataset.w].done = true; jset(BONUS_KEY, v); render(); break; }
@@ -3923,7 +4238,7 @@ document.addEventListener("click", ev => {
     }
     case "finish": { const l = S.logs[logId(S.week, S.wk)]; if (l) { l.finished = true; l.finishedAt = new Date().toISOString(); saveLog(l); S.timer = null; clearInterval(tick); badgeAnnounce();
       if (!advanceIfWeekDone(S.week)) { const nk = REQ.find(k => !isDone(S.week, k)); toast(nk ? "Workout saved. Next up: " + wLabel(nk) + "." : "Workout saved."); }
-      render(); } break; }
+      render(); if (S.wk === "c") wrapCheck(); } break; }
     case "libopen": { const id = b.dataset.c; S.libOpen = S.libOpen === id ? null : id; render(); if (S.libOpen) document.querySelector(".libitem.open")?.scrollIntoView({ block: "nearest" }); break; }
     case "libpick": { S.libPick[b.dataset.c] = +b.dataset.j; render(); break; }
     case "guide": { const id = b.dataset.ex; S.guides.has(id) ? S.guides.delete(id) : S.guides.add(id); render(); break; }
@@ -3990,7 +4305,8 @@ function backupCard() {
 // Backup (Christian 2026-11-09): a web app can't pick a folder, so "Save backup" opens the phone's share menu with the file –
 // Google Drive (a "Backup Training Week" folder, remembered next time), Files or email. "Download instead" keeps the old way.
 function backupFile() {
-  const data = { app: "training-week", version: 1, savedAt: new Date().toISOString(), program: S.program, logs: S.logs, body: S.body };
+  const data = { app: "training-week", version: 1, savedAt: new Date().toISOString(), program: S.program, logs: S.logs, body: S.body,
+    history: jget("twdev.history"), badges: jget("twdev.badges") };   // finished programmes' summaries and earned badges (2026-11-13)
   // .txt / text/plain: Android's share menu only takes some file types from web apps, and .json isn't one of them (the content is still JSON)
   return new File([JSON.stringify(data)], `Training Week DEV backup ${today()}.txt`, { type: "text/plain" });
 }
@@ -4020,6 +4336,8 @@ document.addEventListener("change", ev => {
       const d = JSON.parse(r.result);
       if (d.app !== "training-week" || !d.program) throw new Error("wrong file");
       S.program = d.program; S.logs = d.logs || {}; S.body = d.body || {}; migrate(); syncKeys(); saveLocal();
+      if (d.history && Array.isArray(d.history.programmes)) jset("twdev.history", d.history);
+      if (d.badges && typeof d.badges === "object") { const bd = { ...d.badges, ...jget("twdev.badges") }; jset("twdev.badges", bd); }
       // a restored programme counts as set up (no setup questions); someone moving their data already knows the app → tips off ("Show tips again" on Programme)
       if (!loadProfile()) { saveProfile({ skipped: true, restored: today() }); try { localStorage.setItem("twdev.tips", JSON.stringify({ skipAll: true })); } catch {} }
       S.ob = null; S.tab = "today"; S.week = null; toast("Backup restored."); render(); setTimeout(badgeAnnounce, 800);
