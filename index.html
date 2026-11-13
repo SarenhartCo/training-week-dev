@@ -4479,7 +4479,7 @@ document.addEventListener("click", ev => {
     case "tipskip": closeTip(true); break;
     case "colour": { const v = b.dataset.v; try { if (v === "plan") localStorage.removeItem(COLOUR_KEY); else localStorage.setItem(COLOUR_KEY, v); } catch {} render(); break; }
     case "bdnext": badgePopNext(); break;
-    case "bdskip": { const P = S.badgePop; if (P) { let seen = {}; try { seen = JSON.parse(localStorage.getItem(BADGE_SEEN)) || {}; } catch {} P.list.forEach(b => seen[b.id] = 1); try { localStorage.setItem(BADGE_SEEN, JSON.stringify(seen)); } catch {} S.badgePop = null; badgePopRender(false); } break; }
+    case "bdskip": { const P = S.badgePop; if (P) { let seen = {}; try { seen = JSON.parse(localStorage.getItem(BADGE_SEEN)) || {}; } catch {} P.list.forEach(b => seen[b.id] = 1); try { localStorage.setItem(BADGE_SEEN, JSON.stringify(seen)); } catch {} S.badgePop = null; badgePopRender(false); setTimeout(wrapCheck, 300); } break; }
     case "tipreset": { const v = {}; tipSave(v); toast("Tips will show again as you go."); render(); break; }
     case "cdpause": cdPause(); break;
     case "cddone": cdFinish(false); break;
