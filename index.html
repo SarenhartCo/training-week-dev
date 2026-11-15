@@ -333,7 +333,7 @@ tr:last-child td{border-bottom:0}
 .swbtns.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.swother{display:block;margin:10px auto 0}.swpicked{text-align:center;margin:0 0 10px}
 .swdeckmode{background:transparent!important;box-shadow:none!important;padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px))!important;max-height:100dvh!important}
 .swhead{background:var(--surface);border-radius:16px;padding:12px 14px 6px;box-shadow:0 6px 20px rgba(0,0,0,.2)}.swhead .obsmall{margin:4px 0 6px}
-#swapov:has(.swdeckmode){background:rgba(10,14,20,.25)}
+#swapov.float{background:rgba(10,14,20,.25)}
 .swdeckmode .swdots i{background:rgba(255,255,255,.45)}.swdeckmode .swdots i.on{background:var(--accent)}
 .swdeckmode .swbtns .btn.ghost{background:var(--surface)}.swdeckmode .swpicked{background:var(--surface);border-radius:12px;padding:8px 12px;width:max-content;max-width:100%;margin:0 auto 10px}
 #swapov{position:fixed;inset:0;z-index:60;background:rgba(10,14,20,.55);display:flex;align-items:flex-end;justify-content:center}#swapov[hidden]{display:none}
@@ -689,6 +689,10 @@ const GUIDES = {
   "ez-bar curl": {
     steps: ["Hold the bar on the angled grips, palms up, arms straight.", "Keep the elbows at your sides and curl the bar up.", "Squeeze at the top, then lower slowly to straight arms."],
     avoid: ["Swinging the hips or leaning back.", "Elbows moving forward.", "Stopping short of straight arms at the bottom."]
+  },
+  "dumbbell curl": {
+    steps: ["Stand tall, dumbbells at your sides, palms facing forward.", "Keep the elbows at your sides and curl the weights up.", "Squeeze at the top, then lower slowly."],
+    avoid: ["Swinging the body.", "Elbows drifting forward.", "Dropping the weight on the way down."]
   },
   "barbell curl": {
     steps: ["Shoulder-width grip, palms up, arms straight.", "Keep the elbows at your sides and curl the bar up.", "Squeeze at the top, then lower slowly."],
@@ -1281,6 +1285,12 @@ const ANIM4 = {
     frame: u => curlFrame(u, { hz: 14, half: 30, plate: 9 }),
     cues: [{ when: "all", pt: J => J.elbR, off: [50, -10], text: "Elbows at sides" }, { when: "all", pt: J => J.pelvis, off: [-50, 20], text: "No swinging" }]
   },
+  "dumbbell curl": {
+    cap: ["Start: arms straight, palms forward", "Top: curled up, elbows still"],
+    cam: camera(-30, 10, 116, 210, 0.92), dur: 2600,
+    frame: u => curlFrame(u, { db: true, hz: 20 }),
+    cues: [{ when: "all", pt: J => J.elbR, off: [60, 10], text: "Elbows still" }, { when: "B", pt: J => J.wriR, off: [60, -24], text: "Squeeze at the top" }]
+  },
   "barbell curl": {
     cap: ["Start: arms straight", "Top: curled up, elbows at your sides"],
     cam: camera(-30, 10, 116, 210, 0.92), dur: 2600,
@@ -1479,6 +1489,10 @@ const ANIM4 = {
   "bike intervals": { ...BIKE, cap: ["Hard: spin fast for 30 s", "Easy: 60 s to recover"], dur: 800 }
 };
 for (const k in ANIM4) ANIM[k] = ANIM3[k] = ANIM4[k];
+// restored 2026-11-15: these two were added to the main app only (2026-11-06 / 11-09) and were lost when round 4 moved over
+if (ANIM["parallel bar dips"]) ANIM["assisted parallel bar dips"] = ANIM["parallel bar dips"];
+if (typeof ANIM3 !== "undefined" && ANIM3["parallel bar dips"]) ANIM3["assisted parallel bar dips"] = ANIM3["parallel bar dips"];   // same movement, help from the machine
+if (GUIDES["parallel bar dips"] && !GUIDES["assisted parallel bar dips"]) GUIDES["assisted parallel bar dips"] = GUIDES["parallel bar dips"];
 
 let WK = ["1","2","3","c"];                   // workout keys; "c" = optional extra (set from the programme)
 let REQ = ["1","2","3"];
@@ -4019,15 +4033,17 @@ function swapView() {
   const opts = sw.reason ? swapOptions(e, sw.reason) : [], n = opts.length, i = Math.min(sw.i || 0, Math.max(0, n - 1));
   const head = `<div class="eyebrow">Swap</div><h2 id="sw-title">${esc(e.name)}</h2><p class="swq">Why do you wish to swap?</p>
     <div class="obchips">${SWAP_REASONS.map(([k, l]) => `<button type="button" class="obchip" data-act="swreason" data-v="${k}" aria-pressed="${sw.reason === k}">${l}</button>`).join("")}</div>`;
-  if (!sw.reason) return `<div class="swapsheet" role="dialog" aria-labelledby="sw-title">${head}<div class="swbtns"><button type="button" class="btn ghost" data-act="swclose">Keep ${esc(e.name)}</button></div></div>`;
-  if (!n) return `<div class="swapsheet" role="dialog" aria-labelledby="sw-title">${head}<p class="muted">No other exercise fits here with your equipment and "go easy" choices.</p><div class="swbtns"><button type="button" class="btn ghost" data-act="swclose">Keep ${esc(e.name)}</button></div></div>`;
+  if (!sw.reason) return `<div class="swapsheet swdeckmode" role="dialog" aria-labelledby="sw-title"><div class="swhead">${head}</div><div class="swbtns"><button type="button" class="btn ghost" data-act="swclose">Keep ${esc(e.name)}</button></div></div>`;
+  if (!n) return `<div class="swapsheet swdeckmode" role="dialog" aria-labelledby="sw-title"><div class="swhead">${head}<p class="muted">No other exercise fits here with your equipment and "go easy" choices.</p></div><div class="swbtns"><button type="button" class="btn ghost" data-act="swclose">Keep ${esc(e.name)}</button></div></div>`;
   const card = (nm, k) => {
-    const c = TWLIB.find(EX[nm]?.lib || nm), key = c ? c.keys[0][1] : null, g = c ? TWLIB.guide(c) || { steps: [] } : { steps: [] }, pm = swapPM(cur, nm, sw.reason);
+    const c = TWLIB.find(EX[nm]?.lib || nm), key = c ? c.keys[0][1] : null, ak = nm.toLowerCase(), old = !c && ANIM[ak] ? ak : null;
+    const g = c ? TWLIB.guide(c) || { steps: [] } : GUIDES[ak] || { steps: [] }, pm = swapPM(cur, nm, sw.reason);
     const meta = [feelIn(nm), EQ_NAME[EX[nm]?.eq]].filter(Boolean).join(" · ");
     return `<div class="swcard ${k === i ? "cur" : k < i ? "past" : ""} ${sw.flip === k ? "flip" : ""}" data-k="${k}"><div class="swin">
       <div class="swface"><span class="swidx tl">${k + 1}</span><span class="swidx br">${k + 1}</span>
         ${k === 0 ? `<span class="swbest">Best match</span>` : ""}<b class="swname">${esc(nm)}</b><small class="swmeta">${esc(meta)}</small>
-        <div class="lib swanim">${key ? `<svg class="anim" ${k === i ? "data-lk" : "data-lks"}="${esc(key)}" viewBox="0 0 240 225" role="img" aria-label="Animation of ${esc(nm)}">${TWLIB.frame(key, 0)}</svg>` : `<p class="muted">No animation for this one yet.</p>`}</div>
+        <div class="${old ? "" : "lib "}swanim">${key ? `<svg class="anim" ${k === i ? "data-lk" : "data-lks"}="${esc(key)}" viewBox="0 0 240 225" role="img" aria-label="Animation of ${esc(nm)}">${TWLIB.frame(key, 0)}</svg>`
+          : old ? `<svg class="anim" ${k === i ? "data-k" : "data-ks"}="${esc(old)}" viewBox="0 0 240 225" role="img" aria-label="Animation of ${esc(nm)}">${animFrame(old, 0)}</svg>` : `<p class="muted">No animation for this one yet.</p>`}</div>
         <div class="swpm">${pm.plus ? `<div class="pl">+ ${esc(pm.plus)}</div>` : ""}${pm.minus ? `<div class="mi">− ${esc(pm.minus)}</div>` : ""}</div>
         <small class="swhint">Tap to see how</small></div>
       <div class="swback"><span class="swidx tl">${k + 1}</span><span class="swidx br">${k + 1}</span><b class="swname">How to do it</b>
@@ -4049,7 +4065,8 @@ function swGo(d) {
   const tr = document.querySelector(".swtrack"); if (!tr) { swapRender(); return; }
   tr.style.transition = ""; tr.style.removeProperty("--dx"); tr.style.setProperty("--i", ni);
   tr.querySelectorAll(".swcard").forEach(c => { const k = +c.dataset.k; c.classList.toggle("cur", k === ni); c.classList.toggle("past", k < ni); c.classList.remove("flip"); c.style.removeProperty("--tilt");
-    const a = c.querySelector("svg.anim"); if (a) { const key = a.getAttribute("data-lk") || a.getAttribute("data-lks"); a.removeAttribute("data-lk"); a.removeAttribute("data-lks"); a.setAttribute(k === ni ? "data-lk" : "data-lks", key); } });
+    const a = c.querySelector("svg.anim"); if (a) { const lib = a.hasAttribute("data-lk") || a.hasAttribute("data-lks"), on = lib ? "data-lk" : "data-k", off = lib ? "data-lks" : "data-ks";
+      const key = a.getAttribute(on) || a.getAttribute(off); a.removeAttribute(on); a.removeAttribute(off); a.setAttribute(k === ni ? on : off, key); } });
   document.querySelectorAll(".swdots i").forEach((d, k) => d.classList.toggle("on", k === ni));
   const tmp = document.createElement("div"); tmp.innerHTML = swapView(); const nf = tmp.querySelector(".swfoot"), of = document.querySelector(".swfoot"); if (nf && of) of.innerHTML = nf.innerHTML;
   startAnims();
@@ -4065,7 +4082,7 @@ document.addEventListener("pointerup", ev => { if (!swDrag) return; const d = sw
   else if (d.moved) swSnap();
   else { const c = ev.target.closest(".swcard"); if (!c) return; const k = +c.dataset.k; if (k !== (S.swap.i || 0)) { swGo(k - (S.swap.i || 0)); return; } S.swap.flip = S.swap.flip === k ? null : k; c.classList.toggle("flip"); } });
 document.addEventListener("pointercancel", () => { if (swDrag) { swDrag = null; swSnap(); } });
-function swapRender() { const ov = document.getElementById("swapov"); if (!S.swap) { ov.hidden = true; ov.innerHTML = ""; return; } ov.hidden = false; ov.innerHTML = swapView(); startAnims(); }
+function swapRender() { const ov = document.getElementById("swapov"); if (!S.swap) { ov.hidden = true; ov.innerHTML = ""; return; } ov.hidden = false; ov.innerHTML = swapView(); ov.classList.toggle("float", !!ov.querySelector(".swdeckmode")); startAnims(); }
 function swapApply(scope) {
   const sw = S.swap, base0 = workout(S.week, S.wk).exercises.find(x => x.id === sw.ex), n = sw.pick || (base0 && swapOptions(base0, sw.reason)[sw.i || 0]), base = phaseOf(S.week).workouts[S.wk].exercises.find(x => x.id === sw.ex); if (!base || !n) return;
   const l = ensureLog(S.week, S.wk), f = swapExFields(n, base);
