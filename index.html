@@ -317,7 +317,7 @@ tr:last-child td{border-bottom:0}
 .swdeckmode{max-height:94vh}.swdeckmode .obchips{margin-bottom:10px}
 .swdeck{overflow:hidden;margin:4px -16px 0;padding:8px 0 10px;touch-action:pan-y}
 .swtrack{--cw:min(74vw,330px);display:flex;gap:14px;padding-left:16px;transform:translateX(calc(var(--i) * -1 * (var(--cw) + 14px) + var(--dx,0px)));transition:transform .35s cubic-bezier(.2,1,.3,1)}
-.swcard{flex:0 0 var(--cw);aspect-ratio:5/7;max-height:62vh;perspective:900px;transition:transform .35s,opacity .35s;transform:rotate(var(--tilt,0deg))}
+.swcard{flex:0 0 var(--cw);height:min(calc(var(--cw) * 1.4),calc(100dvh - 400px));min-height:300px;perspective:900px;transition:transform .35s,opacity .35s;transform:rotate(var(--tilt,0deg))}
 .swcard.past{transform:rotate(-7deg) translateY(10px);opacity:0}.swcard{z-index:1}.swcard.cur{z-index:2}
 .swin{position:relative;width:100%;height:100%;transition:transform .5s cubic-bezier(.3,1.3,.4,1);transform-style:preserve-3d}.swcard.flip .swin{transform:rotateY(180deg)}
 .swface,.swback{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;border:1.5px solid var(--line);background:var(--surface);box-shadow:0 6px 20px rgba(0,0,0,.18);padding:22px 18px 18px;display:flex;flex-direction:column;overflow:hidden}
@@ -331,6 +331,11 @@ tr:last-child td{border-bottom:0}
 .swhint{color:var(--muted);font-size:11px;text-align:center;margin-top:8px}
 .swdots{display:flex;gap:6px;justify-content:center;margin:2px 0 10px}.swdots i{width:7px;height:7px;border-radius:50%;background:var(--line)}.swdots i.on{background:var(--accent);width:18px;border-radius:4px}
 .swbtns.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.swother{display:block;margin:10px auto 0}.swpicked{text-align:center;margin:0 0 10px}
+.swdeckmode{background:transparent!important;box-shadow:none!important;padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px))!important;max-height:100dvh!important}
+.swhead{background:var(--surface);border-radius:16px;padding:12px 14px 6px;box-shadow:0 6px 20px rgba(0,0,0,.2)}.swhead .obsmall{margin:4px 0 6px}
+#swapov:has(.swdeckmode){background:rgba(10,14,20,.25)}
+.swdeckmode .swdots i{background:rgba(255,255,255,.45)}.swdeckmode .swdots i.on{background:var(--accent)}
+.swdeckmode .swbtns .btn.ghost{background:var(--surface)}.swdeckmode .swpicked{background:var(--surface);border-radius:12px;padding:8px 12px;width:max-content;max-width:100%;margin:0 auto 10px}
 #swapov{position:fixed;inset:0;z-index:60;background:rgba(10,14,20,.55);display:flex;align-items:flex-end;justify-content:center}#swapov[hidden]{display:none}
 .swapsheet{background:var(--surface);color:var(--ink);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px 20px}
 .swapsheet h2{font-family:var(--display);font-size:24px;margin:2px 0 4px}.swq{margin:0 0 8px;font-weight:600;font-size:15px}.swlist{display:grid;gap:8px;margin:12px 0 6px}
@@ -4000,9 +4005,6 @@ function swapPM(curName, n, reason) {
   if (x.m && c.m && x.m !== c.m) minus.push(`Works the ${MN[x.m] || x.m} more than the ${MN[c.m] || c.m}`);
   if (!c.knee && x.knee) minus.push("More work for the knees");
   if (!ohp(curName) && ohp(n)) minus.push("More load on the shoulders");
-  if (x.eq === "machine" && c.eq !== "machine") minus.push("You may have to wait for the machine");
-  if (x.eq === "cable" && c.eq !== "cable") minus.push("Needs a free cable station");
-  if (x.eq === "bb" && c.eq !== "bb") minus.push("Needs a bar and plates");
   if (x.eq === "db" && c.eq !== "db") minus.push("Needs more balance and control");
   if (x.eq === "bw" && c.eq !== "bw") minus.push("Hard to make heavier");
   if (x.floor && !c.floor) minus.push("Gets you down on the floor");
@@ -4031,13 +4033,12 @@ function swapView() {
       <div class="swback"><span class="swidx tl">${k + 1}</span><span class="swidx br">${k + 1}</span><b class="swname">How to do it</b>
         <ol>${(g.steps.length ? g.steps.slice(0, 2) : ["Same sets and reps as before.", "Starts with \"find your weight\"."]).map(t => `<li>${esc(t)}</li>`).join("")}</ol><small class="swhint">Tap to turn back</small></div></div></div>`; };
   const pick = sw.step === "scope" ? opts[i] : null;
-  return `<div class="swapsheet swdeckmode" role="dialog" aria-labelledby="sw-title">${head}
+  return `<div class="swapsheet swdeckmode" role="dialog" aria-labelledby="sw-title"><div class="swhead">${head}<p class="muted obsmall">Same sets and reps – a new exercise starts with "find your weight".</p></div>
     <div class="swdeck"><div class="swtrack" style="--i:${i}">${opts.map(card).join("")}</div></div>
     <div class="swdots">${opts.map((_, k) => `<i class="${k === i ? "on" : ""}"></i>`).join("")}</div>
     <div class="swfoot">${pick ? `<p class="swpicked">Swap to <b>${esc(pick)}</b> for…</p><div class="swbtns"><button type="button" class="btn ghost" data-act="swback">Back</button><button type="button" class="btn ghost" data-act="swapply" data-v="today">Just today</button><button type="button" class="btn" data-act="swapply" data-v="phase">Rest of this phase</button></div>`
-      : `<div class="swbtns two"><button type="button" class="btn ghost" data-act="swclose">Keep ${esc(e.name)}</button><button type="button" class="btn" data-act="swuse">Use this</button></div>
-         ${i === n - 1 ? `<button type="button" class="linkbtn swother" data-act="swreason" data-v="">None of these – pick another reason</button>` : ""}`}</div>
-    <p class="muted obsmall">Same sets and reps – a new exercise starts with "find your weight".</p></div>`;
+      : `<div class="swbtns two"><button type="button" class="btn ghost" data-act="swclose">Keep ${esc(e.name)}</button><button type="button" class="btn" data-act="swuse">Use this</button></div>`}</div>
+</div>`;
 }
 // swipe: drag the row; past ~50 px (or a quick flick) moves one card; a short tap flips the card
 function swGo(d) {
