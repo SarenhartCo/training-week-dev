@@ -1511,6 +1511,7 @@ const fmt = n => (Math.round(n * 100) / 100).toString().replace(".", ",");
 const isoDate = d => { const z = new Date(d); z.setMinutes(z.getMinutes() - z.getTimezoneOffset()); return z.toISOString().slice(0, 10); };
 const today = () => isoDate(new Date());
 const clone = o => JSON.parse(JSON.stringify(o));
+const fullDate = iso => { const d = new Date(iso + "T12:00"); return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", ...(d.getFullYear() !== new Date().getFullYear() ? { year: "numeric" } : {}) }); };   // year shown when it isn't this year
 const shortDate = iso => new Date(iso + "T12:00").toLocaleDateString("en-GB", { day:"numeric", month:"short" });
 const logId = (w, k) => "w" + String(w).padStart(2, "0") + "-" + k;
 
@@ -3692,11 +3693,11 @@ function historyInner() {
   const best = {};
   all.forEach(l => Object.entries(l.sets || {}).forEach(([id, arr]) => {
     const n = l.names?.[id] || "Exercise", k = n.toLowerCase();
-    arr.filter(x => x.done && x.kg > 0).forEach(x => { if (!best[k] || x.kg > best[k].kg || (x.kg === best[k].kg && x.reps > best[k].reps)) best[k] = { name: n, kg: x.kg, reps: x.reps, week: l.week }; });
+    arr.filter(x => x.done && x.kg > 0).forEach(x => { if (!best[k] || x.kg > best[k].kg || (x.kg === best[k].kg && x.reps > best[k].reps)) best[k] = { name: n, kg: x.kg, reps: x.reps, week: l.week, date: (l.finishedAt || "").slice(0, 10) || l.date }; });
   }));
   const rows = Object.values(best).sort((a, b) => a.name.localeCompare(b.name));
-  if (rows.length) h += `<h2 class="sec">Heaviest sets</h2><div class="tbl"><table><thead><tr><th>Exercise</th><th class="n">Best</th><th class="n">Week</th></tr></thead><tbody>` +
-    rows.map(r => `<tr><td>${esc(r.name)}</td><td class="n">${fmt(r.kg)} kg × ${r.reps}</td><td class="n">${r.week}</td></tr>`).join("") + `</tbody></table></div>`;
+  if (rows.length) h += `<h2 class="sec">Heaviest sets</h2><div class="tbl"><table><thead><tr><th>Exercise</th><th class="n">Best</th><th class="n">Date</th></tr></thead><tbody>` +
+    rows.map(r => `<tr><td>${esc(r.name)}</td><td class="n">${fmt(r.kg)} kg × ${r.reps}</td><td class="n">${r.date ? fullDate(r.date) : "Week " + r.week}</td></tr>`).join("") + `</tbody></table></div>`;
   h += `<h2 class="sec">Sessions</h2>`;
   all.forEach(l => { const st = stats(l);
     h += `<div class="hist"><div><div class="d">Week ${l.week} · ${wLabel(l.workout)} · ${shortDate(l.date)}${l.finished ? "" : " · not finished"}</div><div class="t">${esc(l.title)}</div></div><div class="v num">${fmt(st.vol)} kg<small>${st.done}/${st.total} sets</small></div></div>`; });
