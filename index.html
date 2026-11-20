@@ -3786,7 +3786,10 @@ function phaseNews(pi) {
   const sets = Math.max(0, ...m.map(x => x.sets)), prevSets = Math.max(0, ...Object.values(pm).map(x => x.sets));
   const rest = Math.max(0, ...m.map(x => x.rest || 0));
   const lines = [];
-  if (m.length) lines.push(prev && reps.join("/") !== prevReps.join("/") ? `Main lifts: ${prevReps.join("–")} → <b>${reps.join("–")} reps</b>${sets !== prevSets ? `, ${sets} sets` : ""}` : `Main lifts: <b>${sets} × ${reps.join("–")} reps</b>${rest ? `, ${Math.round(rest / 15) * 15} s rest` : ""}`);
+  // one line per main lift when they differ – "8–6–5 reps" read like a rep scheme for one lift (Christian 2026-11-20)
+  const sr = x => `${x.sets} × ${x.reps}`, same = new Set(m.map(sr)).size === 1, pSame = new Set(Object.values(pm).map(sr));
+  if (m.length && same) lines.push(`Main lifts: <b>${sr(m[0])}</b>${prev && pSame.size === 1 && !pSame.has(sr(m[0])) ? ` (was ${[...pSame][0]})` : ""}${rest ? `, ${Math.round(rest / 15) * 15} s rest` : ""}`);
+  else if (m.length) lines.push(`Main lifts: ${m.map(x => `${esc(x.name)} <b>${sr(x)}</b>`).join(" · ")}`);
   return { ph, pi, aim: ph.about, lines, newEx };
 }
 function phaseCardHtml(n, closable) {
