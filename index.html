@@ -1687,7 +1687,7 @@ function progStep(e, kg, dir) { if (!e.bw && e.inc && e.inc < 1) return Math.max
 function snapKg(e, v) { if (isDb(e)) return v < 10 ? Math.round(v) : 2 * Math.round(v / 2); return Math.round(Math.round(v / e.inc) * e.inc * 100) / 100; }
 function suggest(e, id) {
   const wm = e.name.match(/^Warm-up sets: (.+)$/);            // warm-up sets follow the lift they warm up: about half its weight
-  if (wm && e.inc) { const main = suggest({ ...e, name: wm[1] }, id), st = e.inc >= 2.5 ? 2.5 : 2; return { kg: main.last ? Math.max(st === 2 ? 2 : 5, Math.floor(main.kg / 2 / st) * st) : e.kg, last: null, up: false }; }
+  if (wm && e.inc) { const main = suggest({ ...e, name: wm[1] }, id), st = e.inc >= 2.5 ? 2.5 : 2; const bar = barKg(wm[1]); return { kg: main.last ? (bar ? Math.max(0, Math.floor(((main.kg + bar) / 2 - bar) / st) * st) : Math.max(st === 2 ? 2 : 5, Math.floor(main.kg / 2 / st) * st)) : e.kg, last: null, up: false }; }   // barbell: about half the total, the bar included
   const last = prevBest(e.name, id);
   if (!last) return { kg: e.kg, last: null, up: false };
   if (!e.inc) return { kg: last.kg || e.kg, last, up: false };
@@ -1755,6 +1755,8 @@ function dbHands(name) {
   if (!db || /^Warm-up sets/.test(n)) return 1;
   return /goblet|overhead dumbbell triceps|pullover|suitcase|single-leg calf|single-leg dumbbell romanian|kettlebell/i.test(n) ? 1 : 2;
 }
+// The bar (Christian 2026-11-23): barbell weights are what you load; kg lifted adds the bar – 20 kg barbell, 10 kg EZ-bar.
+function barKg(name) { const n = name || ""; if (/smith/i.test(n)) return 0; return /ez-bar/i.test(n) ? 10 : /barbell|^romanian deadlift$/i.test(n) ? 20 : 0; }
 function bwShare(name) { const n = name || ""; return /pull-up|chin-up|\bdips?\b/i.test(n) ? 1 : /push-up/i.test(n) ? 0.65 : 0; }
 function bodyWeightOn(date) {
   let best = null;
@@ -1766,7 +1768,7 @@ function stats(l) {
   const bw = bodyWeightOn(l.date);
   Object.entries(l.sets || {}).forEach(([eid, a]) => {
     const share = bwShare(l.names?.[eid]), warm = /^Warm-up sets/.test(l.names?.[eid] || ""), hands = dbHands(l.names?.[eid]);   // warm-up sets don't count as kg lifted
-    a.forEach(x => { total++; if (x.done) { done++; if (!warm) vol += Math.max(0, share * bw + (x.kg || 0) * hands) * (x.reps || 0); } });
+    a.forEach(x => { total++; if (x.done) { done++; if (!warm) vol += Math.max(0, share * bw + (x.kg || 0) * hands + barKg(l.names?.[eid])) * (x.reps || 0); } });
   });
   return { done, total, vol };
 }
@@ -1911,7 +1913,7 @@ function todayView() {
           <button class="arr dn" data-act="reps" data-ex="${e.id}" data-i="${j}" data-d="-1" aria-label="Set ${j + 1}: fewer">${ARROW_DN}</button></div>`).join("")}</div></div>
         <div class="feel"><button class="fbtn light ${feel === "light" ? "on" : ""}" data-act="feel" data-ex="${e.id}" data-f="light" aria-pressed="${feel === "light"}" aria-label="Felt light" title="Felt light">${FEEL_ICON.light(22)}</button>
           <button class="fbtn heavy ${feel === "heavy" ? "on" : ""}" data-act="feel" data-ex="${e.id}" data-f="heavy" aria-pressed="${feel === "heavy"}" aria-label="Felt heavy" title="Felt heavy">${FEEL_ICON.heavy(22)}</button></div></div>
-      ${e.inc ? `<div class="kgrow"><span>${e.bw ? (kgNow < 0 ? "Machine help" : "Added") : "Weight"}</span>
+      ${e.inc ? `<div class="kgrow"><span>${e.bw ? (kgNow < 0 ? "Machine help" : "Added") : barKg(e.name) ? "Weight + bar" : "Weight"}</span>
         <button class="step" data-act="kg" data-ex="${e.id}" data-d="-1" data-min="${e.bw ? -80 : 0}" aria-label="${e.bw ? "Less weight (more machine help)" : "Less weight"}">−</button>
         <span class="kg num">${e.bw && kgNow < 0 ? fmt(-kgNow) + " kg" : kgLabel(kgNow) || "0 kg"}</span>
         <button class="step" data-act="kg" data-ex="${e.id}" data-d="1" data-min="${e.bw ? -80 : 0}" aria-label="${e.bw ? "More weight (less machine help)" : "More weight"}">+</button></div>` : ""}
@@ -3087,16 +3089,24 @@ function finalizePlan(P, a) {
   });
   return P;
 }
-function startKg(a, e) {
+function startKg(a, e, n) {
   const age = obAge(a) || 30, m = obMetric(a), bwKg = Math.max(50, Math.min(100, m.kg || 75));
   const sx = a.sex === "Female" ? [0.6, 0.8] : a.sex === "Male" ? [1, 1] : [0.8, 0.9], expF = { New: 0.6, Some: 1, Experienced: 1.6 }[a.level || "Some"], ageF = age >= 65 ? 0.8 : age >= 50 ? 0.9 : 1;
   const raw = e.ratio * bwKg * expF * (e.lower ? sx[1] : sx[0]) * ageF, step = e.eq === "db" ? 2 : 2.5;
   let kg = Math.max(e.eq === "db" ? 2 : 5, Math.floor(raw / step) * step);
   if (a.where === "Home" && e.eq === "db") kg = Math.min(a.dbMax || 10, kg);
+  if (n && barKg(n)) kg = Math.max(0, kg - barKg(n));      // swap into a barbell lift: what you load, without the bar
   return kg;
 }
 const _genBeforeFinal = generatePlan;
-generatePlan = function (a) { return finalizePlan(_genBeforeFinal(a), a); };
+// Barbell weights are what you load – the bar isn't included (Christian 2026-11-23); kg lifted adds the bar (barKg).
+// The starting weights above are totals, so the bar comes off (an empty bar = 0 kg).
+function platesOnly(P) {
+  P.phases.forEach(ph => Object.values(ph.workouts || {}).forEach(w => (w.exercises || []).forEach(e => {
+    const bar = barKg(e.name.replace(/^Warm-up sets: /, "")); if (bar && !e.bw && e.kg > 0) e.kg = Math.max(0, Math.round((e.kg - bar) / 2.5) * 2.5); })));
+  return P;
+}
+generatePlan = function (a) { return platesOnly(finalizePlan(_genBeforeFinal(a), a)); };
 
 // generator>>
 // <<wrapup
@@ -4075,7 +4085,7 @@ function swapExFields(n, e) {
   if (CARDIO_SWAP[n]) return { name: n, lib: CARDIO_SWAP[n].lib || n, unit: "min", reps: e.reps, kg: 0, inc: 0, bw: false, note: cardioNote(n, e.reps) };
   // no setup answers (a programme carried over from before round 4) → the setup defaults, so startKg() has what it needs (Christian 2026-11-12: Just today did nothing)
   const x = EX[n] || {}, a = { ...(typeof defaultAnswers === "function" ? defaultAnswers() : {}), ...(swapProfile() || {}) };
-  const kg = x.ratio && typeof startKg === "function" ? startKg(a, x) : 0;
+  const kg = x.ratio && typeof startKg === "function" ? startKg(a, x, n) : 0;
   return { name: n, lib: x.lib || n, unit: x.unit || "reps", reps: x.unit && x.unit !== e.unit ? (x.reps || e.reps) : (x.unit === "sec" ? (x.reps || e.reps) : e.reps), kg,
     inc: x.inc || 0, ...(x.bw ? { bw: true } : { bw: false }), note: x.note || undefined };
 }
@@ -4240,7 +4250,7 @@ function bbOffer(e) {
   let ups = 0; for (let i = 1; i < h.length; i++) if (h[i].kg > h[i - 1].kg) ups++;
   const last2 = h.slice(-2); if (ups < 3 || last2.length < 2 || !last2.every(x => x.allReps && x.feel !== "heavy")) return null;
   const done = S.logs[logId(S.week, S.wk)]?.sets?.[e.id]?.some(x => x.done); if (done) return null;   // not in the middle of the exercise
-  return { ...m, from: e.name, kg: Math.max(20, Math.floor(2 * (h[h.length - 1].kg) / 2.5) * 2.5) };
+  return { ...m, from: e.name, kg: Math.max(0, Math.floor((2 * h[h.length - 1].kg - barKg(m.to)) / 2.5) * 2.5) };
 }
 function bbCard(e, o) {
   return `<div class="card bbq"><div class="eyebrow">Ready for the barbell?</div><p>You've got strong on the ${esc(o.what)}. Want to try the <b>${esc(o.to.toLowerCase())}</b>? The first session starts at <b>${fmt(o.kg)} kg</b> and finds your weight.</p>
@@ -4252,7 +4262,7 @@ function bbTry(id) {
   const x = EX[o.to] || { inc: 2.5 }, pi = phaseIndex(S.week);
   S.program.phases.forEach((ph, i) => { if (i < pi) return; Object.values(ph.workouts).forEach(w => w.exercises.forEach(y => {   // this phase and the rest of the programme
     if (y.name === o.from) { y.swappedFrom = { name: y.name, lib: y.lib, kg: y.kg, inc: y.inc, note: y.note }; y.name = o.to; y.lib = x.lib || o.to; y.kg = o.kg; y.inc = x.inc || 2.5; y.note = x.note; y.swapScope = "barbell"; }
-    if (y.name === "Warm-up sets: " + o.from) { y.name = "Warm-up sets: " + o.to; y.lib = x.lib || o.to; y.kg = 20; y.inc = 2.5; } })); });
+    if (y.name === "Warm-up sets: " + o.from) { y.name = "Warm-up sets: " + o.to; y.lib = x.lib || o.to; y.kg = 0; y.inc = 2.5; } })); });
   saveProgram();
   const l = ensureLog(S.week, S.wk); for (const y of workout(S.week, S.wk).exercises) { if (y.name === o.to || y.name === "Warm-up sets: " + o.to) { l.names[y.id] = y.name; l.sets[y.id]?.forEach(s => { if (!s.done) s.kg = y.kg; }); } }
   saveLog(l); const v = bbState(); v[o.from] = { tried: true }; bbSave(v);
