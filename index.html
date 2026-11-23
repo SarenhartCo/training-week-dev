@@ -349,6 +349,8 @@ tr:last-child td{border-bottom:0}
 .bbq{border:1.5px solid var(--accent);margin:14px 0 8px}.bbq p{margin:4px 0 10px;font-size:15px}.bbbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
 .mincard{margin-bottom:14px}.mchead{display:flex;justify-content:space-between;align-items:baseline}.mchead b{font-family:var(--display);font-size:22px}.mincard .meter{margin:8px 0 6px}
 .bonusrow{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:14px}.bonusrow span{flex:1}.easych{margin:0 0 8px}
+#infov{position:fixed;inset:0;z-index:61;background:rgba(10,14,20,.6);display:flex;align-items:center;justify-content:center;padding:16px}#infov[hidden]{display:none}#infov h2{font-size:24px}
+.infob{width:22px;height:22px;margin-left:6px;border-radius:50%;border:1.5px solid var(--line);background:none;color:var(--accent);font-family:Georgia,serif;font-weight:700;font-size:12px;line-height:1;padding:0;vertical-align:middle}
 #bdov{position:fixed;inset:0;z-index:57;background:rgba(10,14,20,.6);display:flex;align-items:center;justify-content:center;padding:16px}#bdov[hidden]{display:none}
 .bdsheet{background:var(--surface);color:var(--ink);border-radius:18px;padding:22px 20px;max-width:380px;width:100%;text-align:center;display:grid;gap:8px;justify-items:center}
 .bdsheet h2{font-family:var(--display);font-size:32px;margin:2px 0 0}.bdsheet p{margin:0 0 6px}.bdsheet .btn{width:100%}
@@ -546,6 +548,7 @@ document.getElementById("devreset").addEventListener("click", e => {
   <div id="swapov" hidden></div>
   <div id="wdov" hidden></div>
   <div id="bdov" hidden></div>
+  <div id="infov" hidden></div>
   <div id="wuov" hidden></div>
   <nav class="tabs" aria-label="Sections">
     <button class="tab" data-tab="today" id="tab-today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h2M19 12h2M6 8v8M18 8v8M9 6v12M15 6v12M9 12h6"/></svg>Workout</button>
@@ -1913,7 +1916,7 @@ function todayView() {
           <button class="arr dn" data-act="reps" data-ex="${e.id}" data-i="${j}" data-d="-1" aria-label="Set ${j + 1}: fewer">${ARROW_DN}</button></div>`).join("")}</div></div>
         <div class="feel"><button class="fbtn light ${feel === "light" ? "on" : ""}" data-act="feel" data-ex="${e.id}" data-f="light" aria-pressed="${feel === "light"}" aria-label="Felt light" title="Felt light">${FEEL_ICON.light(22)}</button>
           <button class="fbtn heavy ${feel === "heavy" ? "on" : ""}" data-act="feel" data-ex="${e.id}" data-f="heavy" aria-pressed="${feel === "heavy"}" aria-label="Felt heavy" title="Felt heavy">${FEEL_ICON.heavy(22)}</button></div></div>
-      ${e.inc ? `<div class="kgrow"><span>${e.bw ? (kgNow < 0 ? "Machine help" : "Added") : barKg(e.name) ? "Weight + bar" : "Weight"}</span>
+      ${e.inc ? `<div class="kgrow"><span>${e.bw ? (kgNow < 0 ? "Machine help" : "Added") : "Weight"}${barKg(e.name) && !e.bw ? `<button type="button" class="infob" data-act="barinfo" aria-label="About the weight">i</button>` : ""}</span>
         <button class="step" data-act="kg" data-ex="${e.id}" data-d="-1" data-min="${e.bw ? -80 : 0}" aria-label="${e.bw ? "Less weight (more machine help)" : "Less weight"}">−</button>
         <span class="kg num">${e.bw && kgNow < 0 ? fmt(-kgNow) + " kg" : kgLabel(kgNow) || "0 kg"}</span>
         <button class="step" data-act="kg" data-ex="${e.id}" data-d="1" data-min="${e.bw ? -80 : 0}" aria-label="${e.bw ? "More weight (less machine help)" : "More weight"}">+</button></div>` : ""}
@@ -4680,6 +4683,8 @@ document.addEventListener("click", ev => {
     case "tipskip": closeTip(true); break;
     case "colour": { const v = b.dataset.v; try { if (v === "plan") localStorage.removeItem(COLOUR_KEY); else localStorage.setItem(COLOUR_KEY, v); } catch {} render(); break; }
     case "bdnext": badgePopNext(); break;
+    case "barinfo": { const ov = document.getElementById("infov"); ov.innerHTML = `<div class="bdsheet" role="dialog"><h2>The weight</h2><p class="muted">The weight is what you put on the bar – the bar itself isn't included.</p><button type="button" class="btn" data-act="infook">OK</button></div>`; ov.hidden = false; break; }
+    case "infook": { const ov = document.getElementById("infov"); ov.hidden = true; ov.innerHTML = ""; break; }
     case "bdskip": { const P = S.badgePop; if (P) { let seen = {}; try { seen = JSON.parse(localStorage.getItem(BADGE_SEEN)) || {}; } catch {} P.list.forEach(b => seen[b.id] = 1); try { localStorage.setItem(BADGE_SEEN, JSON.stringify(seen)); } catch {} S.badgePop = null; badgePopRender(false); setTimeout(wrapCheck, 300); } break; }
     case "tipreset": { const v = {}; tipSave(v); toast("Tips will show again as you go."); render(); break; }
     case "cdpause": cdPause(); break;
