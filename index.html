@@ -4082,6 +4082,7 @@ function cardioOptions(e, reason) {
   return order;
 }
 function swapList(e, reason) { return isCardioSwap(e) ? cardioOptions(e, reason) : swapOptions(e, reason); }
+const exKey = n => (n || "").toLowerCase().replace(/'s\b/g, "").replace(/[^a-z0-9]+/g, " ").trim();   // the same exercise under a slightly different name
 function swapOptions(e, reason) {
   if (typeof EX === "undefined") return [];
   const cur = EX[e.name] || EX[e.swappedFrom?.name] || {}, m = cur.m; if (!m || m === "cardio") return [];
@@ -4090,7 +4091,8 @@ function swapOptions(e, reason) {
   for (const k of Object.keys(phaseOf(S.week).workouts)) { const sw = S.logs[logId(S.week, k)]?.swaps; if (sw) Object.values(sw).forEach(x => inWeek.add(x.name)); }   // today's swaps count as used (Christian 2026-11-12)
   const twin = SWAP_TWIN[e.name];
   const near = { shoulders: ["rear"], rear: ["shoulders"], thighs: ["ham", "glutes"], ham: ["glutes"], glutes: ["ham", "thighs"], biceps: [], triceps: [], chest: [], back: [], calves: [], core: [] };
-  const ok = n => { const x = EX[n]; if (!x || n === e.name || inWeek.has(n) || x.m === "cardio") return false;
+  const same = (p, q) => exKey(p) === exKey(q), usedK = new Set([...inWeek].map(exKey));            // "Farmer carry" = "Farmer's carry" (Christian 2026-11-26)
+  const ok = n => { const x = EX[n]; if (!x || same(n, e.name) || (e.swappedFrom && same(n, e.swappedFrom.name)) || usedK.has(exKey(n)) || x.m === "cardio") return false;
     if (easy.has("Knees") && x.knee) return false;
     if (easy.has("Back") && (/Romanian deadlift|back squat|good-morning/i.test(n))) return false;
     if (easy.has("Shoulders") && /shoulder press|overhead|pike|dip|Pull-up|push-up/i.test(n)) return false;
