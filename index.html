@@ -4289,7 +4289,7 @@ function bbOffer(e) {
   return { ...m, from: e.name, kg: Math.max(0, Math.floor((2 * h[h.length - 1].kg - barKg(m.to)) / 2.5) * 2.5) };
 }
 function bbCard(e, o) {
-  return `<div class="card bbq"><div class="eyebrow">Barbell</div><p>Ready for the <b>${esc(o.to.toLowerCase())}</b>? First set: ${o.kg ? `<b>${fmt(o.kg)} kg</b> on the bar` : "<b>bar only</b>"}.</p>
+  return `<div class="card bbq"><div class="eyebrow">Barbell</div><p>Ready for the <b>${esc(o.to.toLowerCase())}</b>? First session: ${o.kg ? `<b>${fmt(o.kg)} kg</b>` : "<b>bar only</b>"}.</p>
     <div class="bbbtns"><button type="button" class="btn small" data-act="bbtry" data-ex="${e.id}">Try it</button><button type="button" class="btn ghost small" data-act="bbnot" data-ex="${e.id}">Not yet</button><button type="button" class="linkbtn" data-act="bbstay" data-ex="${e.id}">Stay with dumbbells</button></div></div>`;
 }
 function bbTry(id) {
